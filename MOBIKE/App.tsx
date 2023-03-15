@@ -96,6 +96,8 @@ function App(): JSX.Element {
     <SafeAreaView style={{backgroundColor: "#02a1fd", height: "100%", justifyContent:"center", alignItems:"center"}}>
       <Text style={{color: "#fff", fontSize: 50, fontWeight:'bold'}}> Hello
       </Text>
+      <Text style={{color: "#fff", fontSize: 50, fontWeight:'bold'}}> React Native
+      </Text>
     </SafeAreaView>
   );
 }
