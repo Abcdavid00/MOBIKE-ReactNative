@@ -5,9 +5,14 @@
  * @format
  */
 
-import React from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
+  Button,
+  DatePickerIOSBase,
+  DatePickerIOSComponent,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -16,7 +21,6 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-
 import {
   Colors,
   DebugInstructions,
@@ -32,7 +36,7 @@ type SectionProps = PropsWithChildren<{
 function Section({children, title}: SectionProps): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
-    <View style={styles.sectionContainer}>
+    <SafeAreaView style={styles.sectionContainer}>
       <Text
         style={[
           styles.sectionTitle,
@@ -42,6 +46,7 @@ function Section({children, title}: SectionProps): JSX.Element {
         ]}>
         {title}
       </Text>
+
       <Text
         style={[
           styles.sectionDescription,
@@ -51,12 +56,26 @@ function Section({children, title}: SectionProps): JSX.Element {
         ]}>
         {children}
       </Text>
-    </View>
+    </SafeAreaView>
   );
 }
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
+
+  const onChange = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate || date;
+    setDate(currentDate);
+  };
+
+
+  const toggleDatePicker = () => {
+    setShow(!show);
+  }
+
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -96,8 +115,22 @@ function App(): JSX.Element {
     <SafeAreaView style={{backgroundColor: "#02a1fd", height: "100%", justifyContent:"center", alignItems:"center"}}>
       <Text style={{color: "#fff", fontSize: 50, fontWeight:'bold'}}> Hello
       </Text>
-      <Text style={{color: "#fff", fontSize: 50, fontWeight:'bold'}}> React Native
+      <View style={{backgroundColor: Colors.white , borderRadius: 20, margin: 20, padding: 10}}>
+        <Button title="Press me" onPress={()=>{ console.log(`Running on ${Platform.OS}, version: ${Platform.Version}`); toggleDatePicker()}}/>
+      </View>
+      <Text style={{color: "#fff", fontSize: 15, fontWeight:'bold'}}> Selected: {date.toLocaleString()}
       </Text>
+      {show && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={date}
+          is24Hour={true}
+          display={"spinner"}
+          mode={"datetime"}
+          onChange={onChange}
+        />
+      )}
+      
     </SafeAreaView>
   );
 }
