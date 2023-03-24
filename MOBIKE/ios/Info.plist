@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   Info.plist
+   MOBIKE
+
+   Created by David Nguyễn on 24/03/2023.
+   Copyright (c) 2023 ___ORGANIZATIONNAME___. All rights reserved.
+-->
+<plist version="1.0">
+<dict>
+  <key>NSCameraUsageDescription</key>
+  <string>Your message to the user explaining why your app needs access to the camera</string>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>Your message to the user explaining why your app needs access to the photo library</string>
+  <key>NSPhotoLibraryAddUsageDescription</key>
+  <string>Your message to the user explaining why your app needs permission to add photos to their library</string>
+  <!-- Add the following key-value pair if you want to use the camera flash -->
+  <key>NSCameraFlashUsageDescription</key>
+  <string>Your message to the user explaining why your app needs access to the camera flash</string>
+</dict>
+</plist>
