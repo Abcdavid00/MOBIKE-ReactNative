@@ -5,8 +5,7 @@
  * @format
  */
 
-import DateTimePicker from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   Button,
@@ -28,7 +27,6 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import Sandbox from './src/sandbox';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -69,8 +67,13 @@ function App(): JSX.Element {
   };
 
   return (
-    <View style={{backgroundColor: "#000000", justifyContent:"center", alignItems:"center"}}>
-      <Sandbox/>
+    <View
+      style={{
+        backgroundColor: '#000000',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+      <Text style={{color: 'white'}}>Hello</Text>
     </View>
   );
 }
