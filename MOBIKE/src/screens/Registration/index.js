@@ -1,6 +1,6 @@
-import {View, Text, Button, BackHandler} from 'react-native';
+import { View, Text, Button, BackHandler } from 'react-native';
 import React from 'react';
-import {LOGIN} from '../../constants/routeNames';
+import { LOGIN } from '../../constants/routeNames';
 import Container from '../../components/common/container';
 import RegistrationComponent from '../../components/Registration';
 import {
@@ -13,19 +13,21 @@ import {
 import BackendAPI from '../../backendAPI';
 import TokenStorage from '../../services/TokenStorage';
 
-const Registration = ({navigation}) => {
+const Registration = ({ navigation }) => {
   const [form, setForm] = React.useState({});
   const [errors, setErrors] = React.useState({});
   const [firstSubmit, setFirstSubmit] = React.useState(true);
 
-  let isEmailChecked = false;
-  let isUsernameChecked = false;
-  let isPhoneChecked = false;
-  let isSubmitted = false;
-  let isSignUpRequestSent = false;
+  // Use a set to store the state of each field
+  // in order to show the error only after the first submit
+  const [isEmailChecked, setIsEmailChecked] = React.useState(false);
+  const [isUsernameChecked, setIsUsernameChecked] = React.useState(false);
+  const [isPhoneChecked, setIsPhoneChecked] = React.useState(false);
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+  const [isSignUpRequestSent, setIsSignUpRequestSent] = React.useState(false);
 
-  const onChange = ({name, value}) => {
-    setForm({...form, [name]: value});
+  const onChange = ({ name, value }) => {
+    setForm({ ...form, [name]: value });
     isSubmitted = false;
     if (!firstSubmit) {
       if (value !== '') {
@@ -33,7 +35,7 @@ const Registration = ({navigation}) => {
         if (name === 'email') {
           isEmailChecked = false;
           setErrors(prev => {
-            return {...prev, [name]: ValidateEmail(value)};
+            return { ...prev, [name]: ValidateEmail(value) };
           });
         }
 
@@ -41,7 +43,7 @@ const Registration = ({navigation}) => {
         else if (name === 'username') {
           isUsernameChecked = false;
           setErrors(prev => {
-            return {...prev, [name]: ValidateUsername(value)};
+            return { ...prev, [name]: ValidateUsername(value) };
           });
         }
 
@@ -49,7 +51,7 @@ const Registration = ({navigation}) => {
         else if (name === 'phone') {
           isPhoneChecked = false;
           setErrors(prev => {
-            return {...prev, [name]: ValidatePhone};
+            return { ...prev, [name]: ValidatePhone };
           });
         }
 
@@ -78,13 +80,13 @@ const Registration = ({navigation}) => {
         }
       } else {
         setErrors(prev => {
-          return {...prev, [name]: '* Please enter your ' + name};
+          return { ...prev, [name]: '* Please enter your ' + name };
         });
       }
     }
   };
 
-  const onEdited = ({name, value}) => {
+  const onEdited = ({ name, value }) => {
     if (value !== '') {
       // email
       if (name === 'email') {
@@ -107,7 +109,7 @@ const Registration = ({navigation}) => {
 
   const signUp = async () => {
 
-    if (errors.email || errors.username || errors.password || errors.confirmPassword) {     
+    if (errors.email || errors.username || errors.password || errors.confirmPassword) {
       return;
     }
 
@@ -121,12 +123,12 @@ const Registration = ({navigation}) => {
     let exists = await BackendAPI.isEmailExist(form.email);
     if (exists) {
       setErrors(prev => {
-        return {...prev, email: '* Email already exists'};
+        return { ...prev, email: '* Email already exists' };
       });
     } else {
       setErrors(prev => {
         if (prev.email && prev.email === '* Email already exists') {
-          return {...prev, email: ''};
+          return { ...prev, email: '' };
         }
         return prev;
       });
@@ -142,12 +144,12 @@ const Registration = ({navigation}) => {
     let exists = await BackendAPI.isUsernameExist(form.username);
     if (exists) {
       setErrors(prev => {
-        return {...prev, username: '* Username already exists'};
+        return { ...prev, username: '* Username already exists' };
       });
     } else {
       setErrors(prev => {
         if (prev.username && prev.username === '* Username already exists') {
-          return {...prev, username: ''};
+          return { ...prev, username: '' };
         }
         return prev;
       });
@@ -159,16 +161,16 @@ const Registration = ({navigation}) => {
     }
   }
 
-  const checkPhone= async () => {
+  const checkPhone = async () => {
     let exists = await BackendAPI.isPhoneExist(form.phone);
     if (exists) {
       setErrors(prev => {
-        return {...prev, phone: '* Phone already exists'};
+        return { ...prev, phone: '* Phone already exists' };
       });
     } else {
       setErrors(prev => {
         if (prev.phone && prev.phone === '* Phone already exists') {
-          return {...prev, phone: ''};
+          return { ...prev, phone: '' };
         }
         return prev;
       });
@@ -188,41 +190,41 @@ const Registration = ({navigation}) => {
     isSignUpRequestSent = false;
     if (!form.email) {
       setErrors(prev => {
-        return {...prev, email: '* Please enter your email'};
+        return { ...prev, email: '* Please enter your email' };
       });
     } else {
       setErrors(prev => {
-        return {...prev, email: ValidateEmail(form.email)};
+        return { ...prev, email: ValidateEmail(form.email) };
       });
     }
 
     if (!form.username) {
       setErrors(prev => {
-        return {...prev, username: '* Please enter your username'};
+        return { ...prev, username: '* Please enter your username' };
       });
     } else {
       setErrors(prev => {
-        return {...prev, username: ValidateUsername(form.username)};
+        return { ...prev, username: ValidateUsername(form.username) };
       });
     }
 
     if (!form.phone) {
       setErrors(prev => {
-        return {...prev, phone: '* Please enter your phone'};
+        return { ...prev, phone: '* Please enter your phone' };
       });
     } else {
       setErrors(prev => {
-        return {...prev, phone: ValidatePhone(form.phone)};
+        return { ...prev, phone: ValidatePhone(form.phone) };
       });
     }
 
     if (!form.password) {
       setErrors(prev => {
-        return {...prev, password: '* Please enter your password'};
+        return { ...prev, password: '* Please enter your password' };
       });
     } else {
       setErrors(prev => {
-        return {...prev, password: ValidatePassword(form.password)};
+        return { ...prev, password: ValidatePassword(form.password) };
       });
     }
 

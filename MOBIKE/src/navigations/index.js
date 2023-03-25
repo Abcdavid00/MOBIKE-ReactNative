@@ -1,12 +1,8 @@
-import { Gesture } from 'react-native-gesture-handler';
-import { View, Text } from 'react-native';
 import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import AuthenticationNavigator from './AuthenticationNavigator';
-import { GlobalContext } from '../context/Provider';
-import BottomNavigator from './BottomNavigator';
 import { useSelector } from 'react-redux';
-import YourPosts from '../screens/YourPosts';
+import AuthenticationNavigator from './AuthenticationNavigator';
+import BottomNavigator from './BottomNavigator';
 import LoadingNavigator from './LoadingNavigator';
 import ApplicationAdminNavigator from './AdminApplicationNavigator';
 
@@ -18,16 +14,20 @@ const AppNavContainer = () => {
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
   const permission = useSelector(state => state.auth.permission);
   const isLoading = useSelector(state => state.loading.loading);
+  console.log('isLoggedIn', isLoggedIn);
+  console.log('permission', permission);
+  console.log('isLoading', isLoading);
   return (
     <NavigationContainer>
-      {isLoading ? (
+      {/* {isLoading ? (
         <LoadingNavigator />
       ) : isLoggedIn ? (
         // (permission == 4) ? (<BottomNavigator />) : ( (permission == 2) ? <ApplicationAdminNavigator/> : <View/>)
         <BottomNavigator />
       ) : (
         <AuthenticationNavigator />
-      )}
+      )} */}
+      <AuthenticationNavigator />
     </NavigationContainer>
   );
 };

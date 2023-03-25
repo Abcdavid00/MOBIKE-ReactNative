@@ -27,6 +27,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import AppNavContainer from './src/navigations';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -66,16 +67,7 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  return (
-    <View
-      style={{
-        backgroundColor: '#000000',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-      <Text style={{color: 'white'}}>Hello</Text>
-    </View>
-  );
+  return <AppNavContainer />;
 }
 
 const styles = StyleSheet.create({

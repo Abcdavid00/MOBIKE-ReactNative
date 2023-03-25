@@ -19,7 +19,7 @@ import { useDispatch } from 'react-redux';
 import styles from './styles';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Checkbox } from 'react-native-paper';
+//import { Checkbox } from 'react-native-paper';
 import MobikeImage from '../common/image';
 
 const LoginComponent = ({
@@ -80,12 +80,12 @@ const LoginComponent = ({
                 paddingBottom: 20,
               }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Checkbox
+                {/* <Checkbox
                   status={checked ? 'checked' : 'unchecked'}
                   onPress={() => {
                     setChecked(!checked);
                   }}
-                />
+                /> */}
                 <Text style={{ fontSize: 12 }}>Remember my account</Text>
               </View>
 
