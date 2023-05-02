@@ -1,10 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import AuthenticationNavigator from './AuthenticationNavigator';
-import BottomNavigator from './BottomNavigator';
-import LoadingNavigator from './LoadingNavigator';
-import ApplicationAdminNavigator from './AdminApplicationNavigator';
 
 const AppNavContainer = () => {
   // const {

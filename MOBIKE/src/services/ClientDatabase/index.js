@@ -8,7 +8,6 @@ import { setVehicleBrands, setVehicleLineUps } from '../../redux/clientDatabase/
 import { setVehicleTypes } from '../../redux/clientDatabase/vehicleType';
 import { setVehicleConditions } from '../../redux/clientDatabase/vehicleCondition';
 import { setColors } from '../../redux/clientDatabase/color';
-import { createSelectorCreator } from 'reselect';
 
 const LOCATIONS = 'Locations';
 const PERMISSIONS = 'Permissions';

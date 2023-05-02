@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { State } from 'react-native-gesture-handler';
 import { validateDate, validateVnId, validateVnPhone } from '../../utils/Validator';
 
 const initialState = {

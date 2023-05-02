@@ -1,20 +1,12 @@
-import {View, Text} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {
-  MARKETPLACE,
   MARKETPLACE_NAVIGATOR,
   NOTIFICATIONS,
-  PROFILE,
   PROFILE_NAVIGATOR,
-  YOU,
   YOUR_POSTS_NAVIGATOR,
 } from '../constants/routeNames';
-import Marketplace from '../screens/Marketplace';
-import Notifications from '../screens/Notifications';
-import Profile from '../screens/Profile';
 import Icon from 'react-native-vector-icons/Ionicons';
-import HeaderSearch from '../components/HeaderSearch';
 import MarketplaceNavigator from './MarketplaceNavigator';
 import YourPostsNavigator from './YourPostsNavigator';
 import ProfileNavigator from './ProfileNavigator';

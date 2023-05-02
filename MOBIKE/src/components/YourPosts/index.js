@@ -1,7 +1,6 @@
-import { View, Text, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { View, Dimensions } from 'react-native';
 import React from 'react';
 import colors from '../../assets/theme/colors';
-import { ADD_POST } from '../../constants/routeNames';
 import { useNavigation } from '@react-navigation/native';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import ActiveRoute from './ActiveRoute';
@@ -9,7 +8,6 @@ import InactiveRoute from './InactiveRoute';
 import DeactivatedRoute from './DeactivatedRoute';
 import SoldRoute from './SoldRoute';
 import { useWindowDimensions } from 'react-native';
-import Container from '../common/container';
 
 const heightScreen = Dimensions.get('window').height;
 

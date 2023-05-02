@@ -1,6 +1,5 @@
 import HttpRequest, { BigGetRequest, ProtectedUploadImage, UploadIdentityImage } from "./HttpRequest.js";
 import Store from "../redux/store";
-import { resolvePlugin } from "@babel/core";
 import { setLikedPosts } from "../redux/slice/likeSlice.js";
 
 

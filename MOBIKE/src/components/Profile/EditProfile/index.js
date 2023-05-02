@@ -1,11 +1,7 @@
-import { Gesture } from 'react-native-gesture-handler';
 import {
   View,
   Text,
   TouchableWithoutFeedback,
-  Keyboard,
-  TouchableOpacity,
-  Modal,
   StyleSheet,
   Dimensions,
 } from 'react-native';
@@ -18,26 +14,21 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Animated, { FadeInUp, Layout, SlideInLeft } from 'react-native-reanimated';
+import Animated, { FadeInUp, Layout } from 'react-native-reanimated';
 import BottomSheet from 'reanimated-bottom-sheet';
 import AddressBottomSheetContent from './AddressBottomSheetContent';
 import Store from '../../../redux/store';
-import { GetPersonalInfo } from '../../../backendAPI';
-import AddPost from './../../../screens/AddPost/index';
-import { useSelector } from 'react-redux';
-import { setBirthdate, setName, setIdentification_number, setPhone_number } from '../../../redux/clientDatabase/personalInfo';
 import colors from '../../../assets/theme/colors';
 import { Image } from 'react-native';
 import * as ImagePicker from 'react-native-image-picker';
 import { KeyboardAvoidingView } from 'react-native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FilterPropFrameComponent from '../../FiltersPopUp/FilterPropFrame';
 import { SetProfileImage, SetPersonalInfo, SetIdentityImage, SetPersonalAddress } from '../../../backendAPI';
 import { UpdatePersonalInfo } from '../../../services/TokenStorage';
 import { useNavigation } from '@react-navigation/native';
 import { Popup, Root } from 'popup-ui';
-import { PROFILE, PROFILE_NAVIGATOR } from './../../../constants/routeNames';
+import { PROFILE } from './../../../constants/routeNames';
 
 const heightScreen = Dimensions.get('window').height;
 

@@ -1,8 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { useEffect } from 'react';
-import { TouchableWithoutFeedback } from 'react-native';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import ContextMenu from 'react-native-context-menu-view';
 import { FAB } from 'react-native-paper';
 import { useDispatch } from 'react-redux';

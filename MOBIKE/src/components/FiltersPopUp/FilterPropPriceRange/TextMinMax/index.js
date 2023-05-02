@@ -1,16 +1,12 @@
-import {View, Text} from 'react-native';
+import {View} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
 import TextInputOutline from '../../../common/textInputOutline-Kohana';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-  setIsSendingOddValue,
   setMinMaxText,
   setPriceRange,
 } from '../../../../redux/slice/filterSlice';
-import {InterpolateFromPositionToValue} from '../../../../utils/interpolation';
 
 const TextMinMaxComponent = ({Min, Max, step, sliderWidth}) => {
   const dispatch = useDispatch();

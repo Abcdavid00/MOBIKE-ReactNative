@@ -8,10 +8,8 @@ import { POST_DETAIL, POST_DETAIL_NAVIGATOR } from '../../../constants/routeName
 import { brandNameFromID, formatPrice, typeNameFromID } from '../../../utils/idToProperty';
 import { selectPost } from '../../../redux/slice/selectedPostSlice';
 import { TouchableWithoutFeedback } from 'react-native';
-import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 import { GetPersonalPostDetail, GetPost } from '../../../backendAPI';
 import SkeletonContent from 'react-native-skeleton-content-nonexpo';
-import colors from '../../../assets/theme/colors';
 
 
 const PostPreview = ({

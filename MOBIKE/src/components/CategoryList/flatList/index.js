@@ -1,7 +1,6 @@
-import {View, Text, FlatList, ScrollView} from 'react-native';
+import { FlatList} from 'react-native';
 import React from 'react';
 import ListItem from '../listItem';
-import colors from '../../../assets/theme/colors';
 
 var typeEventClick = '';
 

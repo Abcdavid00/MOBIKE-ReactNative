@@ -1,4 +1,4 @@
-import {View, Text, Image, Button} from 'react-native';
+import {View, Image} from 'react-native';
 import React from 'react';
 import {setLoading} from '../../redux/slice/loadingSlice';
 import {useDispatch, useSelector} from 'react-redux';

@@ -1,11 +1,8 @@
-import { Gesture } from 'react-native-gesture-handler';
-import { View, Text, TouchableWithoutFeedback, BackHandler } from 'react-native';
+import { View, Text, TouchableWithoutFeedback } from 'react-native';
 import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
-import { useNavigation } from '@react-navigation/native';
 import colors from '../../../assets/theme/colors';
-import { MARKETPLACE } from '../../../constants/routeNames';
 import { Dimensions } from 'react-native';
 const heightScreen = Dimensions.get('window').height;
 const Header = ({ title, iconRight, textRight, onClickRight, onLeftClick }) => {

@@ -4,7 +4,6 @@ import { setAll } from '../../redux/clientDatabase/personalInfo';
 import Store from '../../redux/store';
 import { login, logout } from '../../redux/slice/authSlice';
 import BackendAPI, { GetPersonalInfo } from '../../backendAPI';
-import permission from '../../redux/clientDatabase/permission';
 
 
 export const init = async () => {

@@ -1,7 +1,5 @@
 import React from 'react';
 import { useEffect } from 'react';
-import { Text, View } from 'react-native';
-import { useSelector } from 'react-redux';
 import PostDetailComponent from '../../components/PostDetail';
 import store from '../../redux/store';
 

@@ -1,7 +1,5 @@
-import {View, Text} from 'react-native';
 import React, {useEffect} from 'react';
 import FiltersPopUpComponent from '../../components/FiltersPopUp';
-import Header from '../../components/common/header';
 
 const FiltersPopUp = ({navigation}) => {
   useEffect(() => {

@@ -1,8 +1,6 @@
 import React from 'react';
-import { Alert, TouchableOpacity } from 'react-native';
-import { TouchableNativeFeedback } from 'react-native';
 import { Text, View } from 'react-native';
-import { Root, Popup } from 'popup-ui'
+import { Root } from 'popup-ui'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
@@ -12,16 +10,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import colors from '../../assets/theme/colors';
 import Container from '../common/container';
 import Carousel from '../Banner/carousel';
-import data from '../../data/imageBanner';
-import { Image } from 'react-native';
 import Store from '../../redux/store';
-import { color } from 'react-native-reanimated';
 import ReadMore from '@fawazahmed/react-native-read-more';
 import { Dimensions } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FAB } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { MARKETPLACE, YOUR_POSTS } from '../../constants/routeNames';
+import { YOUR_POSTS } from '../../constants/routeNames';
 import MobikeImage from '../common/image';
 import { ADD_POST } from './../../constants/routeNames';
 

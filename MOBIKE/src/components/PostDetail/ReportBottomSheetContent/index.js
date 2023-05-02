@@ -3,18 +3,8 @@ import { Keyboard, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
 import colors from '../../../assets/theme/colors';
 import TextInputOutline from '../../common/textInputOutline-Kohana';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import FontAwnesome from 'react-native-vector-icons/FontAwesome';
-import { Image } from 'react-native';
-import MobikeImage from '../../common/image';
-import { useState } from 'react';
-import Animated, { Layout } from 'react-native-reanimated';
-import { ScrollView } from 'react-native-gesture-handler';
 import { TouchableWithoutFeedback } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Dimensions } from 'react-native';
-import Store from '../../../redux/store';
-import { useEffect } from 'react';
 import { FAB } from 'react-native-paper';
 
 const widthScreen = Dimensions.get('window').width;

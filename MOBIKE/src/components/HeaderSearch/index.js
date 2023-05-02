@@ -1,13 +1,10 @@
-import {Gesture} from 'react-native-gesture-handler';
-import {View, Text, TouchableWithoutFeedback} from 'react-native';
+import {View, TouchableWithoutFeedback} from 'react-native';
 import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import TextInputOutline from '../common/textInputOutline-Kohana';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
 import colors from '../../assets/theme/colors';
 import {
-  YOUR_POSTS,
-  FILTERS_POP_UP,
   FILTERS_POP_UP_NAVIGATOR,
 } from '../../constants/routeNames';
 import {useNavigation} from '@react-navigation/native';

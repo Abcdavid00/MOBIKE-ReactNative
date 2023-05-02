@@ -1,6 +1,4 @@
-import {useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {Text, TouchableWithoutFeedback} from 'react-native';
 import Header from '../components/common/header';
 import {EDIT_ACCOUNT, EDIT_PTOFILE, PROFILE} from '../constants/routeNames';
 import EditAccount from '../screens/EditAccount';

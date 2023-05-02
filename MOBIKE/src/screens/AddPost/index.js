@@ -1,18 +1,7 @@
 import {
-  View,
-  Text,
-  TouchableWithoutFeedback,
-  Keyboard,
   StyleSheet,
-  TouchableOpacity,
-  Image,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import TextInputOutline from '../../components/common/textInputOutline-Kohana';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Container from '../../components/common/container';
-import * as ImagePicker from 'react-native-image-picker';
+import React, { useEffect } from 'react';
 import AddPostComponent from '../../components/AddPost';
 
 const AddPost = ({ navigation }) => {

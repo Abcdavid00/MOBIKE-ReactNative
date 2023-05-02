@@ -1,15 +1,8 @@
-import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text, TouchableWithoutFeedback } from 'react-native';
-import Header from '../components/common/header';
 import HeaderSearch from '../components/HeaderSearch';
-import { FILTERS_POP_UP_NAVIGATOR, MARKETPLACE, POST_DETAIL, POST_DETAIL_NAVIGATOR, PRODUCT_LIST } from '../constants/routeNames';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Foundation from 'react-native-vector-icons/Foundation';
+import { FILTERS_POP_UP_NAVIGATOR, MARKETPLACE, POST_DETAIL_NAVIGATOR, PRODUCT_LIST } from '../constants/routeNames';
 import Marketplace from '../screens/Marketplace';
-import PostDetail from '../screens/PostDetail';
 import FiltersPopUpNavigator from './FiltersPopUpNavigator';
-import colors from '../assets/theme/colors';
 import PostDetailNavigator from './PostDetailNavigator';
 import ProductList from '../screens/ProductList';
 

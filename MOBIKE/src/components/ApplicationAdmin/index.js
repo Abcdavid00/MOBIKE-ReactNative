@@ -1,4 +1,4 @@
-import { View, Text, useWindowDimensions } from 'react-native'
+import { View, useWindowDimensions } from 'react-native'
 import React from 'react'
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import colors from '../../assets/theme/colors';

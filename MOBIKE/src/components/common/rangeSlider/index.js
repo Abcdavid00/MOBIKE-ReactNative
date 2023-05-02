@@ -1,6 +1,5 @@
-import {View, Text, StyleSheet, TextInput} from 'react-native';
+import {View, StyleSheet, TextInput} from 'react-native';
 import React, {useEffect} from 'react';
-import colors from '../../../assets/theme/colors';
 import {PanGestureHandler} from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedGestureHandler,
@@ -9,8 +8,6 @@ import Animated, {
   useAnimatedProps,
   runOnJS,
 } from 'react-native-reanimated';
-import {useDispatch, useSelector} from 'react-redux';
-import {setIsSendingOddValue} from '../../../redux/slice/filterSlice';
 
 Animated.addWhitelistedNativeProps({text: true});
 

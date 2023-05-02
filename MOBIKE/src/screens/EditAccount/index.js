@@ -1,4 +1,3 @@
-import {View, Text} from 'react-native';
 import React, {useEffect} from 'react';
 import EditAccountComponent from '../../components/Profile/EditAccount';
 

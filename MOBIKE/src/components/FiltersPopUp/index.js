@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Container from '../common/container';
 import FilterPropNameComponent from './FilterPropName';

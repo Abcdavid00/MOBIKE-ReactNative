@@ -1,4 +1,3 @@
-import {View, Text} from 'react-native';
 import React, {createContext, useReducer} from 'react';
 import auth from './reducers/auth';
 import authInitialState from './initialStates/authInitialState';

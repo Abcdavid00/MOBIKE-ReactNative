@@ -5,13 +5,11 @@ import {
     TouchableWithoutFeedback,
     Dimensions,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ScrollView } from 'react-native-gesture-handler';
-import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
+import Animated, { Layout } from 'react-native-reanimated';
 import colors from '../../../assets/theme/colors';
-import { useSelector } from 'react-redux';
 
 const heightScreen = Dimensions.get('window').height;
 

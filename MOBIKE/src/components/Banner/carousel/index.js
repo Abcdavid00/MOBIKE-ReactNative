@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Dimensions,
   FlatList,
   Animated,
 } from 'react-native';
-import colors from '../../../assets/theme/colors';
-import data from '../../../data/imageBanner';
 import CarouselItem from '../carouselItem';
 
 const { width, height } = Dimensions.get('window');

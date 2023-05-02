@@ -1,10 +1,7 @@
-import { View, Text, TouchableWithoutFeedback } from 'react-native';
-import Animated, { Easing, EasingNode, Layout } from 'react-native-reanimated';
-import React, { useEffect, useRef, useState } from 'react';
+import { View, TouchableWithoutFeedback } from 'react-native';
+import Animated, { EasingNode, Layout } from 'react-native-reanimated';
+import React, { useRef } from 'react';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
-import TextInputOutline from '../../common/textInputOutline-Kohana';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const FilterPropFrameComponent = ({
   onToggle,

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useEffect } from 'react';
-import { TouchableWithoutFeedback } from 'react-native';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import ContextMenu from 'react-native-context-menu-view';
 import { GetPersonalPost } from '../../../backendAPI';
 import Container from '../../common/container';

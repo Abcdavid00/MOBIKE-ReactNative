@@ -1,11 +1,8 @@
-import { Gesture } from 'react-native-gesture-handler';
 import {
   View,
   Text,
   Image,
   StyleSheet,
-  Touchable,
-  TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
 import React from 'react';

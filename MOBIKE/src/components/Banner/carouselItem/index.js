@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
+import { StyleSheet, Dimensions, Image } from 'react-native';
 import MobikeImage from '../../common/image';
 
 export const { width, height } = Dimensions.get('window');
