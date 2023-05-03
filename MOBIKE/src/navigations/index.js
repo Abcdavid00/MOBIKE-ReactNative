@@ -2,6 +2,9 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import AuthenticationNavigator from './AuthenticationNavigator';
+import BottomNavigator from './BottomNavigator';
+import ApplicationAdminNavigator from './AdminApplicationNavigator';
+import LoadingNavigator from './LoadingNavigator';
 
 const AppNavContainer = () => {
   // const {
@@ -16,15 +19,15 @@ const AppNavContainer = () => {
   console.log('isLoading', isLoading);
   return (
     <NavigationContainer>
-      {/* {isLoading ? (
+      {isLoading ? (
         <LoadingNavigator />
       ) : isLoggedIn ? (
-        // (permission == 4) ? (<BottomNavigator />) : ( (permission == 2) ? <ApplicationAdminNavigator/> : <View/>)
-        <BottomNavigator />
+        (permission == 4) ? (<BottomNavigator />) : ( (permission == 2) ? <ApplicationAdminNavigator/> : <View/>)
+        // <BottomNavigator />
       ) : (
         <AuthenticationNavigator />
-      )} */}
-      <AuthenticationNavigator />
+      )}
+      {/* <AuthenticationNavigator /> */}
     </NavigationContainer>
   );
 };

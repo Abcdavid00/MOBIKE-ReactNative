@@ -12,7 +12,7 @@ const LoadingText = () => {
       }
     }, 1000);
   }, [loadingText]);
-  return <Text style={{marginBottom: 15}}>{loadingText}</Text>;
+  return <Text style={{marginBottom: 15, color: 'black'}}>{loadingText}</Text>;
 };
 
 export default LoadingText;
