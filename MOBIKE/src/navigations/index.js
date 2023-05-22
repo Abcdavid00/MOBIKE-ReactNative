@@ -27,7 +27,7 @@ const AppNavContainer = () => {
       ) : (
         <AuthenticationNavigator />
       )}
-      {/* <AuthenticationNavigator /> */}
+      {/* <BottomNavigator /> */}
     </NavigationContainer>
   );
 };

@@ -27,6 +27,7 @@ import { UploadPost } from '../../backendAPI';
 import { Root, Popup } from 'popup-ui';
 import { YOUR_POSTS } from './../../constants/routeNames';
 import PostPreviewComponent from './../PostPreviewComponent/index';
+
 const heightScreen = Dimensions.get('window').height;
 const widthScreen = Dimensions.get('window').width;
 const MAX_IMAGE = 8;
@@ -419,7 +420,7 @@ const AddPostComponent = ({ }) => {
         const color = Store.getState().colors.find((item) => item.ID == ID);
         if (color)
             return '#' + color.Color_hex;
-        else return '';
+        else return '#000';
     };
 
     const convertFirstCharacterToUppercase = (stringToConvert) => {

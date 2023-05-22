@@ -46,19 +46,32 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     setForm({...form, [name]: value});
   };
 
+  type response = {
+    msg: string;
+    token: string;
+    error: string;
+  };
+
+  const [wrongPopupVisibility, setWrongPopupVisibility] = React.useState(false);
+  const onChangePopupVisibility = (visibility: boolean) => {
+    setWrongPopupVisibility(visibility);
+  };
   const login = async () => {
     console.log('Login Submitted');
     const res = await TokenStorage.signIn(form.username, form.password);
-    // if (res.msg == "Incompleted") {
+    // if (res.msg == 'Incompleted') {
     //   Popup.show({
-    //     type: "Warning",
-    //     title: "Login Failed",
+    //     type: 'Warning',
+    //     title: 'Login Failed',
     //     button: true,
-    //     buttonText: "Try again",
-    //     background: "#a0a0a080",
-    //     callback: () => Popup.hide()
-    //   })
+    //     buttonText: 'Try again',
+    //     background: '#a0a0a080',
+    //     callback: () => Popup.hide(),
+    //   });
     // }
+    if (res.msg == 'Incompleted') {
+      onChangePopupVisibility(true);
+    }
   };
 
   const onSubmit = () => {
@@ -100,6 +113,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       onTest={onTest}
       OnSigninWithGoogle={OnSigninWithGoogle}
       navigation={navigation}
+      wrongPopupVisibility={wrongPopupVisibility}
+      onChangePopupVisibility={onChangePopupVisibility}
     />
   );
 };

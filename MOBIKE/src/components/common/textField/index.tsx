@@ -15,21 +15,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import Feather from 'react-native-vector-icons/Feather';
 import {IconProps} from 'react-native-vector-icons/Icon';
-import {
-  POPPINS_LIGHT_ITALIC,
-  POPPINS_REGULAR,
-} from '../../../assets/fonts';
+import {POPPINS_LIGHT_ITALIC, POPPINS_REGULAR} from '../../../assets/fonts';
 import colors from '../../../assets/theme/colors';
 import {ThemeState} from '../../../redux/slice/themeSlice';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/store';
 
 type TextFieldProps = React.ComponentProps<typeof TextInput> & {
-  label?: string;
+  label: string;
   isTypePassword?: boolean;
-  iconClass?: React.ComponentType<IconProps>;
-  iconName?: string;
-  iconColor?: string;
+  iconClass: React.ComponentType<IconProps>;
+  iconName: string;
+  iconColor: string;
   iconSize?: number;
   error?: string;
 };
@@ -41,7 +38,7 @@ const TextField: React.FC<TextFieldProps> = props => {
     iconClass,
     iconName,
     iconColor,
-    iconSize,
+    iconSize = 22,
     onBlur,
     onFocus,
     value,
@@ -61,9 +58,8 @@ const TextField: React.FC<TextFieldProps> = props => {
     state => state.theme,
   );
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
-
   return (
-    <View style={[style, {width: '100%'}]}>
+    <View style={[{width: '100%'}, style]}>
       {theme == 'light' ? (
         <Image
           source={require('../../../assets/images/input_light.png')}

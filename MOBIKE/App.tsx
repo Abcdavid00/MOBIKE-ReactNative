@@ -17,7 +17,11 @@ import {
   MD3LightTheme as DefaultTheme,
   Provider as PaperProvider,
 } from 'react-native-paper';
-import {RootState} from './src/redux/store';
+import store, {RootState} from './src/redux/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import TokenStorage from './src/services/TokenStorage';
+import ClientDatabase from './src/services/ClientDatabase';
+import {setLoading} from './src/redux/slice/loadingSlice';
 
 const theme_light = {
   ...DefaultTheme,
@@ -112,6 +116,29 @@ const theme_dark = {
 };
 
 function App(): JSX.Element {
+  useEffect(() => {
+    console.log('Main');
+    const Init = async () => {
+      await AsyncStorage.clear();
+      await TokenStorage.init();
+      await ClientDatabase.init();
+      TokenStorage.print();
+      ClientDatabase.print();
+      store.dispatch(setLoading(false));
+    };
+
+    const sandbox = async () => {
+      try {
+        // const cities = await BigGetRequest("cities");
+        // console.log(cities);
+      } catch (error) {
+        console.log('Sandbox error: ' + error);
+      }
+    };
+    Init();
+    sandbox();
+  }, []);
+
   useEffect(() => {
     const getThemeFromAsyncStorage = async () => {
       const theme = await getThemeState();
