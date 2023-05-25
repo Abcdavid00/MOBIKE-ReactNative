@@ -1,29 +1,16 @@
 import React from 'react';
-import {View, StyleSheet, Dimensions, FlatList, Animated} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  FlatList,
+  Animated,
+} from 'react-native';
 import CarouselItem from '../carouselItem';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/store';
-import {ThemeState} from '../../../redux/slice/themeSlice';
-import colors from '../../../assets/theme/colors';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-type CarouselProps = {
-  data: Array<string>;
-  isUri?: boolean;
-  isImageID?: boolean;
-  havingBackground?: boolean;
-};
-
-const Carousel: React.FC<CarouselProps> = ({
-  data,
-  isUri = false,
-  isImageID = false,
-  havingBackground = false,
-}) => {
-  const theme = useSelector<RootState, ThemeState>(state => state.theme);
-  const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
-  
+const Carousel = ({ data, isUri = false, isImageID = false, havingBackground = false }) => {
   const scrollX = new Animated.Value(0);
   let position = Animated.divide(scrollX, width);
   if (data && data.length) {
@@ -39,30 +26,16 @@ const Carousel: React.FC<CarouselProps> = ({
           scrollEventThrottle={16}
           decelerationRate={'normal'}
           showsHorizontalScrollIndicator={false}
-          renderItem={({item, index}) => {
-            return (
-              <CarouselItem
-                item={item}
-                isUri={isUri}
-                isImageID={isImageID}
-                index={index}
-              />
-            );
+          renderItem={({ item, index }) => {
+            return <CarouselItem item={item} isUri={isUri} isImageID={isImageID} index={index} />;
           }}
           onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {x: scrollX}}}],
-            {useNativeDriver: false},
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: false },
           )}
         />
 
-        <View
-          style={[
-            styles.dotView,
-            havingBackground && {
-              backgroundColor: theme=='light' ? '#ffffff55': '#00000055',
-              borderRadius: 10,
-            },
-          ]}>
+        <View style={[styles.dotView, havingBackground && { backgroundColor: '#ffffff55', borderRadius: 10, }]}>
           {data.map((_, i) => {
             let opacity = position.interpolate({
               inputRange: [i - 1, i, i + 1],
@@ -76,9 +49,10 @@ const Carousel: React.FC<CarouselProps> = ({
                   opacity,
                   height: 5,
                   width: 5,
-                  backgroundColor: color.onBackground,
+                  backgroundColor: '#000',
                   margin: 2,
                   borderRadius: 5,
+
                 }}
               />
             );
@@ -95,7 +69,7 @@ const styles = StyleSheet.create({
   dotView: {
     flexDirection: 'row',
     justifyContent: 'center',
-    bottom: 0,
+    bottom: 15,
     alignSelf: 'center',
     paddingVertical: 1,
     paddingHorizontal: 3,

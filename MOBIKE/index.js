@@ -7,7 +7,6 @@ import { Provider } from 'react-redux';
 import App from './App';
 import { name as appName } from './app.json';
 import store from './src/redux/store';
-import { ModalPortal } from 'react-native-modals';
 
 // const theme = {
 //     ...DefaultTheme,
@@ -23,9 +22,8 @@ import { ModalPortal } from 'react-native-modals';
 export default function Main() {
 
     return (
-        <Provider store={store}>
-            <App />
-            <ModalPortal />
+        <Provider store={store}>           
+                <App />
         </Provider>
     );
 }

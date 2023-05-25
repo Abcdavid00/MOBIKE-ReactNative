@@ -64,7 +64,7 @@ export const signIn = async (usernameOrEmail: String, password: String, savePass
             addUID(response.uid);
         }
         const myinfo = await BackendAPI.me(response.token);
-        if (myinfo.msg == "Completed") {
+        if (myinfo.msg == Completed) {
             Store.dispatch(login({
                 ID: myinfo.user.ID,
                 token: myinfo.token,
@@ -105,7 +105,7 @@ export const print = async () => {
     }
 };
 
-export const getToken = async (UID: string | number) => {
+export const getToken = async (UID) => {
     try {
         let tokenStorage = await AsyncStorage.getItem('TokenStorage');
         tokenStorage = JSON.parse(tokenStorage);
