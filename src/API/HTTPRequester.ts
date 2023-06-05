@@ -1,6 +1,6 @@
 const schema = "https";
-const host = "abcdavid-knguyen.ddns.net";
-const port = 30001;
+const host = "mobike.ddns.net";
+const port = null;
 
 const retryInterval = 100;
 const retryLimit = 10;
@@ -16,6 +16,8 @@ type HTTPResult = {
 }
 
 function GenerateURL(path: string): string {
+    if (!port)
+        return `${schema}://${host}/${path}`;
     return `${schema}://${host}:${port}/${path}`;
 }
 
