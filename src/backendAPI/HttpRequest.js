@@ -1,6 +1,6 @@
 const scheme = 'https';
-const host = 'abcdavid-knguyen.ddns.net';
-const port = '30001';
+const host = 'mobike.ddns.net';
+const port = null;
 
 const retryInterval = 100;
 const maxRetry = 10;
@@ -14,7 +14,11 @@ const log = (message: string) => {
 };
 
 export const GenerateRequestUrl = (path: String) => {
-  let request = scheme + '://' + host + ':' + port + '/' + path;
+  let request = undefined;
+  request = scheme + '://' + host + ':' + port + '/' + path;
+  if (!port) {
+    request = scheme + '://' + host + '/' + path;
+  }
   return request;
 };
 
