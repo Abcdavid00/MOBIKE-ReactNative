@@ -1,22 +1,17 @@
-import {
-  View,
-  Text,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Pressable,
-} from 'react-native';
+import {View, Text, Keyboard, Pressable} from 'react-native';
 import React from 'react';
 import Container from '../common/container';
 import colors from '../../assets/theme/colors';
 import Carousel from '../Banner/carousel';
 import imageBanner from '../../data/imageBanner';
-import dataCategoryList from '../../data/dataCategoryList';
-import dataPostPreviewList from '../../data/dataPostPreviewList';
 import CategoryList from '../CategoryList/flatList';
 import PostPreviewList from '../PostPreview/flatList';
 import store, {RootState} from '../../redux/store';
-import {useNavigation} from '@react-navigation/native';
-import {PRODUCT_LIST} from '../../constants/routeNames';
+import {
+  POST_DETAIL_NAVIGATOR,
+  PRODUCT_LIST,
+  SEARCH,
+} from '../../constants/routeNames';
 import {useDispatch, useSelector} from 'react-redux';
 import {setInitial} from '../../redux/slice/filterSlice';
 import {GetAllPosts} from '../../backendAPI';
@@ -27,6 +22,9 @@ import {MarketplaceStackParamList} from '../../navigations/MarketplaceNavigator'
 import {ThemeState} from '../../redux/slice/themeSlice';
 import TextField from '../common/textField';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {POPPINS_BOLD, POPPINS_LIGHT_ITALIC} from '../../assets/fonts';
+import {vehicleType} from '../../redux/clientDatabase/vehicleType';
+import {imageVehicleType} from '../../data/imageVehicleTypes';
 import ShadowWrapper from '../common/shadowWrapper';
 
 type MarketplaceComponentProps = {
@@ -36,7 +34,9 @@ type MarketplaceComponentProps = {
 const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   navigation,
 }) => {
-  const dataType = store.getState().vehicleTypes;
+  const dataType = useSelector<RootState, vehicleType[]>(
+    state => state.vehicleTypes,
+  );
   console.log('dataType', dataType);
   const dispatch = useDispatch();
 
@@ -47,59 +47,22 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   const getFilterPostList = async () => {
     const postListTmp = await GetAllPosts();
     console.log('postList: ' + JSON.stringify(postListTmp));
-    let tmp: Array<string> = [];
+    let tmp: Array<number> = [];
     for (let i = 0; i < postListTmp.length; i++) {
       tmp.push(postListTmp[i].ID);
     }
     setPostList(tmp);
-    setIsLoading(false);
   };
 
-  const [postList, setPostList] = React.useState<Array<string>>([]);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [postList, setPostList] = React.useState<Array<number>>([]);
 
-  const loadingArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  // const RenderSkeleton = (index: number) => {
-  //   return (
-  //     <SkeletonContent
-  //       containerStyle={[
-  //         styles.styleWrapper,
-  //         index == 0 ? {marginLeft: 20} : null,
-  //         {backgroundColor: '#f5f5f5'},
-  //       ]}
-  //       highlightColor="#C0DAF155"
-  //       isLoading={isLoading}
-  //       layout={[
-  //         {
-  //           key: 'image',
-  //           width: 135,
-  //           height: 135,
-  //           borderRadius: 5,
-  //         },
-  //         {
-  //           key: 'title',
-  //           width: 130,
-  //           height: 14,
-  //           marginTop: 10,
-  //         },
-  //         {
-  //           key: 'info',
-  //           width: 130,
-  //           height: 10,
-  //           marginTop: 10,
-  //         },
-  //         {
-  //           key: 'price',
-  //           width: 130,
-  //           height: 16,
-  //           marginTop: 10,
-  //         },
-  //       ]}>
-  //       <Text>Your content</Text>
-  //       <Text>Other content</Text>
-  //     </SkeletonContent>
-  //   );
-  // };
+  const onNavigateProductList = () => {
+    navigation.navigate(PRODUCT_LIST);
+  };
+
+  const onNavigateSearch = () => {
+    navigation.navigate(SEARCH);
+  };
 
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
@@ -107,7 +70,8 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   return (
     <Container
       keyboardShouldPersistTaps="always"
-      styleScrollView={{backgroundColor: 'white'}}>
+      styleScrollView={{backgroundColor: color.background}}>
+      {/* Header */}
       <View style={styles.wrapperHeader}>
         <TextField
           label={'What are you looking for ?'}
@@ -115,6 +79,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
           iconName={'search-outline'}
           iconColor={color.primary}
           style={{width: '85%'}}
+          onTouchEnd={onNavigateSearch}
         />
         <Pressable>
           <Ionicons
@@ -124,78 +89,50 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
           />
         </Pressable>
       </View>
+
+      {/* Banner */}
       <Carousel data={imageBanner} />
-      {/* <ShadowWrapper
-        style={{
-          height: 300,
-          width: 300,
-          alignSelf: 'center',
-        }}
-        contentStyle={{
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <Text>Hello</Text>
-      </ShadowWrapper> */}
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 'bold',
-              marginStart: 20,
-              marginTop: 5,
-              marginBottom: 7,
-              color: '#000000',
-            }}>
-            Vehicle Types
+
+      {/*Vehicle Type*/}
+      <View>
+        <Text style={[styles.vehicleTypeHeading, {color: color.onBackground}]}>
+          Vehicle Types
+        </Text>
+        <CategoryList
+          data={dataType}
+          type={'navigate'}
+          onNavigate={onNavigateProductList}
+          renderItem={undefined}
+          imageVehicleTypes={imageVehicleType}
+        />
+      </View>
+
+      {/* Most Recently Title */}
+      <View style={styles.mostRecentlyHeadingWrapper}>
+        <Text style={[styles.mostRecentlyHeading, {color: color.onBackground}]}>
+          Most Recently
+        </Text>
+        <Pressable
+          onPress={() => {
+            onNavigateProductList();
+            dispatch(setInitial);
+          }}>
+          <Text style={[styles.seeMoreHeading, {color: color.primary}]}>
+            {'See more >'}
           </Text>
-          <CategoryList data={dataType} type={undefined} />
+        </Pressable>
+      </View>
 
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginHorizontal: 20,
-              marginVertical: 10,
-              marginTop: 20,
-            }}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: 'bold',
-                color: '#000000',
-              }}>
-              Most Recently
-            </Text>
-            <TouchableWithoutFeedback
-              onPress={() => {
-                navigation.navigate(PRODUCT_LIST);
-                dispatch(setInitial);
-              }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '500',
-                  color: colors.primary,
-                  fontStyle: 'italic',
-                }}>
-                {'See more >'}
-              </Text>
-            </TouchableWithoutFeedback>
-          </View>
-          {/* {isLoading ? (
-            <View style={{flexDirection: 'row'}}>
-              {loadingArray.map((item, index) => RenderSkeleton(index))}
-            </View>
-          ) : (
-            <PostPreviewList data={postList} />
-          )} */}
+      {/*Preview Post List */}
+      <PostPreviewList
+        data={postList}
+        onPress={() => {
+          navigation.navigate(POST_DETAIL_NAVIGATOR);
+        }}
+        renderItem={undefined}
+      />
 
-          <PostPreviewList data={postList} />
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={{height: 100}} />
     </Container>
   );
 };
@@ -203,19 +140,34 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
 export default MarketplaceComponent;
 
 const styles = StyleSheet.create({
-  styleWrapper: {
-    backgroundColor: '#EDEDED',
-    borderRadius: 5,
-    marginEnd: 13,
-    marginVertical: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   wrapperHeader: {
     flexDirection: 'row',
     paddingLeft: '6%',
     paddingEnd: '4%',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  vehicleTypeHeading: {
+    fontSize: 16,
+    fontFamily: POPPINS_BOLD,
+    paddingLeft: '6%',
+    marginTop: 5,
+    marginBottom: 7,
+  },
+  mostRecentlyHeadingWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginVertical: 10,
+    marginTop: 20,
+  },
+  mostRecentlyHeading: {
+    fontSize: 16,
+    fontFamily: POPPINS_BOLD,
+  },
+  seeMoreHeading: {
+    fontSize: 12,
+    fontFamily: POPPINS_LIGHT_ITALIC,
   },
 });

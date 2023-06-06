@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@fawazahmed/react-native-read-more": "^3.0.2",
-    "@react-native-async-storage/async-storage": "^1.17.12",
+    "@react-native-async-storage/async-storage": "^1.18.1",
     "@react-native-community/datetimepicker": "^7.0.0",
     "@react-native-community/eslint-config": "^3.2.0",
     "@react-native-masked-view/masked-view": "^0.2.8",
@@ -36,6 +36,7 @@
     "eslint-plugin-unused-imports": "^2.0.0",
     "popup-ui": "^1.2.2",
     "react": "18.2.0",
+    "react-content-loader": "^6.2.1",
     "react-native": "0.71.4",
     "react-native-app-auth": "^6.4.3",
     "react-native-async-storage": "^0.0.1",

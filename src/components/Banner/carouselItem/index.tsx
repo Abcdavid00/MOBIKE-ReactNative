@@ -36,8 +36,7 @@ const CarouselItem: React.FC<CarouselItemProps> = ({
         />
       );
     } else {
-      const {url} = item;
-      return <Image source={url} style={styles.image} key={index} />;
+      return <Image source={item} style={styles.image} key={index} />;
     }
   };
 

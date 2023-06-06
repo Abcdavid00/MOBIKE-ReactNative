@@ -24,6 +24,7 @@ export const selectedPostSlice = createSlice({
       // state.VehicleBrand = action.payload.VehicleBrand;
       state.isActivePost = action.payload.isActivePost;
       state.isAdmin = action.payload.isAdmin;
+      return state;
     },
   },
 });

@@ -261,17 +261,17 @@ export const GetUserInfo = async (ID) => {
 }
 
 export const PostFilter = (
-    title: string,
-    page: Number,
-    numperPage: Number,
-    asc: Boolean,
-    priceStart: Number,
-    priceEnd: Number,
-    brand: Number,
-    lineup: Number,
-    type: Number,
-    color: Number,
-    manufacturerYear: Number,
+    title?: string,
+    page?: Number,
+    numperPage?: Number,
+    asc?: Boolean,
+    priceStart?: Number,
+    priceEnd?: Number,
+    brand?: Number,
+    lineup?: Number,
+    type?: Number,
+    color?: Number,
+    manufacturerYear?: Number,
 ) => {
     const args = {
         string: title,

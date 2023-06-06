@@ -10,10 +10,16 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import MarketplaceNavigator from './MarketplaceNavigator';
 import YourPostsNavigator from './YourPostsNavigator';
 import ProfileNavigator from './ProfileNavigator';
+import {useSelector} from 'react-redux';
+import {RootState} from '../redux/store';
+import {ThemeState} from '../redux/slice/themeSlice';
+import colors from '../assets/theme/colors';
 
 const Tab = createBottomTabNavigator();
 
 const BottomNavigator = () => {
+  const theme = useSelector<RootState, ThemeState>(state => state.theme);
+  const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -29,19 +35,42 @@ const BottomNavigator = () => {
           } else if (route.name === PROFILE_NAVIGATOR) {
             iconName = focused ? 'person' : 'person-outline';
           }
-
-          // You can return any component that you like here!
-          return <Icon name={iconName} size={size} color={color} />;
+          if (focused) {
+            return (
+              <Icon
+                name={iconName}
+                size={size}
+                color={
+                  theme == 'light'
+                    ? colors.lightTheme.onBackground
+                    : colors.darkTheme.onBackground
+                }
+              />
+            );
+          } else
+            return (
+              <Icon
+                name={iconName}
+                size={size}
+                color={
+                  theme == 'light'
+                    ? colors.lightTheme.onBackground_light
+                    : colors.darkTheme.onBackground_light
+                }
+              />
+            );
         },
-        tabBarActiveTintColor: '#384653',
-        tabBarInactiveTintColor: '#8D8D8D',
+        tabBarActiveTintColor: color.onBackground,
+        tabBarInactiveTintColor: color.onBackground_light,
         tabBarItemStyle: {marginBottom: 10},
         tabBarIconStyle: {marginBottom: -5},
         tabBarLabelStyle: {fontSize: 12},
-        tabBarStyle: {backgroundColor: '#EDF8FF', height: 56},
+        tabBarStyle: {
+          backgroundColor:
+            theme == 'light' ? color.background_bottomNav : '#3d4146',
+          height: 56,
+        },
         tabBarHideOnKeyboard: true,
-        tabBarActiveBackgroundColor: '#EDF8FF',
-        tabBarInactiveBackgroundColor: '#EDF8FF',
         headerShown: false,
       })}>
       <Tab.Screen

@@ -1,6 +1,32 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
 
-const initialState = {
+export type FilterState = {
+  name: string;
+  vehicleTypes: Array<number>;
+  priceRange: {
+    min: number;
+    max: number;
+    minPosition: number;
+    maxPosition: number;
+  };
+  minMaxText: {
+    min: number;
+    max: number;
+  };
+  manufacturer: Array<{
+    id: number;
+    value: string;
+  }>;
+  asc: Boolean;
+  title?: string;
+  brand?: number;
+  lineup?: number;
+  type?: number;
+  color?: number;
+  manufacturerYear?: number;
+};
+
+const initialState: FilterState = {
   name: '',
   vehicleTypes: [],
   priceRange: {
@@ -62,8 +88,7 @@ const filterSlice = createSlice({
           break;
         }
       }
-      if (!flag)
-        state.manufacturer.push(temp);
+      if (!flag) state.manufacturer.push(temp);
     },
 
     setBrand: (state, action) => {
@@ -81,7 +106,6 @@ const filterSlice = createSlice({
     setManufacturerYear: (state, action) => {
       state.manufacturerYear = action.payload;
     },
-
 
     setInitial: () => {
       return initialState;

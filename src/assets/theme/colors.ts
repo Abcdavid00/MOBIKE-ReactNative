@@ -20,6 +20,10 @@ export default {
     onBackground_light: '#686868',
     onBackground_disabled: '#646E8255',
 
+    background_bottomNav: '#EDF8FF',
+
+    divider: '#d8d8d8',
+
     surface: '#E9EDF0',
     onSurface: '#3C3C3C',
 
@@ -37,6 +41,10 @@ export default {
     onBackground: '#FFFFFFDE',
     onBackground_light: '#FFFFFF99',
     onBackground_disabled: '#FFFFFF61',
+
+    background_bottomNav: '#FFFFFF14',
+
+    divider: '#4b4b4b',
 
     surface: '#2C3036',
     onSurface: '#fff',

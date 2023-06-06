@@ -71,9 +71,9 @@ const ShadowWrapper: React.FC<ShadowWrapperProp> = ({
           {_renderContent()}
         </Shadow>
         <Shadow
-          distance={20}
+          distance={10}
           startColor={'#48505777'}
-          offset={[-10, -10]}
+          offset={[-4, -4]}
           containerStyle={{position: 'absolute'}}>
           {_renderContent()}
         </Shadow>

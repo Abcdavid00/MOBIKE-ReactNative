@@ -116,15 +116,16 @@ const theme_dark = {
 };
 
 function App(): JSX.Element {
+
   useEffect(() => {
     console.log('Main');
     const Init = async () => {
-      await AsyncStorage.clear();
+      // await AsyncStorage.clear();
       await TokenStorage.init();
       await ClientDatabase.init();
       TokenStorage.print();
       ClientDatabase.print();
-      store.dispatch(setLoading(false));
+      dispatch(setLoading(false));
     };
 
     const sandbox = async () => {

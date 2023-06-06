@@ -6,7 +6,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
 import Animated, {
   FadeInLeft,
   FadeInRight,
@@ -21,7 +21,7 @@ import {ThemeState} from '../../../redux/slice/themeSlice';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/store';
 
-type TextFieldProps = React.ComponentProps<typeof TextInput> & {
+export type TextFieldProps = React.ComponentProps<typeof TextInput> & {
   label: string;
   isTypePassword?: boolean;
   iconClass: React.ComponentType<IconProps>;
@@ -54,6 +54,7 @@ const TextField: React.FC<TextFieldProps> = props => {
   const onToggleHidden = () => {
     setHidden(!hidden);
   };
+
   const theme: ThemeState = useSelector<RootState, ThemeState>(
     state => state.theme,
   );
@@ -104,7 +105,12 @@ const TextField: React.FC<TextFieldProps> = props => {
         {(isFocused || valueTmp) && (
           <Animated.View entering={FadeInLeft} exiting={FadeOutLeft}>
             {iconClass && (
-              <Icon name={iconName} color={iconColor} size={iconSize} />
+              <Icon
+                name={iconName}
+                color={iconColor}
+                size={iconSize}
+                style={{bottom: 2}}
+              />
             )}
           </Animated.View>
         )}

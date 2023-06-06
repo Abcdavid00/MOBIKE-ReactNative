@@ -9,7 +9,7 @@ import colors from '../../../assets/theme/colors';
 const {width, height} = Dimensions.get('window');
 
 type CarouselProps = {
-  data: Array<string>;
+  data: Array<String>;
   isUri?: boolean;
   isImageID?: boolean;
   havingBackground?: boolean;

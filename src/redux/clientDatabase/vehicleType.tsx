@@ -1,8 +1,8 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 export type vehicleType = {
-  id: string;
-  name: string;
+  ID: string;
+  Type: string;
 };
 
 export type vehicleTypeState = Array<vehicleType>;

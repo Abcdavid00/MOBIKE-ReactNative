@@ -1,15 +1,12 @@
 import {View, Image} from 'react-native';
 import React from 'react';
-import {setLoading} from '../../redux/slice/loadingSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import LoadingText from '../LoadingText';
+import {RootState} from '../../redux/store';
 
 const LoadingComponent = () => {
-  const isLoading = useSelector(state => state.loading.loading);
+  const isLoading = useSelector<RootState, Boolean>(state => state.loading);
   const dispatch = useDispatch();
-  const onChangingLoading = () => {
-    dispatch(setLoading(!isLoading));
-  };
   return (
     <View>
       <Image
@@ -25,8 +22,11 @@ const LoadingComponent = () => {
           top: 70,
           alignItems: 'center',
         }}>
-        <LoadingText/>
-        <Image source={require('../../assets/images/loading-wheel.gif')} />
+        <LoadingText />
+        <Image
+          source={require('../../assets/images/loading-wheel.gif')}
+          style={{width: 80, height: 80}}
+        />
         {/* <Button onPress={() => onChangingLoading()} title="setLoading" /> */}
       </View>
     </View>

@@ -13,7 +13,7 @@ const AppNavContainer = () => {
 
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
   const permission = useSelector(state => state.auth.permission);
-  const isLoading = useSelector(state => state.loading.loading);
+  const isLoading = useSelector(state => state.loading);
   console.log('isLoggedIn', isLoggedIn);
   console.log('permission', permission);
   console.log('isLoading', isLoading);

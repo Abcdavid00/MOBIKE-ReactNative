@@ -6,19 +6,25 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import React from 'react';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import colors from '../../../assets/theme/colors';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
+  FilterState,
   setVehicleTypesAdd,
   setVehicleTypesRemove,
 } from '../../../redux/slice/filterSlice';
-import { PRODUCT_LIST } from '../../../constants/routeNames';
+import {PRODUCT_LIST} from '../../../constants/routeNames';
+import {CategoryItem} from '../flatList';
+import { RootState } from '../../../redux/store';
 
-const ListItem = ({ item, index, type }) => {
+type ListItemProps = {
+  item: CategoryItem;
+};
+
+const ListItemFilter: React.FC<ListItemProps> = ({item}) => {
   const navigation = useNavigation();
-  let path = item.url;
-  const vehicleTypes = useSelector(state => state.filter.vehicleTypes);
+  const vehicleTypes = useSelector<RootState, Array<string>>(state => state.filter.vehicleTypes);
 
   const isInSelectdList = vehicleTypes.includes(item.id);
   const dispatch = useDispatch();
@@ -26,21 +32,21 @@ const ListItem = ({ item, index, type }) => {
   const [isSelected, setIsSelected] = React.useState(isInSelectdList);
   const selectedColor = colors.secondary;
 
-  const { navigate } = useNavigation();
-  const choose = type == 'choose';
+  const {navigate} = useNavigation();
+  const choose = item.type == 'choose';
   const onPress = choose
     ? () => {
-      if (!isSelected) {
-        dispatch(setVehicleTypesAdd(item.ID));
-      } else {
-        dispatch(setVehicleTypesRemove(item.ID));
+        if (!isSelected) {
+          dispatch(setVehicleTypesAdd(item.id));
+        } else {
+          dispatch(setVehicleTypesRemove(item.id));
+        }
+        setIsSelected(!isSelected);
       }
-      setIsSelected(!isSelected);
-    }
     : () => {
-      dispatch(setVehicleTypesAdd(item.ID));
-      navigate(PRODUCT_LIST);
-    };
+        dispatch(setVehicleTypesAdd(item.id));
+        navigate(PRODUCT_LIST);
+      };
 
   return (
     <View style={styles.styleWrapper}>
@@ -53,15 +59,17 @@ const ListItem = ({ item, index, type }) => {
                 backgroundColor: isSelected ? selectedColor : '#d9d9d9',
               },
             ]}>
-            <Image source={require('../../../assets/images/category.png')} style={styles.styleImage} />
+            <Image
+              source={require('../../../assets/images/category.png')}
+              style={styles.styleImage}
+            />
           </View>
 
           <Text
             style={[
-              styles.styleTitle,
-              choose && { color: isSelected ? '#3B8AD3' : 'black' },
+              choose && {color: isSelected ? '#3B8AD3' : 'black'},
             ]}>
-            {item.Type}
+            {item.type}
           </Text>
         </View>
       </TouchableWithoutFeedback>
@@ -92,7 +100,6 @@ const styles = StyleSheet.create({
     fontWeight: 'semibold',
     textAlign: 'center',
     fontStyle: 'italic',
-    color: '#000',
   },
 
   imageWrapper: {
@@ -107,4 +114,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ListItem;
+export default ListItemFilter;
