@@ -148,12 +148,12 @@ const styles = StyleSheet.create({
     },
     selectedLabel: {
         marginStart: 15,
-        color: colors.black,
+        color: '#000',
         fontWeight: 'bold',
     },
     resetLabel: {
         marginEnd: 15,
-        color: colors.primary,
+        color: "#000",
         fontWeight: 'bold',
     },
     selectedSectionContent: {

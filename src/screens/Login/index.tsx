@@ -31,10 +31,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   type formState = {
     username: string;
     password: string;
+    savePassword: boolean;
   };
   const [form, setForm] = React.useState<formState>({
     username: '',
     password: '',
+    savePassword: false,
   });
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -44,6 +46,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   };
   const onChange = ({name, value}: paramState) => {
     setForm({...form, [name]: value});
+  };
+
+  const onChangeSavePassword = (checked: boolean) => {
+    setForm({...form, savePassword: checked});
   };
 
   type response = {
@@ -58,7 +64,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   };
   const login = async () => {
     console.log('Login Submitted');
-    const res = await TokenStorage.signIn(form.username, form.password);
+    const res = await TokenStorage.signIn(
+      form.username,
+      form.password,
+      form.savePassword,
+    );
     // if (res.msg == 'Incompleted') {
     //   Popup.show({
     //     type: 'Warning',
@@ -109,6 +119,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   return (
     <LoginComponent
       onChange={onChange}
+      onChangeSavePassword={onChangeSavePassword}
       onSubmit={onSubmit}
       onTest={onTest}
       OnSigninWithGoogle={OnSigninWithGoogle}

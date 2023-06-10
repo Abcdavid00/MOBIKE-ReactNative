@@ -16,7 +16,6 @@ import {
   POPPINS_BOLD,
   POPPINS_LIGHT,
   POPPINS_LIGHT_ITALIC,
-  POPPINS_REGULAR,
   POPPINS_SEMI_BOLD,
 } from '../../assets/fonts';
 import colors from '../../assets/theme/colors';
@@ -28,20 +27,12 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/store';
 import {ThemeState} from '../../redux/slice/themeSlice';
 import CustomButton from '../common/customButton';
-import Modal, {
-  ModalTitle,
-  ModalContent,
-  ModalFooter,
-  ModalButton,
-  SlideAnimation,
-  ScaleAnimation,
-  BottomModal,
-  ModalPortal,
-} from 'react-native-modals';
+import Modal, {ModalContent, ScaleAnimation} from 'react-native-modals';
 import Feather from 'react-native-vector-icons/Feather';
 
 type LoginComponentProps = {
   onChange: (value: {name: string; value: string}) => void;
+  onChangeSavePassword: (checked: boolean) => void;
   onSubmit: () => void;
   onTest: () => void;
   OnSigninWithGoogle: () => void;
@@ -52,6 +43,7 @@ type LoginComponentProps = {
 
 const LoginComponent: React.FC<LoginComponentProps> = ({
   onChange,
+  onChangeSavePassword,
   onSubmit,
   onTest,
   OnSigninWithGoogle,
@@ -116,6 +108,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
                 status={checked ? 'checked' : 'unchecked'}
                 onPress={() => {
                   setChecked(!checked);
+                  onChangeSavePassword(!checked);
                 }}
                 uncheckedColor={color.onBackground_disabled}
               />
@@ -233,8 +226,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
               }}>
               <Feather name="x-circle" color={'#FFF'} size={54} />
             </View>
-          }
-        >
+          }>
           <ModalContent
             style={{
               backgroundColor: theme == 'light' ? '#fff' : color.background,
@@ -266,14 +258,21 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
               </Text>
               <Button
                 mode="contained"
-                style={{backgroundColor: theme=='light' ? '#374662' : '#f5f5f5', marginTop: 10, paddingHorizontal: 35,}}
+                style={{
+                  backgroundColor: theme == 'light' ? '#374662' : '#f5f5f5',
+                  marginTop: 10,
+                  paddingHorizontal: 35,
+                }}
                 onPress={() => onChangePopupVisibility(false)}>
-                <Text style={{
-                  fontFamily: POPPINS_LIGHT,
-                  fontSize: 14,
-                  color: color.background,
-                  textAlign: 'center',
-                }}>Close</Text>
+                <Text
+                  style={{
+                    fontFamily: POPPINS_LIGHT,
+                    fontSize: 14,
+                    color: color.background,
+                    textAlign: 'center',
+                  }}>
+                  Close
+                </Text>
               </Button>
             </View>
           </ModalContent>

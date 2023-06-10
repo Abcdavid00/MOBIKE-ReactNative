@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import {configureStore} from '@reduxjs/toolkit';
 import authReducer from '../slice/authSlice';
 import loadingReducer from '../slice/loadingSlice';
 import personalInfo from '../clientDatabase/personalInfo';
@@ -12,7 +12,8 @@ import permission from '../clientDatabase/permission';
 import filterReducer from '../slice/filterSlice';
 import selectedPostReducer from '../slice/selectedPostSlice';
 import likeReducer from '../slice/likeSlice';
-import themeReducer from '../slice/themeSlice'
+import themeReducer from '../slice/themeSlice';
+import sortReducer from '../slice/sortSlice';
 
 const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ const store = configureStore({
     selectedPost: selectedPostReducer,
     like: likeReducer,
     theme: themeReducer,
+    sort: sortReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

@@ -1,14 +1,51 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import ProductListComponent from '../../components/ProductListComponent';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {MarketplaceStackParamList} from '../../navigations/MarketplaceNavigator';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../redux/store';
+import {ThemeState} from '../../redux/slice/themeSlice';
+import colors, {ColorThemeProps} from '../../assets/theme/colors';
+import {getThemeColor} from '../../utils/getThemeColor';
+import {
+  RouteProp,
+  getFocusedRouteNameFromRoute,
+  useNavigationState,
+} from '@react-navigation/native';
+import {MARKETPLACE} from '../../constants/routeNames';
 
 type ProductListProps = {
   navigation: StackNavigationProp<MarketplaceStackParamList, 'ProductList'>;
 };
 
-const ProductList: React.FC<ProductListProps> = ({navigation}) => {
+const ProductListScreen: React.FC<ProductListProps> = ({navigation}) => {
+  const color = useSelector<RootState, ColorThemeProps>(state =>
+    getThemeColor(state.theme),
+  );
+  const navigationState = useNavigationState(state => state);
+
+  const previousScreen =
+    navigationState.routes[navigationState.index - 1]?.name;
+  useEffect(() => {
+    if (previousScreen == MARKETPLACE) {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {
+          display: 'none',
+        },
+      });
+
+      return () =>
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {
+            backgroundColor: color.background_bottomNav,
+            minHeight: 56,
+            maxHeight: 80,
+          },
+        });
+    }
+  }, [navigation]);
+
   return <ProductListComponent navigation={navigation} />;
 };
 
-export default ProductList;
+export default ProductListScreen;

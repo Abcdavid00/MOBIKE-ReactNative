@@ -5,7 +5,16 @@ import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
 import colors from '../../../assets/theme/colors';
 import { Dimensions } from 'react-native';
 const heightScreen = Dimensions.get('window').height;
-const Header = ({ title, iconRight, textRight, onClickRight, onLeftClick }) => {
+
+type HeaderProps = {
+  title: string,
+  iconRight?: string,
+  textRight?: string,
+  onClickRight?: () => void,
+  onLeftClick?: () => void,
+}
+
+const Header : React.FC<HeaderProps> = ({ title, iconRight, textRight, onClickRight, onLeftClick }) => {
   return (
     <View
       style={{

@@ -147,14 +147,16 @@ const PostPreview: React.FC<PostPreviewProps> = ({
     if (!postInfo) return null;
     if (isActivePost) {
       return (
-        <View style={{marginVertical: 7.5}}>
+        <View style={{marginVertical: 12}}>
           <ShadowWrapper
             style={{
               width: widthScreen * 0.42,
               height: widthScreen * 0.42 * 1.45,
               borderRadius: 11.75,
             }}>
-            <View style={[styles.styleWrapper, styleWrapper]}>
+            <Pressable
+              style={[styles.styleWrapper, styleWrapper]}
+              onPress={onPressItem}>
               <MobikeImage
                 imageID={postInfo.post.rel_Image[0]}
                 style={styles.styleImage}
@@ -187,7 +189,7 @@ const PostPreview: React.FC<PostPreviewProps> = ({
                   {formatPrice(postInfo.post.Pricetag) + ' VND'}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           </ShadowWrapper>
         </View>
       );

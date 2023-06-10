@@ -3,115 +3,92 @@ import {
   Text,
   Image,
   StyleSheet,
-  TouchableWithoutFeedback,
+  ImageSourcePropType,
+  Pressable,
 } from 'react-native';
 import React from 'react';
-import {useNavigation} from '@react-navigation/native';
-import colors from '../../../assets/theme/colors';
+import {ColorThemeProps} from '../../../assets/theme/colors';
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  FilterState,
-  setVehicleTypesAdd,
-  setVehicleTypesRemove,
-} from '../../../redux/slice/filterSlice';
-import {PRODUCT_LIST} from '../../../constants/routeNames';
 import {CategoryItem} from '../flatList';
-import { RootState } from '../../../redux/store';
+import {RootState} from '../../../redux/store';
+import {getThemeColor} from '../../../utils/getThemeColor';
+import {POPPINS_SEMI_BOLD} from '../../../assets/fonts';
+import {setVehicleType} from '../../../redux/slice/filterSlice';
 
 type ListItemProps = {
   item: CategoryItem;
+  image: ImageSourcePropType;
+  index: number;
+  last: boolean;
 };
 
-const ListItemFilter: React.FC<ListItemProps> = ({item}) => {
-  const navigation = useNavigation();
-  const vehicleTypes = useSelector<RootState, Array<string>>(state => state.filter.vehicleTypes);
+const ListItemFilter: React.FC<ListItemProps> = ({
+  item,
+  image,
+  index,
+  last,
+}) => {
+  const isSelected = useSelector<RootState, boolean>(
+    state => state.filter.vehicleType == item.ID,
+  );
 
-  const isInSelectdList = vehicleTypes.includes(item.id);
   const dispatch = useDispatch();
 
-  const [isSelected, setIsSelected] = React.useState(isInSelectdList);
-  const selectedColor = colors.secondary;
+  const onPress = () => {
+    if (!isSelected) {
+      dispatch(setVehicleType(item.ID));
+    } else dispatch(setVehicleType(0));
+  };
 
-  const {navigate} = useNavigation();
-  const choose = item.type == 'choose';
-  const onPress = choose
-    ? () => {
-        if (!isSelected) {
-          dispatch(setVehicleTypesAdd(item.id));
-        } else {
-          dispatch(setVehicleTypesRemove(item.id));
-        }
-        setIsSelected(!isSelected);
-      }
-    : () => {
-        dispatch(setVehicleTypesAdd(item.id));
-        navigate(PRODUCT_LIST);
-      };
+  const color = useSelector<RootState, ColorThemeProps>(state =>
+    getThemeColor(state.theme),
+  );
 
   return (
-    <View style={styles.styleWrapper}>
-      <TouchableWithoutFeedback onPress={onPress}>
-        <View>
-          <View
-            style={[
-              styles.imageWrapper,
-              choose && {
-                backgroundColor: isSelected ? selectedColor : '#d9d9d9',
-              },
-            ]}>
-            <Image
-              source={require('../../../assets/images/category.png')}
-              style={styles.styleImage}
-            />
-          </View>
-
-          <Text
-            style={[
-              choose && {color: isSelected ? '#3B8AD3' : 'black'},
-            ]}>
-            {item.type}
-          </Text>
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
+    <Pressable onPress={onPress}>
+      <View
+        style={[
+          styles.styleWrapper,
+          {
+            backgroundColor: isSelected
+              ? color.secondary + '4D'
+              : color.background,
+            borderColor: isSelected ? color.secondary : color.divider,
+          },
+          last && {marginRight: 40},
+        ]}>
+        <Image source={image} style={styles.styleImage} />
+        <Text style={[styles.styleTitle, {color: color.onBackground}]}>
+          {item.Type}
+        </Text>
+      </View>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   styleWrapper: {
-    width: 65,
-    paddingStart: 20,
-    paddingEnd: 5,
-    backgroundColor: 'transparent',
-    marginHorizontal: 12,
-    marginVertical: 5,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 16,
+    marginRight: 8,
   },
 
   styleImage: {
     resizeMode: 'contain',
+    width: 24,
+    height: 24,
   },
 
   styleTitle: {
-    width: 65,
-    paddingTop: 5,
-    fontSize: 12,
-    fontWeight: 'semibold',
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-
-  imageWrapper: {
-    width: 60,
-    height: 60,
-    borderRadius: 60,
-    padding: 5,
-    backgroundColor: '#d9d9d9',
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
+    marginStart: 8,
+    fontSize: 14,
+    textAlignVertical: 'bottom',
+    fontFamily: POPPINS_SEMI_BOLD,
   },
 });
-
 export default ListItemFilter;

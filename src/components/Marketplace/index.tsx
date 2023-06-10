@@ -1,4 +1,4 @@
-import {View, Text, Keyboard, Pressable} from 'react-native';
+import {View, Text, Keyboard, Pressable, Dimensions} from 'react-native';
 import React from 'react';
 import Container from '../common/container';
 import colors from '../../assets/theme/colors';
@@ -22,10 +22,19 @@ import {MarketplaceStackParamList} from '../../navigations/MarketplaceNavigator'
 import {ThemeState} from '../../redux/slice/themeSlice';
 import TextField from '../common/textField';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {POPPINS_BOLD, POPPINS_LIGHT_ITALIC} from '../../assets/fonts';
+import {
+  POPPINS_BOLD,
+  POPPINS_ITALIC,
+  POPPINS_LIGHT_ITALIC,
+} from '../../assets/fonts';
 import {vehicleType} from '../../redux/clientDatabase/vehicleType';
-import {imageVehicleType} from '../../data/imageVehicleTypes';
+import {imageVehicleTypes} from '../../data/imageVehicleTypes';
 import ShadowWrapper from '../common/shadowWrapper';
+import {getFontSize} from '../../utils/fontSizeResponsive';
+import PostPreviewLoader from '../common/contentLoader/postPreview';
+import PostPreview from '../PostPreview/listItem';
+
+const widthScreen = Dimensions.get('window').width;
 
 type MarketplaceComponentProps = {
   navigation: StackNavigationProp<MarketplaceStackParamList, 'Marketplace'>;
@@ -52,6 +61,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
       tmp.push(postListTmp[i].ID);
     }
     setPostList(tmp);
+    setIsLoading(false);
   };
 
   const [postList, setPostList] = React.useState<Array<number>>([]);
@@ -63,6 +73,9 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   const onNavigateSearch = () => {
     navigation.navigate(SEARCH);
   };
+
+  const [isLoading, setIsLoading] = React.useState(true);
+  const loadingArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
@@ -103,34 +116,65 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
           type={'navigate'}
           onNavigate={onNavigateProductList}
           renderItem={undefined}
-          imageVehicleTypes={imageVehicleType}
+          imageVehicleTypes={imageVehicleTypes}
         />
       </View>
 
-      {/* Most Recently Title */}
+      {/* Most Recent Title */}
       <View style={styles.mostRecentlyHeadingWrapper}>
         <Text style={[styles.mostRecentlyHeading, {color: color.onBackground}]}>
-          Most Recently
+          Most Recent
         </Text>
         <Pressable
           onPress={() => {
             onNavigateProductList();
             dispatch(setInitial);
           }}>
-          <Text style={[styles.seeMoreHeading, {color: color.primary}]}>
+          <Text style={[styles.seeMoreHeading, {color: color.text}]}>
             {'See more >'}
           </Text>
         </Pressable>
       </View>
 
       {/*Preview Post List */}
-      <PostPreviewList
+      {/* <PostPreviewList
         data={postList}
         onPress={() => {
           navigation.navigate(POST_DETAIL_NAVIGATOR);
         }}
         renderItem={undefined}
-      />
+      /> */}
+
+      <View style={{marginLeft: widthScreen * 0.01}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-around',
+          }}>
+          {isLoading
+            ? loadingArray.map((item, index) => (
+                // <RenderSkeleton key={index} index={index} />
+                <PostPreviewLoader key={index} />
+              ))
+            : postList.map((item, index) => {
+                return (
+                  <PostPreview
+                    postID={item}
+                    key={index}
+                    styleWrapper={{marginTop: 13}}
+                    isActivePost={true}
+                    pressable={true}
+                    onPress={() => {
+                      navigation.navigate(POST_DETAIL_NAVIGATOR);
+                      console.log('hello');
+                    }}
+                    index={index}
+                  />
+                );
+              })}
+        </View>
+      </View>
 
       <View style={{height: 100}} />
     </Container>
@@ -159,15 +203,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginHorizontal: 20,
-    marginVertical: 10,
     marginTop: 20,
   },
   mostRecentlyHeading: {
-    fontSize: 16,
+    fontSize: getFontSize(16),
     fontFamily: POPPINS_BOLD,
   },
   seeMoreHeading: {
-    fontSize: 12,
-    fontFamily: POPPINS_LIGHT_ITALIC,
+    fontSize: getFontSize(14),
+    fontFamily: POPPINS_ITALIC,
   },
 });

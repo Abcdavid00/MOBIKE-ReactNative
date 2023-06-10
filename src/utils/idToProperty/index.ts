@@ -1,7 +1,8 @@
-import Store from '../../redux/store';
+import { useSelector } from 'react-redux';
+import Store, { RootState } from '../../redux/store';
 
 //Brand
-export const brandNameFromID = (ID) => {
+export const brandNameFromID = (ID : number) => {
     const brand = Store.getState().vehicleModels.VehicleBrands.find((item) => item.ID == ID);
     if (brand)
         return brand.Name;
@@ -9,7 +10,7 @@ export const brandNameFromID = (ID) => {
 };
 
 //Lineup
-export const lineupNameFromID = (ID) => {
+export const lineupNameFromID = (ID: number) => {
     const lineup = Store.getState().vehicleModels.VehicleLineUps.find((item) => item.ID == ID);
     if (lineup)
         return lineup.Lineup;
@@ -17,7 +18,7 @@ export const lineupNameFromID = (ID) => {
 };
 
 //Type
-export const typeNameFromID = (ID) => {
+export const typeNameFromID = (ID: number) => {
     const type = Store.getState().vehicleTypes.find((item) => item.ID == ID);
     if (type)
         return type.Type;
@@ -25,21 +26,21 @@ export const typeNameFromID = (ID) => {
 };
 
 //Color
-export const colorNameFromID = (ID) => {
+export const colorNameFromID = (ID: number) => {
     const color = Store.getState().colors.find((item) => item.ID == ID);
     if (color)
         return convertFirstCharacterToUppercase(color.Name);
     else return '';
 };
 
-export const colorHexFromID = (ID) => {
+export const colorHexFromID = (ID: number) => {
     const color = Store.getState().colors.find((item) => item.ID == ID);
     if (color)
         return '#' + color.Color_hex;
     else return '';
 };
 
-export const convertFirstCharacterToUppercase = (stringToConvert) => {
+export const convertFirstCharacterToUppercase = (stringToConvert: String) => {
     var firstCharacter = stringToConvert.substring(0, 1);
     var restString = stringToConvert.substring(1);
     return firstCharacter.toUpperCase() + restString;
@@ -47,7 +48,7 @@ export const convertFirstCharacterToUppercase = (stringToConvert) => {
 
 
 //Condition
-export const conditionNameFromID = (ID) => {
+export const conditionNameFromID = (ID: number) => {
     const condition = Store.getState().vehicleConditions.find((item) => item.ID == ID);
     if (condition)
         return condition.Condition;
@@ -55,13 +56,13 @@ export const conditionNameFromID = (ID) => {
 };
 
 //Price
-export const formatPrice = (price) => {
+export const formatPrice = (price : number) => {
     if (price == undefined) return '';
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 //City
-export const cityNameFromID = (ID) => {
+export const cityNameFromID = (ID : number) => {
     const city = Store.getState().locations.Cities.find((item) => item.ID == ID);
     if (city)
         return city.Name;

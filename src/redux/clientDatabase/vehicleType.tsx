@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 export type vehicleType = {
-  ID: string;
+  ID: number;
   Type: string;
 };
 

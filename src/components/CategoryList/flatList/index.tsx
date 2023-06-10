@@ -8,13 +8,11 @@ import {
 import React from 'react';
 import ListItemFilter from '../listItem/ListItemFilter';
 import ListItemMarketplace from '../listItem/ListItemMarketplace';
+import {vehicleType} from '../../../redux/clientDatabase/vehicleType';
 
 var typeEventClick = '';
 
-export type CategoryItem = {
-  ID: string;
-  Type: string;
-};
+export type CategoryItem = vehicleType;
 
 interface CategoryListProps extends FlatListProps<CategoryItem> {
   data: CategoryItem[];
@@ -33,7 +31,9 @@ const CategoryList: React.FC<CategoryListProps> = props => {
   } = props;
 
   const renderItemFilter: ListRenderItem<CategoryItem> = ({item, index}) => {
-    return <ListItemFilter item={item} />;
+    return <ListItemFilter item={item} key={index} image={imageVehicleTypes[index]}
+    index={index}
+    last={index == data.length - 1} />;
   };
 
   const renderItemMarketplace: ListRenderItem<CategoryItem> = ({
@@ -42,6 +42,7 @@ const CategoryList: React.FC<CategoryListProps> = props => {
   }) => {
     return (
       <ListItemMarketplace
+        key={index}
         item={item}
         onNavigate={onNavigate}
         image={imageVehicleTypes[index]}
@@ -55,7 +56,7 @@ const CategoryList: React.FC<CategoryListProps> = props => {
     type == 'choose' ? renderItemFilter : renderItemMarketplace;
 
   const keyExtractor = (item: CategoryItem, index: number) => {
-    return item.ID;
+    return item.ID.toString();
   };
   return (
     // <ScrollView horizontal showsHorizontalScrollIndicator={false}>

@@ -2,7 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 
 export type FilterState = {
   name: string;
-  vehicleTypes: Array<number>;
+  vehicleType: number;
   priceRange: {
     min: number;
     max: number;
@@ -28,7 +28,7 @@ export type FilterState = {
 
 const initialState: FilterState = {
   name: '',
-  vehicleTypes: [],
+  vehicleType: 0,
   priceRange: {
     min: 0,
     max: 0,
@@ -57,14 +57,20 @@ const filterSlice = createSlice({
     setTitle: (state, action) => {
       state.title = action.payload;
     },
-    setVehicleTypesAdd: (state, action) => {
-      state.vehicleTypes.push(action.payload);
-      console.log(state.vehicleTypes);
+    setVehicleType: (state, action) => {
+      // state.vehicleTypes.push(action.payload);
+      // state.vehicleTypes = [action.payload];
+      // console.log('State update :' + state.vehicleTypes);
+      state.vehicleType = action.payload;
     },
-    setVehicleTypesRemove: (state, action) => {
-      let index = state.vehicleTypes.indexOf(action.payload);
-      state.vehicleTypes.splice(index, 1);
-    },
+    // setVehicleTypesRemove: (state, action) => {
+    //   let index = state.vehicleTypes.indexOf(action.payload);
+    //   state.vehicleTypes.splice(index, 1);
+    // },
+    // setVehicleTypeRemoveAll: state => {
+    //   state.vehicleTypes = [];
+    //   return state;
+    // },
     setPriceRange: (state, action) => {
       state.priceRange.min = action.payload.min;
       state.priceRange.max = action.payload.max;
@@ -115,8 +121,9 @@ const filterSlice = createSlice({
 
 export const {
   setTitle,
-  setVehicleTypesAdd,
-  setVehicleTypesRemove,
+  setVehicleType,
+  // setVehicleTypesRemove,
+  // setVehicleTypeRemoveAll,
   setPriceRange,
   setMinMaxText,
   setManufacturer,

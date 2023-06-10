@@ -1,8 +1,10 @@
-import { ImageSourcePropType } from "react-native";
+import {ImageSourcePropType} from 'react-native';
 
-export const imageVehicleType : Array<ImageSourcePropType> = [
-    require('../assets/images/scooterType.png'),
-    require('../assets/images/manualType.png'),
-    require('../assets/images/motorbikeType.png'),
-    require('../assets/images/electricType.png'),
-]
+export type imageVehicleTypesType = Array<ImageSourcePropType>;
+
+export const imageVehicleTypes: imageVehicleTypesType = [
+  require('../assets/images/scooterType.png'),
+  require('../assets/images/manualType.png'),
+  require('../assets/images/motorbikeType.png'),
+  require('../assets/images/electricType.png'),
+];

@@ -3,21 +3,15 @@ import {
   Text,
   Image,
   StyleSheet,
-  TouchableWithoutFeedback,
   ImageSourcePropType,
   Pressable,
 } from 'react-native';
-import React, {useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React from 'react';
 import colors from '../../../assets/theme/colors';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-  FilterState,
-  setInitial,
-  setVehicleTypesAdd,
-  setVehicleTypesRemove,
+  setInitial, setVehicleType,
 } from '../../../redux/slice/filterSlice';
-import {PRODUCT_LIST} from '../../../constants/routeNames';
 import {CategoryItem} from '../flatList';
 import {RootState} from '../../../redux/store';
 import {ThemeState} from '../../../redux/slice/themeSlice';
@@ -41,7 +35,7 @@ const ListItemMarketplace: React.FC<ListItemProps> = ({
   const dispatch = useDispatch();
 
   const onPress = () => {
-    dispatch(setVehicleTypesAdd(item.ID));
+    dispatch(setVehicleType(item.ID));
     onNavigate();
   };
 
@@ -141,3 +135,5 @@ const styles = StyleSheet.create({
 });
 
 export default ListItemMarketplace;
+
+

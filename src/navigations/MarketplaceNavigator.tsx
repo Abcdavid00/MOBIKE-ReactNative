@@ -8,10 +8,11 @@ import {
 import MarketplaceScreen from '../screens/Marketplace';
 import FiltersPopUpNavigator from './FiltersPopUpNavigator';
 import PostDetailNavigator from './PostDetailNavigator';
-import ProductList from '../screens/ProductList';
+import ProductListScreen from '../screens/ProductList';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import SearchScreen from '../screens/Search';
+import {RouteProp} from '@react-navigation/native';
 
 export type MarketplaceStackParamList = {
   [MARKETPLACE]: undefined;
@@ -40,7 +41,10 @@ const MarketplaceNavigator = () => {
         name={POST_DETAIL_NAVIGATOR}
         component={PostDetailNavigator}
       />
-      <MarketplaceStack.Screen name={PRODUCT_LIST} component={ProductList} />
+      <MarketplaceStack.Screen
+        name={PRODUCT_LIST}
+        component={ProductListScreen}
+      />
 
       <MarketplaceStack.Screen name={SEARCH} component={SearchScreen} />
     </MarketplaceStack.Navigator>
