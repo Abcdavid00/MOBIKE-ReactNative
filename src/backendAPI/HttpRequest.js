@@ -5,7 +5,7 @@ const port = '30001';
 const retryInterval = 100;
 const maxRetry = 10;
 
-const ResquestLog = true;
+const ResquestLog = false;
 
 const log = (message: string) => {
   if (ResquestLog) {

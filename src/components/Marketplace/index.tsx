@@ -55,7 +55,6 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
 
   const getFilterPostList = async () => {
     const postListTmp = await GetAllPosts();
-    console.log('postList: ' + JSON.stringify(postListTmp));
     let tmp: Array<number> = [];
     for (let i = 0; i < postListTmp.length; i++) {
       tmp.push(postListTmp[i].ID);

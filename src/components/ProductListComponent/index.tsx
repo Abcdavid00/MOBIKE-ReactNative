@@ -76,7 +76,6 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
 
   const getFilterPostList = async () => {
     const postListTmp = await GetAllPosts(filterPost);
-    console.log('postList: ' + JSON.stringify(postListTmp));
     setPostList(postListTmp);
     setIsLoading(false);
   };

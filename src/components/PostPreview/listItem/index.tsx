@@ -115,7 +115,6 @@ const PostPreview: React.FC<PostPreviewProps> = ({
   const [postInfo, setPostInfo] = React.useState<PostPreviewType>();
   const getPost = async () => {
     const post = await GetPost(postID);
-    console.log('PostPreview: ' + JSON.stringify(post));
     setPostInfo(post);
     setIsLoading(false);
   };
