@@ -1,4 +1,9 @@
-import {View, TouchableWithoutFeedback, Pressable} from 'react-native';
+import {
+  View,
+  TouchableWithoutFeedback,
+  Pressable,
+  StyleSheet,
+} from 'react-native';
 import Animated, {
   Easing,
   Layout,
@@ -9,6 +14,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import React, {useRef} from 'react';
 import SimpleLineIcon from 'react-native-vector-icons/SimpleLineIcons';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/store';
+import {ColorThemeProps} from '../../../assets/theme/colors';
+import {getThemeColor} from '../../../utils/getThemeColor';
+import {getFontSize} from '../../../utils/fontSizeResponsive';
+import {POPPINS_REGULAR} from '../../../assets/fonts';
+import {ThemeState} from '../../../redux/slice/themeSlice';
 
 type FilterPropFrameComponentProps = {
   onToggle: () => void;
@@ -52,36 +64,29 @@ const FilterPropFrameComponent: React.FC<FilterPropFrameComponentProps> = ({
       ],
     };
   });
+
+  const color = useSelector<RootState, ColorThemeProps>(state =>
+    getThemeColor(state.theme),
+  );
+
   return (
     <Animated.View
       layout={Layout.stiffness(100).damping(10).duration(durationLayout)}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          paddingTop: 20,
-          paddingBottom: 15,
-          alignItems: 'center',
-        }}>
+      <View style={styles.styleWrapper}>
         <Animated.Text
           layout={Layout.stiffness(100).damping(10).duration(durationLayout)}
-          style={[
-            {
-              marginStart: 25,
-              color: 'black',
-              fontSize: 16,
-              fontStyle: 'italic',
-              fontWeight: '700',
-            },
-            styleLabel,
-          ]}>
+          style={[styles.styleLabel, {color: color.onBackground}, styleLabel]}>
           {type}
         </Animated.Text>
         <Pressable onPress={toggle}>
           <Animated.View
             layout={Layout.stiffness(100).damping(10).duration(durationLayout)}
             style={[{marginEnd: 25}, animatedStyles]}>
-            <SimpleLineIcon name="arrow-down" size={15} color={'black'} />
+            <SimpleLineIcon
+              name="arrow-down"
+              size={16}
+              color={color.onBackground}
+            />
           </Animated.View>
         </Pressable>
       </View>
@@ -90,7 +95,7 @@ const FilterPropFrameComponent: React.FC<FilterPropFrameComponentProps> = ({
         <Animated.View
           layout={Layout.stiffness(100).damping(10).duration(durationLayout)}
           style={{
-            backgroundColor: '#A9A9A9',
+            backgroundColor: color.divider,
             height: 1,
             marginStart: 25,
             marginTop: show ? 10 : 6,
@@ -102,3 +107,18 @@ const FilterPropFrameComponent: React.FC<FilterPropFrameComponentProps> = ({
 };
 
 export default FilterPropFrameComponent;
+
+const styles = StyleSheet.create({
+  styleWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 20,
+    paddingBottom: 15,
+    alignItems: 'center',
+  },
+  styleLabel: {
+    marginStart: 25,
+    fontSize: getFontSize(16),
+    fontFamily: POPPINS_REGULAR,
+  },
+});

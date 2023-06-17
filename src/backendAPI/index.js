@@ -279,7 +279,7 @@ export const PostFilter = (
         numperpage: numperPage,
         order: asc ? "asc" : "desc",
         pricestart: priceStart,
-        priceend: undefined,
+        priceend: priceEnd,
         brand: brand,
         lineup: lineup,
         type: type,

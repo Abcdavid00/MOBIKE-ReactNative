@@ -7,7 +7,7 @@ import React from 'react';
 import ChatListScreen from '../screens/ChatList';
 import ChatRoomScreen from '../screens/ChatRoom';
 
-export type MarketplaceStackParamList = {
+export type ChatStackParamList = {
   [CHAT_LIST]: undefined;
   [CHAT_ROOM]: undefined;
 };

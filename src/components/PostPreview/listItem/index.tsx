@@ -53,7 +53,7 @@ export type PostPreviewType = {
     Pricetag: number;
     Time_created: Date;
     Title: string;
-    rel_Image: string[];
+    rel_Image: number[];
     rel_Like: string[];
     rel_Rating: string[];
   };
@@ -115,7 +115,7 @@ const PostPreview: React.FC<PostPreviewProps> = ({
   const [postInfo, setPostInfo] = React.useState<PostPreviewType>();
   const getPost = async () => {
     const post = await GetPost(postID);
-    console.log('PostPreview: ' + JSON.stringify(post));
+    // console.log('PostPreview: ' + JSON.stringify(post));
     setPostInfo(post);
     setIsLoading(false);
   };

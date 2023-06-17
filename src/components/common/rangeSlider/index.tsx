@@ -1,17 +1,45 @@
 import {View, StyleSheet, TextInput} from 'react-native';
 import React, {useEffect} from 'react';
-import {PanGestureHandler} from 'react-native-gesture-handler';
+import {
+  GestureEvent,
+  PanGestureHandler,
+  PanGestureHandlerEventPayload,
+  PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   useAnimatedProps,
   runOnJS,
+  GestureHandlers,
 } from 'react-native-reanimated';
+import {priceRangeType} from '../../../redux/slice/filterSlice';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/store';
+import {ColorThemeProps} from '../../../assets/theme/colors';
+import {getThemeColor} from '../../../utils/getThemeColor';
+import themeSlice from '../../../redux/slice/themeSlice';
 
 Animated.addWhitelistedNativeProps({text: true});
 
-const RangeSlider = ({
+type RangeSliderProps = {
+  sliderWidth: number;
+  min: number;
+  max: number;
+  step: number;
+  onValueChange: (value: priceRangeType) => void;
+  minPosition: number;
+  maxPosition: number;
+  minValue: number;
+  maxValue: number;
+};
+
+type AnimatedGHContext = {
+  startX: number;
+};
+
+const RangeSlider: React.FC<RangeSliderProps> = ({
   sliderWidth,
   min,
   max,
@@ -24,7 +52,6 @@ const RangeSlider = ({
 }) => {
   const position = useSharedValue(minPosition);
   const position2 = useSharedValue(maxPosition);
-  //const priceRange = useSelector(state => state.filter.priceRange);
 
   useEffect(() => {
     position.value = minPosition;
@@ -38,7 +65,10 @@ const RangeSlider = ({
   const zIndex2 = useSharedValue(0);
   const opacity = useSharedValue(0.75);
   const opacity2 = useSharedValue(0.75);
-  const gestureHandler = useAnimatedGestureHandler({
+  const gestureHandler = useAnimatedGestureHandler<
+    GestureEvent<PanGestureHandlerEventPayload>,
+    AnimatedGHContext
+  >({
     onStart: (_, ctx) => {
       ctx.startX = position.value;
     },
@@ -72,7 +102,10 @@ const RangeSlider = ({
       });
     },
   });
-  const gestureHandler2 = useAnimatedGestureHandler({
+  const gestureHandler2 = useAnimatedGestureHandler<
+    GestureEvent<PanGestureHandlerEventPayload>,
+    AnimatedGHContext
+  >({
     onStart: (_, ctx) => {
       ctx.startX = position2.value;
     },
@@ -140,8 +173,9 @@ const RangeSlider = ({
 
     return {
       text: `${val}m VND`,
-    };
+    } as any;
   });
+
   const maxLabelText = useAnimatedProps(() => {
     let val =
       min +
@@ -152,36 +186,69 @@ const RangeSlider = ({
 
     return {
       text: `${val}m VND`,
-    };
+    } as any;
   });
+
+  const color = useSelector<RootState, ColorThemeProps>(state =>
+    getThemeColor(state.theme),
+  );
   return (
     <View style={[styles.styleContainer]}>
-      <View style={[styles.sliderBack, {width: sliderWidth}]} />
+      <View
+        style={[
+          styles.sliderBack,
+          {width: sliderWidth, backgroundColor: color.onBackground_disabled},
+        ]}
+      />
       <Animated.View
-        style={[styles.sliderFront, {width: sliderWidth}, animatedStyleSlider]}
+        style={[
+          styles.sliderFront,
+          {width: sliderWidth, backgroundColor: color.primary},
+          animatedStyleSlider,
+        ]}
       />
       <PanGestureHandler onGestureEvent={gestureHandler}>
-        <Animated.View style={[styles.sliderThumb, animatedStyle]}>
-          <Animated.View style={[styles.label, opacityStyle]}>
+        <Animated.View
+          style={[
+            styles.sliderThumb,
+            {backgroundColor: color.primary},
+            animatedStyle,
+          ]}>
+          <Animated.View
+            style={[
+              styles.label,
+              {backgroundColor: color.primary},
+              opacityStyle,
+            ]}>
             <AnimatedTextInput
-              style={styles.labelText}
-              defaultValue={0}
+              style={[styles.labelText, {color: color.onPrimary}]}
+              defaultValue={''}
               animatedProps={minLabelText}
-              value={minValue + 'm VND'}
+              value={minValue + ' mVND'}
               editable={false}
             />
           </Animated.View>
         </Animated.View>
       </PanGestureHandler>
       <PanGestureHandler onGestureEvent={gestureHandler2}>
-        <Animated.View style={[styles.sliderThumb, animatedStyle2]}>
-          <Animated.View style={[styles.label, opacityStyle2]}>
+        <Animated.View
+          style={[
+            styles.sliderThumb,
+            {backgroundColor: color.primary},
+            animatedStyle2,
+          ]}>
+          <Animated.View
+            style={[
+              styles.label,
+              {backgroundColor: color.primary},
+              opacityStyle2,
+            ]}>
             <AnimatedTextInput
-              style={styles.labelText}
-              defaultValue={0}
+              style={[styles.labelText, {color: color.onPrimary}]}
+              defaultValue={''}
               animatedProps={maxLabelText}
               editable={false}
-              value={maxValue+'m VND'}
+              value={maxValue + ' mVND'}
             />
           </Animated.View>
         </Animated.View>
@@ -200,7 +267,6 @@ const styles = StyleSheet.create({
   },
   sliderBack: {
     height: 2,
-    backgroundColor: '#343A3D',
     borderRadius: 20,
   },
   sliderFront: {

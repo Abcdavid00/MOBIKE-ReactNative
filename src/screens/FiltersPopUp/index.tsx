@@ -6,15 +6,13 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/store';
 import {ColorThemeProps} from '../../assets/theme/colors';
 import {getThemeColor} from '../../utils/getThemeColor';
+import { MarketplaceStackParamList } from '../../navigations/MarketplaceNavigator';
 
 type FilterPopUpScreen = {
-  navigation: StackNavigationProp<FilterPopUpStackParamList, 'FiltersPopUp'>;
+  navigation: StackNavigationProp<MarketplaceStackParamList, 'FiltersPopUp'>;
 };
 
 const FiltersPopUpScreen: React.FC<FilterPopUpScreen> = ({navigation}) => {
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
   return <FiltersPopUpComponent navigation={navigation} />;
 };
 

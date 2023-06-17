@@ -27,13 +27,12 @@ const ProductListScreen: React.FC<ProductListProps> = ({navigation}) => {
   const previousScreen =
     navigationState.routes[navigationState.index - 1]?.name;
   useEffect(() => {
+    navigation.getParent()?.setOptions({
+      tabBarStyle: {
+        display: 'none',
+      },
+    });
     if (previousScreen == MARKETPLACE) {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: {
-          display: 'none',
-        },
-      });
-
       return () =>
         navigation.getParent()?.setOptions({
           tabBarStyle: {

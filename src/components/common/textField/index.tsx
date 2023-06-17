@@ -29,6 +29,9 @@ export type TextFieldProps = React.ComponentProps<typeof TextInput> & {
   iconColor: string;
   iconSize?: number;
   error?: string;
+  non_existingAnimation?: boolean;
+  flagLabel?: Boolean;
+  flagIcon?: Boolean;
 };
 
 const TextField: React.FC<TextFieldProps> = props => {
@@ -45,6 +48,7 @@ const TextField: React.FC<TextFieldProps> = props => {
     onChangeText,
     isTypePassword = false,
     error,
+    non_existingAnimation,
     ...restOfProps
   } = props;
   const [isFocused, setIsFocused] = useState(false);
@@ -87,6 +91,7 @@ const TextField: React.FC<TextFieldProps> = props => {
           onChangeText?.(e);
         }}
         secureTextEntry={hidden}
+        value={value}
         {...restOfProps}
       />
       <View
@@ -97,13 +102,15 @@ const TextField: React.FC<TextFieldProps> = props => {
         {!isFocused && !valueTmp && (
           <Animated.Text
             entering={FadeInRight}
-            exiting={FadeOutRight}
+            exiting={non_existingAnimation ? undefined : FadeOutRight}
             style={[styles.label, {color: color.onBackground_light}]}>
             {label}
           </Animated.Text>
         )}
         {(isFocused || valueTmp) && (
-          <Animated.View entering={FadeInLeft} exiting={FadeOutLeft}>
+          <Animated.View
+            entering={FadeInLeft}
+            exiting={non_existingAnimation ? undefined : FadeOutLeft}>
             {iconClass && (
               <Icon
                 name={iconName}

@@ -13,7 +13,7 @@ import ProductListScreen from '../screens/ProductList';
 export type FilterPopUpStackParamList = {
   [FILTERS_POP_UP]: undefined;
   [FILTERS_POP_UP_MANUFACTURER]: undefined;
-  [PRODUCT_LIST]: undefined;
+  // [PRODUCT_LIST]: undefined;
 };
 
 const FilterStack = createStackNavigator();
@@ -46,11 +46,11 @@ const FiltersPopUpNavigator = () => {
           ),
         }}
       />
-      <FilterStack.Screen
+      {/* <FilterStack.Screen
         name={PRODUCT_LIST}
         component={ProductListScreen}
         options={{headerShown: false}}
-      />
+      /> */}
     </FilterStack.Navigator>
   );
 };

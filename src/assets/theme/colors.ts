@@ -30,7 +30,7 @@ const colors: ColorProps = {
     onSurface: '#3C3C3C',
 
     primary: '#90B4D3',
-    onPrimary: '#3C3C3C',
+    onPrimary: '#FFFFFF',
     secondary: '#C0DAF1',
     onSecondary: '#212121',
 
@@ -55,7 +55,7 @@ const colors: ColorProps = {
     onSurface: '#fff',
 
     primary: '#BFDCEF',
-    onPrimary: '#fff',
+    onPrimary: '#4b4b4b',
     secondary: '#C0DAF1',
     onSecondary: '#fff',
 

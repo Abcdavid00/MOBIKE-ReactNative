@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useEffect} from 'react';
 import {
   Dimensions,
@@ -9,18 +9,16 @@ import {
 } from 'react-native';
 import {Text, View} from 'react-native';
 import {GetAllPosts, PostFilter} from '../../backendAPI';
-import store, {RootState} from '../../redux/store';
+import {RootState} from '../../redux/store';
 import Container from '../common/container';
 import PostPreview from '../PostPreview/listItem';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {MarketplaceStackParamList} from '../../navigations/MarketplaceNavigator';
 import {useDispatch, useSelector} from 'react-redux';
-import {FilterState, setInitial} from '../../redux/slice/filterSlice';
+import {FilterState} from '../../redux/slice/filterSlice';
 import {
-  FILTERS_POP_UP_NAVIGATOR,
-  POST_DETAIL,
+  FILTERS_POP_UP,
   POST_DETAIL_NAVIGATOR,
-  PRODUCT_LIST,
   SEARCH,
 } from '../../constants/routeNames';
 import {ThemeState} from '../../redux/slice/themeSlice';
@@ -29,11 +27,12 @@ import TextField from '../common/textField';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
-import {POPPINS_SEMI_BOLD} from '../../assets/fonts';
+import {POPPINS_REGULAR, POPPINS_SEMI_BOLD} from '../../assets/fonts';
 import {getFontSize} from '../../utils/fontSizeResponsive';
 import {SortOptionType, sortOption} from '../../data/sortOption';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {SortState, setInitialSort, setSort} from '../../redux/slice/sortSlice';
+import {useIsFocused} from '@react-navigation/native';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -54,31 +53,33 @@ type PostList = PostListItem[];
 const ProductListComponent: React.FC<ProductListComponentProps> = ({
   navigation,
 }) => {
-  useEffect(() => {
-    getFilterPostList();
-  }, []);
   const filter = useSelector<RootState, FilterState>(state => state.filter);
-  const filterPost = PostFilter(
-    filter.title,
-    undefined,
-    undefined,
-    true,
-    filter.priceRange.min * 1000000,
-    undefined,
-    filter.brand,
-    filter.lineup,
-    filter.vehicleType,
-    filter.color,
-    filter.manufacturerYear,
-  );
-  console.log('filter: ' + JSON.stringify(filter));
-  console.log(JSON.stringify(filterPost));
+  useEffect(() => {
+    getFilterPostList(
+      PostFilter(
+        filter.title,
+        undefined,
+        undefined,
+        true,
+        filter.priceRange.min * 1000000,
+        filter.priceRange.max * 1000000,
+        filter.brand,
+        filter.lineup,
+        filter.vehicleType,
+        filter.color,
+        filter.manufacturerYear,
+      ),
+    );
+    console.log('First time Filter State: ' + JSON.stringify(filter));
+  }, []);
 
-  const getFilterPostList = async () => {
-    const postListTmp = await GetAllPosts(filterPost);
-    console.log('postList: ' + JSON.stringify(postListTmp));
+  const getFilterPostList = async (agrs: string) => {
+    const postListTmp = await GetAllPosts(agrs);
+    // console.log('In function get: ' + agrs);
+    // console.log('postList: ' + JSON.stringify(postListTmp));
     setPostList(postListTmp);
     setIsLoading(false);
+    setIsReady(true);
   };
 
   const [postList, setPostList] = React.useState<PostList>([]);
@@ -89,20 +90,37 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
   };
 
   const onGoBack = () => {
-    // dispatch(setInitialSort());
+    dispatch(setInitialSort());
     navigation.goBack();
   };
   const dispatch = useDispatch();
 
-  //navigation done, then dispatch
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      dispatch(setInitialSort());
-      dispatch(setInitial());
-    });
+  const isFocused = useIsFocused();
 
-    return unsubscribe;
-  }, [dispatch, navigation]);
+  useEffect(() => {
+    if (isFocused) {
+      // console.log('PostList length: ' + postList.length);
+      // console.log('Loading: ' + isLoading);
+      console.log('In fuction get: ' + JSON.stringify(filter));
+      getFilterPostList(
+        PostFilter(
+          filter.title,
+          undefined,
+          undefined,
+          true,
+          filter.priceRange.min * 1000000,
+          filter.priceRange.max * 1000000,
+          filter.brand,
+          filter.lineup,
+          filter.vehicleType,
+          filter.color,
+          filter.manufacturerYear,
+        ),
+      );
+    } else {
+      onClose();
+    }
+  }, [isFocused]);
 
   const sortOptionSelected = useSelector<RootState, SortState>(
     state => state.sort,
@@ -112,8 +130,75 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
   };
 
   const onNavigateFilter = () => {
-    navigation.navigate(FILTERS_POP_UP_NAVIGATOR);
+    navigation.navigate(FILTERS_POP_UP);
   };
+
+  const onClose = () => {
+    // setIsLoading(true);
+    setPostList([]);
+    setIsReady(false);
+    console.log('Clear');
+  };
+
+  const [isReady, setIsReady] = useState(false);
+  const _renderContent = () => {
+    if (postList.length != 0) {
+      return postList.map((item, index) => {
+        return (
+          <PostPreview
+            postID={item.ID}
+            key={index}
+            styleWrapper={{marginTop: 13}}
+            isActivePost={true}
+            pressable={true}
+            onPress={() => {
+              navigation.navigate(POST_DETAIL_NAVIGATOR);
+            }}
+            index={index}
+          />
+        );
+      });
+    } else if (isFocused && isReady) {
+      return (
+        <View
+          style={{
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: widthScreen,
+            marginLeft: widthScreen * -0.01,
+          }}>
+          <Image
+            source={require('../../assets/images/not-found.png')}
+            style={{width: '30%', height: '30%'}}
+          />
+          <Text
+            style={{
+              fontSize: getFontSize(16),
+              fontFamily: POPPINS_SEMI_BOLD,
+              textAlign: 'center',
+              marginTop: '5%',
+            }}>
+            No matching posts found
+          </Text>
+          <Text
+            style={{
+              fontSize: getFontSize(12),
+              fontFamily: POPPINS_REGULAR,
+              textAlign: 'center',
+              paddingHorizontal: '10%',
+            }}>
+            There are no matches for the selected keyword or filter. Try
+            changing keywords or filter criteria
+          </Text>
+        </View>
+      );
+    }
+  };
+
+  const isFiltered = useSelector<RootState, Boolean>(
+    state => state.filter.isFiltered,
+  );
 
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
@@ -129,12 +214,13 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
           />
         </Pressable>
         <TextField
-          label={'What are you looking for ?'}
+          label={!filter.title ? 'What are you looking for ?' : ''}
           iconClass={Ionicons}
           iconName={'search-outline'}
           iconColor={color.primary}
           style={{width: '90%'}}
-          onTouchEnd={onNavigateSearch}
+          onTouchEndCapture={onNavigateSearch}
+          value={filter.title}
         />
       </View>
 
@@ -156,22 +242,26 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
             alignItems: 'center',
             flexDirection: 'row',
           }}>
-          {/* <Image
-            source={require('../../assets/images/filter_on_light.png')}
-            style={{width: 24, height: 24, resizeMode: 'cover'}}
-          /> */}
-          <AntDesign
-            name={'filter'}
-            color={color.onBackground_light}
-            size={24}
-          />
+          {isFiltered ? (
+            <Image
+              source={theme=='light'? require('../../assets/images/filter_on_light.png') : require('../../assets/images/filter_on_dark.png')}
+              style={{width: 24, height: 24, resizeMode: 'cover'}}
+            />
+          ) : (
+            <AntDesign
+              name={'filter'}
+              color={color.onBackground_light}
+              size={24}
+            />
+          )}
+
           <Text
             style={{
               marginStart: 8,
               paddingTop: 8,
               fontSize: getFontSize(15),
               fontFamily: POPPINS_SEMI_BOLD,
-              color: color.onBackground,
+              color: isFiltered ? color.primary : color.onBackground,
             }}>
             Filter
           </Text>
@@ -239,6 +329,7 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
           })}
         </ScrollView>
       </View>
+
       <Container
         keyboardShouldPersistTaps="always"
         styleScrollView={{
@@ -255,25 +346,9 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
             }}>
             {isLoading
               ? loadingArray.map((item, index) => (
-                  // <RenderSkeleton key={index} index={index} />
                   <PostPreviewLoader key={index} />
                 ))
-              : postList.map((item, index) => {
-                  return (
-                    <PostPreview
-                      postID={item.ID}
-                      key={index}
-                      styleWrapper={{marginTop: 13}}
-                      isActivePost={true}
-                      pressable={true}
-                      onPress={() => {
-                        navigation.navigate(POST_DETAIL_NAVIGATOR);
-                        console.log('hello');
-                      }}
-                      index={index}
-                    />
-                  );
-                })}
+              : _renderContent()}
           </View>
         </View>
       </Container>

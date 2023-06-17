@@ -1,7 +1,7 @@
 import {View, ScrollView, ViewStyle} from 'react-native';
 import React from 'react';
 
-type ContainerProps = {
+type ContainerProps = React.ComponentProps<typeof ScrollView> & {
   styleWrapper?: ViewStyle;
   styleScrollView?: ViewStyle;
   keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
@@ -13,13 +13,15 @@ const Container: React.FC<ContainerProps> = ({
   styleScrollView,
   keyboardShouldPersistTaps,
   children,
+  ...restOfProp
 }) => {
   return (
     <ScrollView
       style={styleScrollView}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={false}>
+      showsVerticalScrollIndicator={false}
+      {...restOfProp}>
       <View style={styleWrapper}>{children}</View>
     </ScrollView>
   );

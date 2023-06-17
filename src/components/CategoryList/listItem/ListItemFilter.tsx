@@ -13,7 +13,7 @@ import {CategoryItem} from '../flatList';
 import {RootState} from '../../../redux/store';
 import {getThemeColor} from '../../../utils/getThemeColor';
 import {POPPINS_SEMI_BOLD} from '../../../assets/fonts';
-import {setVehicleType} from '../../../redux/slice/filterSlice';
+import {setType, setVehicleType} from '../../../redux/slice/filterSlice';
 
 type ListItemProps = {
   item: CategoryItem;
@@ -37,7 +37,8 @@ const ListItemFilter: React.FC<ListItemProps> = ({
   const onPress = () => {
     if (!isSelected) {
       dispatch(setVehicleType(item.ID));
-    } else dispatch(setVehicleType(0));
+    } 
+    else dispatch(setVehicleType(undefined));
   };
 
   const color = useSelector<RootState, ColorThemeProps>(state =>

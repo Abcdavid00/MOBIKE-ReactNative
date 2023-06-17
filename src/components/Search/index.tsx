@@ -27,8 +27,9 @@ import {
   getHistorySearch,
   saveHistorySearch,
 } from '../../services/HistorySearchStorage';
-import {setTitle} from '../../redux/slice/filterSlice';
+import {FilterState, setTitle} from '../../redux/slice/filterSlice';
 import {PRODUCT_LIST} from '../../constants/routeNames';
+import {useIsFocused} from '@react-navigation/native';
 
 type SearchComponentProp = {
   navigation: StackNavigationProp<MarketplaceStackParamList, 'Search'>;
@@ -59,6 +60,7 @@ const SearchComponent: React.FC<SearchComponentProp> = ({navigation}) => {
       dispatch(setTitle(text));
       onNavigateProductList();
       await onAddHistory(text);
+      onSetChange();
     };
     if (historySearch != null)
       return (
@@ -109,7 +111,7 @@ const SearchComponent: React.FC<SearchComponentProp> = ({navigation}) => {
   const onPressSearch = async (text: string) => {
     dispatch(setTitle(text));
     onNavigateProductList();
-    await onAddHistory(text);
+    if (text != '') await onAddHistory(text);
   };
   const onDeleteHistory = () => {
     AsyncStorage.removeItem('historySearch');
@@ -119,6 +121,24 @@ const SearchComponent: React.FC<SearchComponentProp> = ({navigation}) => {
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
 
+  const filter = useSelector<RootState, FilterState>(state => state.filter);
+  const [value, setValue] = useState(filter.title);
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (isFocused) {
+      setValue(filter.title);
+    }
+  }, [isFocused]);
+  const [flagLabel, setFlagLabel] = useState(true);
+  const [flagIcon, setFlagIcon] = useState(false);
+  const onSetChange = () => {
+    setFlagLabel(false);
+    setFlagIcon(true);
+  };
+  const onSetDefault = () => {
+    setFlagLabel(true);
+    setFlagIcon(false);
+  };
   return (
     // <Pressable onPress={Keyboard.dismiss} accessible={false} style={{flex: 1}}>
     <View style={{backgroundColor: color.background, flex: 1}}>
@@ -141,6 +161,9 @@ const SearchComponent: React.FC<SearchComponentProp> = ({navigation}) => {
           onSubmitEditing={e => {
             onPressSearch(e.nativeEvent.text);
           }}
+          flagLabel={flagLabel}
+          flagIcon={flagIcon}
+          defaultValue={value}
         />
       </View>
 

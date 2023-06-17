@@ -1,12 +1,18 @@
-import {View, Text, Keyboard, Pressable, Dimensions} from 'react-native';
-import React from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
+import React, {useState} from 'react';
 import Container from '../common/container';
 import colors from '../../assets/theme/colors';
 import Carousel from '../Banner/carousel';
 import imageBanner from '../../data/imageBanner';
 import CategoryList from '../CategoryList/flatList';
-import PostPreviewList from '../PostPreview/flatList';
-import store, {RootState} from '../../redux/store';
+import {RootState} from '../../redux/store';
 import {
   POST_DETAIL_NAVIGATOR,
   PRODUCT_LIST,
@@ -22,14 +28,9 @@ import {MarketplaceStackParamList} from '../../navigations/MarketplaceNavigator'
 import {ThemeState} from '../../redux/slice/themeSlice';
 import TextField from '../common/textField';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {
-  POPPINS_BOLD,
-  POPPINS_ITALIC,
-  POPPINS_LIGHT_ITALIC,
-} from '../../assets/fonts';
+import {POPPINS_BOLD, POPPINS_ITALIC} from '../../assets/fonts';
 import {vehicleType} from '../../redux/clientDatabase/vehicleType';
 import {imageVehicleTypes} from '../../data/imageVehicleTypes';
-import ShadowWrapper from '../common/shadowWrapper';
 import {getFontSize} from '../../utils/fontSizeResponsive';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
 import PostPreview from '../PostPreview/listItem';
@@ -46,17 +47,19 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   const dataType = useSelector<RootState, vehicleType[]>(
     state => state.vehicleTypes,
   );
-  console.log('dataType', dataType);
+  // console.log('dataType', dataType);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    getFilterPostList();
+    getFilterPostList(page);
   }, []);
 
-  const getFilterPostList = async () => {
-    const postListTmp = await GetAllPosts();
+  const getFilterPostList = async (page?: number) => {
+    const postListTmp = await GetAllPosts(
+      page ? 'page=' + page.toString() : '',
+    );
     console.log('postList: ' + JSON.stringify(postListTmp));
-    let tmp: Array<number> = [];
+    let tmp: Array<number> = Array.from(postList);
     for (let i = 0; i < postListTmp.length; i++) {
       tmp.push(postListTmp[i].ID);
     }
@@ -75,14 +78,41 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   };
 
   const [isLoading, setIsLoading] = React.useState(true);
-  const loadingArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const loadingArray = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  ];
 
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
 
+  //Infinite Scroll
+  const [page, setPage] = useState(1);
+  // const [isScrollEndReached, setIsScrollEndReached] = useState(false);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const layoutHeight = event.nativeEvent.layoutMeasurement.height;
+    if (offsetY + layoutHeight >= contentHeight) {
+      // setIsScrollEndReached(true);
+      getFilterPostList(page + 1);
+      // setIsLoading(true);
+      setPage(page + 1);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (isScrollEndReached) {
+  //     console.log('page: ' + page);
+  //     getFilterPostList(page);
+  //     setIsScrollEndReached(false);
+  //   }
+  // }, [isScrollEndReached]);
+
   return (
     <Container
       keyboardShouldPersistTaps="always"
+      // onScroll={e => handleScroll(e)}
       styleScrollView={{backgroundColor: color.background}}>
       {/* Header */}
       <View style={styles.wrapperHeader}>
@@ -137,13 +167,6 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
       </View>
 
       {/*Preview Post List */}
-      {/* <PostPreviewList
-        data={postList}
-        onPress={() => {
-          navigation.navigate(POST_DETAIL_NAVIGATOR);
-        }}
-        renderItem={undefined}
-      /> */}
 
       <View style={{marginLeft: widthScreen * 0.01}}>
         <View
@@ -152,27 +175,25 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
             flexWrap: 'wrap',
             justifyContent: 'space-around',
           }}>
-          {isLoading
-            ? loadingArray.map((item, index) => (
-                // <RenderSkeleton key={index} index={index} />
-                <PostPreviewLoader key={index} />
-              ))
-            : postList.map((item, index) => {
-                return (
-                  <PostPreview
-                    postID={item}
-                    key={index}
-                    styleWrapper={{marginTop: 13}}
-                    isActivePost={true}
-                    pressable={true}
-                    onPress={() => {
-                      navigation.navigate(POST_DETAIL_NAVIGATOR);
-                      console.log('hello');
-                    }}
-                    index={index}
-                  />
-                );
-              })}
+          {postList.map((item, index) => {
+            return (
+              <PostPreview
+                postID={item}
+                key={index}
+                styleWrapper={{marginTop: 13}}
+                isActivePost={true}
+                pressable={true}
+                onPress={() => {
+                  navigation.navigate(POST_DETAIL_NAVIGATOR);
+                }}
+                index={index}
+              />
+            );
+          })}
+          {isLoading &&
+            loadingArray.map((item, index) => (
+              <PostPreviewLoader key={index} />
+            ))}
         </View>
       </View>
 

@@ -4,7 +4,7 @@ import Store from '../../redux/store';
 import { setCities, setDistricts, setWards, setTree } from '../../redux/clientDatabase/location';
 import { setImageTypes } from '../../redux/clientDatabase/imageType';
 import { setPermissions } from '../../redux/clientDatabase/permission';
-import { setVehicleBrands, setVehicleLineUps } from '../../redux/clientDatabase/vehicleModel';
+import { setVehicleBrands, setVehicleLineUps } from '../../redux/clientDatabase/vehicleModel.ts';
 import { setVehicleTypes } from '../../redux/clientDatabase/vehicleType';
 import { setVehicleConditions } from '../../redux/clientDatabase/vehicleCondition';
 import { setColors } from '../../redux/clientDatabase/color';

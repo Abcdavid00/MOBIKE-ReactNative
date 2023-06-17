@@ -42,6 +42,8 @@ const TextFieldWithRef = forwardRef<TextInputHandle, TextFieldProps>(
       onChangeText,
       isTypePassword = false,
       error,
+      flagLabel = true,
+      flagIcon = false,
       ...restOfProps
     } = props;
     const [isFocused, setIsFocused] = useState(false);
@@ -98,6 +100,7 @@ const TextFieldWithRef = forwardRef<TextInputHandle, TextFieldProps>(
             onChangeText?.(e);
           }}
           secureTextEntry={hidden}
+          value={value}
           {...restOfProps}
         />
         <View
@@ -105,7 +108,7 @@ const TextFieldWithRef = forwardRef<TextInputHandle, TextFieldProps>(
             styles.labelContainer,
             valueTmp || isFocused ? {width: iconSize} : null,
           ]}>
-          {!isFocused && !valueTmp && (
+          {!isFocused && !valueTmp && flagLabel && (
             <Animated.Text
               entering={FadeInRight}
               exiting={FadeOutRight}
@@ -113,7 +116,7 @@ const TextFieldWithRef = forwardRef<TextInputHandle, TextFieldProps>(
               {label}
             </Animated.Text>
           )}
-          {(isFocused || valueTmp) && (
+          {(isFocused || valueTmp || flagIcon) && (
             <Animated.View entering={FadeInLeft} exiting={FadeOutLeft}>
               {iconClass && (
                 <Icon

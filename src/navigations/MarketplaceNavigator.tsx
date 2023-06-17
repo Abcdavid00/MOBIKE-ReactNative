@@ -1,4 +1,5 @@
 import {
+  FILTERS_POP_UP,
   FILTERS_POP_UP_NAVIGATOR,
   MARKETPLACE,
   POST_DETAIL_NAVIGATOR,
@@ -13,29 +14,30 @@ import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import SearchScreen from '../screens/Search';
 import {RouteProp} from '@react-navigation/native';
+import FiltersPopUpScreen from '../screens/FiltersPopUp';
 
 export type MarketplaceStackParamList = {
   [MARKETPLACE]: undefined;
-  [FILTERS_POP_UP_NAVIGATOR]: undefined;
+  [FILTERS_POP_UP]: undefined;
   [POST_DETAIL_NAVIGATOR]: undefined;
   [PRODUCT_LIST]: undefined;
   [SEARCH]: undefined;
 };
 
-const MarketplaceStack = createStackNavigator();
+const MarketplaceStack = createStackNavigator<MarketplaceStackParamList>();
 
 const MarketplaceNavigator = () => {
   return (
     <MarketplaceStack.Navigator
       initialRouteName={MARKETPLACE}
-      screenOptions={{headerShown: false}}>
+      screenOptions={{headerShown: false,}}>
       <MarketplaceStack.Screen
         name={MARKETPLACE}
         component={MarketplaceScreen}
       />
       <MarketplaceStack.Screen
-        name={FILTERS_POP_UP_NAVIGATOR}
-        component={FiltersPopUpNavigator}
+        name={FILTERS_POP_UP}
+        component={FiltersPopUpScreen}
       />
       <MarketplaceStack.Screen
         name={POST_DETAIL_NAVIGATOR}
