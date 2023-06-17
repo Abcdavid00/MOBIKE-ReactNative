@@ -121,20 +121,12 @@ function App(): JSX.Element {
 
   useEffect(() => {
     console.log('Main');
-    const Init = async () => {
-      // await AsyncStorage.clear();
-      await TokenStorage.init();
-      await ClientDatabase.init();
-      // TokenStorage.print(); 
-      // ClientDatabase.print();
-      dispatch(setLoading(false));
-    };
-
+    
     const sandbox = async () => {
       try {
-
+        const uid = store.getState().auth.ID;
         const socket = io('https://mobike.ddns.net:443');
-        socket.emit('set user', 'React Native')
+        socket.emit('set user', uid);
         socket.emit('chat message', "Hello from React Native");
         socket.on('connect', () => {
           console.log('Socket Connected');
@@ -146,8 +138,18 @@ function App(): JSX.Element {
         console.log('Sandbox error: ' + error);
       }
     };
+
+    const Init = async () => {
+      // await AsyncStorage.clear();
+      await TokenStorage.init();
+      await ClientDatabase.init();
+      // TokenStorage.print(); 
+      // ClientDatabase.print();
+      dispatch(setLoading(false));
+      sandbox();
+    };
+
     Init();
-    sandbox();
   }, []);
 
   useEffect(() => {

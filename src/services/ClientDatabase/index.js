@@ -19,6 +19,7 @@ const VEHICLECONDITIONS = 'VehicleConditions';
 const COLORS = 'Colors';
 
 const doLog = false;
+
 const log = (message) => {
     if (doLog) {
         console.log(message);
