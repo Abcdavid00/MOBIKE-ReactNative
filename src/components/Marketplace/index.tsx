@@ -47,7 +47,6 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   const dataType = useSelector<RootState, vehicleType[]>(
     state => state.vehicleTypes,
   );
-  // console.log('dataType', dataType);
   const dispatch = useDispatch();
 
   useEffect(() => {

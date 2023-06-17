@@ -115,6 +115,8 @@ const theme_dark = {
   },
 };
 
+import io from 'socket.io-client';
+
 function App(): JSX.Element {
 
   useEffect(() => {
@@ -123,15 +125,23 @@ function App(): JSX.Element {
       // await AsyncStorage.clear();
       await TokenStorage.init();
       await ClientDatabase.init();
-      TokenStorage.print();
-      ClientDatabase.print();
+      // TokenStorage.print(); 
+      // ClientDatabase.print();
       dispatch(setLoading(false));
     };
 
     const sandbox = async () => {
       try {
-        // const cities = await BigGetRequest("cities");
-        // console.log(cities);
+
+        const socket = io('https://mobike.ddns.net:443');
+        socket.emit('set user', 'React Native')
+        socket.emit('chat message', "Hello from React Native");
+        socket.on('connect', () => {
+          console.log('Socket Connected');
+        });
+        socket.on('chat message', (msg: string) => {
+          console.log('Socket Message: ' + msg);
+        })
       } catch (error) {
         console.log('Sandbox error: ' + error);
       }

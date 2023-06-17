@@ -793,6 +793,20 @@ const PostDetailComponent = ({
                                     paddingHorizontal: 30,
                                     height: 50,
                                 }} />
+
+                            <FAB
+                                onPress={() => {
+                                    // TODO: Navigate to chat screen
+                                }}
+                                label='Chat'
+                                variant='extended'
+                                size='small'
+                                style={{
+                                    backgroundColor: "#59FB69",
+                                    Bottom: 0,
+                                    paddingHorizontal: 30,
+                                    height: 50,
+                                }} />
                         </View>
 
                     )
