@@ -123,24 +123,25 @@ function App(): JSX.Element {
     console.log('Main');
     const Init = async () => {
       // await AsyncStorage.clear();
-      const socket = io('https://mobike.ddns.net:443');
-      socket.emit('chat message', "Hello from React Native");
-      socket.on('connect', () => {
-        console.log('Socket Connected');
-      });
-      socket.on('chat message', (msg: string) => {
-        console.log('Socket Message: ' + msg);
-      })
-
       await TokenStorage.init();
       await ClientDatabase.init();
-      TokenStorage.print();
-      ClientDatabase.print();
+      // TokenStorage.print(); 
+      // ClientDatabase.print();
       dispatch(setLoading(false));
     };
 
     const sandbox = async () => {
       try {
+
+        const socket = io('https://mobike.ddns.net:443');
+        socket.emit('set user', 'React Native')
+        socket.emit('chat message', "Hello from React Native");
+        socket.on('connect', () => {
+          console.log('Socket Connected');
+        });
+        socket.on('chat message', (msg: string) => {
+          console.log('Socket Message: ' + msg);
+        })
       } catch (error) {
         console.log('Sandbox error: ' + error);
       }

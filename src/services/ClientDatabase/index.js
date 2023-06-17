@@ -18,6 +18,12 @@ const VEHICLETYPES = 'VehicleTypes';
 const VEHICLECONDITIONS = 'VehicleConditions';
 const COLORS = 'Colors';
 
+const doLog = false;
+const log = (message) => {
+    if (doLog) {
+        console.log(message);
+    }
+}
 
 export const init = async () => {
     try {
@@ -57,30 +63,30 @@ const updateAndLoadClientDatabase = async () => {
             updateVehicleConditions(),
             updateColors()
         ]).then((res) => {
-            // console.log("Location from server: " + JSON.stringify(res[0]))
+            // log("Location from server: " + JSON.stringify(res[0]))
             Store.dispatch(setCities(res[0].Cities));
-            console.log("Client database: " + Store.getState().locations.Cities.length + " cities loaded" )
+            log("Client database: " + Store.getState().locations.Cities.length + " cities loaded" )
             Store.dispatch(setDistricts(res[0].Districts));
-            console.log("Client database: " + Store.getState().locations.Districts.length + " districts loaded")
+            log("Client database: " + Store.getState().locations.Districts.length + " districts loaded")
             Store.dispatch(setWards(res[0].Wards));
-            console.log("Client database: " + Store.getState().locations.Wards.length + " wards loaded")
+            log("Client database: " + Store.getState().locations.Wards.length + " wards loaded")
             Store.dispatch(setTree(res[0].Tree));
             Store.dispatch(setPermissions(res[1]));
-            console.log("Client database: " + Store.getState().permissions.length + " permissions loaded")
+            log("Client database: " + Store.getState().permissions.length + " permissions loaded")
             Store.dispatch(setImageTypes(res[2]));
-            console.log("Client database: " + Store.getState().imageTypes.length + " image types loaded")
+            log("Client database: " + Store.getState().imageTypes.length + " image types loaded")
             Store.dispatch(setVehicleBrands(res[3]));
-            console.log("Client database: " + Store.getState().vehicleModels.VehicleBrands.length + " vehicle brands loaded")
+            log("Client database: " + Store.getState().vehicleModels.VehicleBrands.length + " vehicle brands loaded")
             Store.dispatch(setVehicleLineUps(res[4]));
-            console.log("Client database: " + Store.getState().vehicleModels.VehicleLineUps.length + " vehicle lineups loaded")
+            log("Client database: " + Store.getState().vehicleModels.VehicleLineUps.length + " vehicle lineups loaded")
             Store.dispatch(setVehicleTypes(res[5]));
-            console.log("Client database: " + Store.getState().vehicleTypes.length + " vehicle types loaded")
+            log("Client database: " + Store.getState().vehicleTypes.length + " vehicle types loaded")
             Store.dispatch(setVehicleConditions(res[6]));
-            console.log("Client database: " + Store.getState().vehicleConditions.length + " vehicle conditions loaded")
+            log("Client database: " + Store.getState().vehicleConditions.length + " vehicle conditions loaded")
             Store.dispatch(setColors(res[7]));
-            console.log("Client database: " + Store.getState().colors.length + " colors loaded")
+            log("Client database: " + Store.getState().colors.length + " colors loaded")
         });
-        // console.log("Location loaded: " + JSON.stringify(Store.getState().locations));
+        // log("Location loaded: " + JSON.stringify(Store.getState().locations));
     } catch (error) {
         console.log("Update and load client database error: " + error);
     }
@@ -89,16 +95,16 @@ const updateAndLoadClientDatabase = async () => {
 const updateLocations = async () => {
     try {
         const onlineLocationsVersion = (await getVersion(LOCATIONS)).Version;
-        // console.log('Online locations version: ' + onlineLocationsVersion);
+        // log('Online locations version: ' + onlineLocationsVersion);
         const localLocationsVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).Locations;
-        // console.log('Local locations version: ' + localLocationsVersion);
-        console.log("Client database: " + localLocationsVersion + " locations version")
+        // log('Local locations version: ' + localLocationsVersion);
+        log("Client database: " + localLocationsVersion + " locations version")
         if (localLocationsVersion >= onlineLocationsVersion) {
-            console.log('Locations are up to date');
+            log('Locations are up to date');
             return JSON.parse(await AsyncStorage.getItem(LOCATIONS));
         }
 
-        console.log("Updating locations");
+        log("Updating locations");
 
         let wards = undefined;
         let districts = undefined;
@@ -109,7 +115,7 @@ const updateLocations = async () => {
         })
 
         //Create address tree
-        console.log("Creating Address Tree");
+        log("Creating Address Tree");
         tree = [];
         for (let i = 0; i < cities.length; i++) {
             let city = cities[i];
@@ -128,7 +134,7 @@ const updateLocations = async () => {
                 Districts: cityDistrictsTree
             });
         }
-        console.log("Address Tree created");
+        log("Address Tree created");
 
         const Locations = {
             Cities: cities,
@@ -143,7 +149,7 @@ const updateLocations = async () => {
             Locations: onlineLocationsVersion,
         }
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Locations updated, current version: " + onlineLocationsVersion);
+        log("Locations updated, current version: " + onlineLocationsVersion);
 
         return Locations;
 
@@ -155,16 +161,16 @@ const updateLocations = async () => {
 const updateVehicleBrands = async () => {
     try {
         const onlineVehicleBrandsVersion = (await getVersion(VEHICLEBRANDS)).Version;
-        // console.log('Online vehicle brands version: ' + onlineVehicleBrandsVersion);
+        // log('Online vehicle brands version: ' + onlineVehicleBrandsVersion);
         const localVehicleBrandsVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).VehicleBrands;
-        // console.log('Local vehicle brands version: ' + localVehicleBrandsVersion);
-        console.log("Client database: " + localVehicleBrandsVersion + " vehicle brands version")
+        // log('Local vehicle brands version: ' + localVehicleBrandsVersion);
+        log("Client database: " + localVehicleBrandsVersion + " vehicle brands version")
         if (localVehicleBrandsVersion >= onlineVehicleBrandsVersion) {
-            console.log('Vehicle brands are up to date');
+            log('Vehicle brands are up to date');
             return JSON.parse(await AsyncStorage.getItem(VEHICLEBRANDS));
         }
 
-        console.log("Updating vehicle brands");
+        log("Updating vehicle brands");
 
         const VehicleBrands = await getVehicleBrands();
 
@@ -175,7 +181,7 @@ const updateVehicleBrands = async () => {
         }
 
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Vehicle brands updated, current version: " + onlineVehicleBrandsVersion);
+        log("Vehicle brands updated, current version: " + onlineVehicleBrandsVersion);
 
         return VehicleBrands;
 
@@ -187,16 +193,16 @@ const updateVehicleBrands = async () => {
 const updateVehicleLineups = async () => {
     try {
         const onlineVehicleLineupsVersion = (await getVersion(VEHICLELINEUPS)).Version;
-        // console.log('Online vehicle lineups version: ' + onlineVehicleLineupsVersion);
+        // log('Online vehicle lineups version: ' + onlineVehicleLineupsVersion);
         const localVehicleLineupsVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).VehicleLineups;
-        // console.log('Local vehicle lineups version: ' + localVehicleLineupsVersion);
-        console.log("Client database: " + localVehicleLineupsVersion + " vehicle lineups version")
+        // log('Local vehicle lineups version: ' + localVehicleLineupsVersion);
+        log("Client database: " + localVehicleLineupsVersion + " vehicle lineups version")
         if (localVehicleLineupsVersion >= onlineVehicleLineupsVersion) {
-            console.log('Vehicle lineups are up to date');
+            log('Vehicle lineups are up to date');
             return JSON.parse(await AsyncStorage.getItem(VEHICLELINEUPS));
         }
 
-        console.log("Updating vehicle lineups");
+        log("Updating vehicle lineups");
 
         const VehicleLineups = await getVehicleLineups();
 
@@ -207,7 +213,7 @@ const updateVehicleLineups = async () => {
         }
 
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Vehicle lineups updated, current version: " + onlineVehicleLineupsVersion);
+        log("Vehicle lineups updated, current version: " + onlineVehicleLineupsVersion);
 
         return VehicleLineups;
 
@@ -219,16 +225,16 @@ const updateVehicleLineups = async () => {
 const updateVehicleTypes = async () => {
     try {
         const onlineVehicleTypesVersion = (await getVersion(VEHICLETYPES)).Version;
-        // console.log('Online vehicle types version: ' + onlineVehicleTypesVersion);
+        // log('Online vehicle types version: ' + onlineVehicleTypesVersion);
         const localVehicleTypesVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).VehicleTypes;
-        // console.log('Local vehicle types version: ' + localVehicleTypesVersion);
-        console.log("Client database: " + localVehicleTypesVersion + " vehicle types version")
+        // log('Local vehicle types version: ' + localVehicleTypesVersion);
+        log("Client database: " + localVehicleTypesVersion + " vehicle types version")
         if (localVehicleTypesVersion >= onlineVehicleTypesVersion) {
-            console.log('Vehicle types are up to date');
+            log('Vehicle types are up to date');
             return JSON.parse(await AsyncStorage.getItem(VEHICLETYPES));
         }
 
-        console.log("Updating vehicle types");
+        log("Updating vehicle types");
 
         const VehicleTypes = await getVehicleTypes();
 
@@ -239,7 +245,7 @@ const updateVehicleTypes = async () => {
         }
 
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Vehicle types updated, current version: " + onlineVehicleTypesVersion);
+        log("Vehicle types updated, current version: " + onlineVehicleTypesVersion);
 
         return VehicleTypes;
     } catch (error) {
@@ -250,16 +256,16 @@ const updateVehicleTypes = async () => {
 const updateVehicleConditions = async () => {
     try {
         const onlineVehicleConditionsVersion = (await getVersion(VEHICLECONDITIONS)).Version;
-        // console.log('Online vehicle conditions version: ' + onlineVehicleConditionsVersion);
+        // log('Online vehicle conditions version: ' + onlineVehicleConditionsVersion);
         const localVehicleConditionsVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).VehicleConditions;
-        // console.log('Local vehicle conditions version: ' + localVehicleConditionsVersion);
-        console.log("Client database: " + localVehicleConditionsVersion + " vehicle conditions version")
+        // log('Local vehicle conditions version: ' + localVehicleConditionsVersion);
+        log("Client database: " + localVehicleConditionsVersion + " vehicle conditions version")
         if (localVehicleConditionsVersion >= onlineVehicleConditionsVersion) {
-            console.log('Vehicle conditions are up to date');
+            log('Vehicle conditions are up to date');
             return JSON.parse(await AsyncStorage.getItem(VEHICLECONDITIONS));
         }
 
-        console.log("Updating vehicle conditions");
+        log("Updating vehicle conditions");
 
         const VehicleConditions = await getVehicleConditions();
 
@@ -270,7 +276,7 @@ const updateVehicleConditions = async () => {
         }
 
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Vehicle conditions updated, current version: " + onlineVehicleConditionsVersion);
+        log("Vehicle conditions updated, current version: " + onlineVehicleConditionsVersion);
 
         return VehicleConditions;
     } catch (error) {
@@ -281,16 +287,16 @@ const updateVehicleConditions = async () => {
 const updateColors = async () => {
     try {
         const onlineColorsVersion = (await getVersion(COLORS)).Version;
-        // console.log('Online colors version: ' + onlineColorsVersion);
+        // log('Online colors version: ' + onlineColorsVersion);
         const localColorsVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).Colors;
-        // console.log('Local colors version: ' + localColorsVersion);
-        console.log("Client database: " + localColorsVersion + " colors version")
+        // log('Local colors version: ' + localColorsVersion);
+        log("Client database: " + localColorsVersion + " colors version")
         if (localColorsVersion >= onlineColorsVersion) {
-            console.log('Colors are up to date');
+            log('Colors are up to date');
             return JSON.parse(await AsyncStorage.getItem(COLORS));
         }
 
-        console.log("Updating colors");
+        log("Updating colors");
 
         const Colors = await getColors();
 
@@ -301,7 +307,7 @@ const updateColors = async () => {
         }
 
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Colors updated, current version: " + onlineColorsVersion);
+        log("Colors updated, current version: " + onlineColorsVersion);
 
         return Colors;
     } catch {
@@ -312,16 +318,16 @@ const updateColors = async () => {
 const updatePermissions = async () => {
     try {
         const onlinePermissionsVersion = (await getVersion(PERMISSIONS)).Version;
-        // console.log('Online permissions version: ' + onlinePermissionsVersion);
+        // log('Online permissions version: ' + onlinePermissionsVersion);
         const localPermissionsVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).Permissions;
-        // console.log('Local permissions version: ' + localPermissionsVersion);
-        console.log("Client database: " + localPermissionsVersion + " permissions version")
+        // log('Local permissions version: ' + localPermissionsVersion);
+        log("Client database: " + localPermissionsVersion + " permissions version")
         if (localPermissionsVersion >= onlinePermissionsVersion) {
-            console.log('Permissions are up to date');
+            log('Permissions are up to date');
             return JSON.parse(await AsyncStorage.getItem(PERMISSIONS));
         }
 
-        console.log("Updating permissions");
+        log("Updating permissions");
 
         const Permissions = await getPermissions();
 
@@ -331,7 +337,7 @@ const updatePermissions = async () => {
             Permissions: onlinePermissionsVersion,
         }
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Permissions updated, current version: " + onlinePermissionsVersion);
+        log("Permissions updated, current version: " + onlinePermissionsVersion);
 
         return Permissions;
 
@@ -343,16 +349,16 @@ const updatePermissions = async () => {
 const updateImageTypes = async () => {
     try {
         const onlineImageTypesVersion = (await getVersion(IMAGETYPES)).Version;
-        // console.log('Online image types version: ' + onlineImageTypesVersion);
+        // log('Online image types version: ' + onlineImageTypesVersion);
         const localImageTypesVersion = JSON.parse(await AsyncStorage.getItem('ClientDatabaseVersion')).ImageTypes;
-        // console.log('Local image types version: ' + localImageTypesVersion);
-        console.log("Client database: " + localImageTypesVersion + " image types version")
+        // log('Local image types version: ' + localImageTypesVersion);
+        log("Client database: " + localImageTypesVersion + " image types version")
         if (localImageTypesVersion >= onlineImageTypesVersion) {
-            console.log('Image types are up to date');
+            log('Image types are up to date');
             return JSON.parse(await AsyncStorage.getItem(IMAGETYPES));
         }
 
-        console.log("Updating image types");
+        log("Updating image types");
 
         const ImageTypes = await getImageTypes();
 
@@ -362,7 +368,7 @@ const updateImageTypes = async () => {
             ImageTypes: onlineImageTypesVersion,
         }
         await AsyncStorage.mergeItem('ClientDatabaseVersion', JSON.stringify(version));
-        console.log("Image types updated, current version: " + onlineImageTypesVersion);
+        log("Image types updated, current version: " + onlineImageTypesVersion);
 
         return ImageTypes;
 

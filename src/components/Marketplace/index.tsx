@@ -46,7 +46,6 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   const dataType = useSelector<RootState, vehicleType[]>(
     state => state.vehicleTypes,
   );
-  console.log('dataType', dataType);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -166,7 +165,6 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
                     pressable={true}
                     onPress={() => {
                       navigation.navigate(POST_DETAIL_NAVIGATOR);
-                      console.log('hello');
                     }}
                     index={index}
                   />
