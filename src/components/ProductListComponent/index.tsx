@@ -73,8 +73,6 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
     console.log('First time Filter State: ' + JSON.stringify(filter));
   }, []);
 
-  const getFilterPostList = async () => {
-    const postListTmp = await GetAllPosts(filterPost);
   const getFilterPostList = async (agrs: string) => {
     const postListTmp = await GetAllPosts(agrs);
     // console.log('In function get: ' + agrs);
