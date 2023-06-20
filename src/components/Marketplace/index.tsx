@@ -5,6 +5,8 @@ import {
   Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  FlatList,
+  ListRenderItem,
 } from 'react-native';
 import React, {useState} from 'react';
 import Container from '../common/container';
@@ -60,6 +62,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
       page ? 'page=' + page.toString() : '',
     );
     // console.log('postList: ' + JSON.stringify(postListTmp));
+    console.log('Page: ' + page);
     let tmp: Array<number> = [...postList];
     for (let i = 0; i < postListTmp.length; i++) {
       tmp.push(postListTmp[i].ID);
@@ -105,13 +108,14 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (isScrollEndReached) {
-      console.log('page: ' + page);
-      setIsScrollEndReached(false);
-      getFilterPostList(page);
-    }
-  }, [isScrollEndReached]);
+  // useEffect(() => {
+  //   if (isScrollEndReached) {
+  //     console.log('page: ' + page);
+  //     setIsScrollEndReached(false);
+  //     getFilterPostList(page);
+  //     setPage(page + 1);
+  //   }
+  // }, [isScrollEndReached]);
 
   // const renderItemPostPreview: ListRenderItem<number> = ({item, index}) => (
   //   <PostPreview
@@ -137,11 +141,29 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   //   index,
   // });
 
+  // const onEndReached = ({distanceFromEnd}: {distanceFromEnd: number}) => {
+  //   if (distanceFromEnd < 0) return;
+  //   console.log('isScrollEnd :' + isScrollEndReached);
+  //   if (!isScrollEndReached) {
+  //   setIsLoading(true);
+  //   setIsScrollEndReached(true);
+  //   getFilterPostList(page);
+  //   setPage(page + 1);
+  //   }
+  // };
+
+  const {height} = Dimensions.get('window');
+
   return (
     <Container
       keyboardShouldPersistTaps="always"
       // onScroll={handleScroll}
-      styleScrollView={{backgroundColor: color.background}}>
+      styleScrollView={{
+        backgroundColor: color.background,
+        height: height,
+        flex: 1,
+      }}
+      styleWrapper={{}}>
       {/* Header */}
       <View style={styles.wrapperHeader}>
         <TextField
@@ -232,20 +254,17 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
         numColumns={2}
         keyExtractor={keyExtractorPostPreview}
         renderItem={renderItemPostPreview}
-        initialNumToRender={6}
-        maxToRenderPerBatch={20}
-        getItemLayout={getItemLayout}
-        windowSize={10}
         ListFooterComponent={isLoading ? <PostPreviewLoader /> : null}
-        onEndReached={() => {
-          // if (!isScrollEndReached && !isLoading) {
-          //   setIsLoading(true);
-          //   setIsScrollEndReached(true);
-          //   setPage(page + 1);
-          // }
-          console.log('Hello there');
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        onMomentumScrollBegin={() => {
+          setIsScrollEndReached(false);
         }}
-        onEndReachedThreshold={0.3}
+        removeClippedSubviews={true} // Unmount components when outside of window
+        initialNumToRender={2} // Reduce initial render amount
+        maxToRenderPerBatch={1} // Reduce number in each render batch
+        updateCellsBatchingPeriod={100} // Increase time between renders
+        windowSize={7} // Reduce the window size
       /> */}
     </Container>
   );

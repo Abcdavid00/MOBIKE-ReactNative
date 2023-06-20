@@ -2,7 +2,11 @@ import {View, Text, TouchableWithoutFeedback, Pressable} from 'react-native';
 import React from 'react';
 import colors, {ColorThemeProps} from '../../assets/theme/colors';
 import {signOut} from '../../services/TokenStorage';
-import {EDIT_ACCOUNT, EDIT_PROFILE} from '../../constants/routeNames';
+import {
+  EDIT_ACCOUNT,
+  EDIT_PROFILE,
+  SAVED_POST_NAVIGATOR,
+} from '../../constants/routeNames';
 import {useNavigation} from '@react-navigation/native';
 import store, {RootState} from '../../redux/store';
 import MobikeImage from '../common/image';
@@ -59,6 +63,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({navigation}) => {
         }}
       />
 
+      {/*Edit Profile */}
       <Pressable
         onPress={() => navigation.navigate(EDIT_PROFILE)}
         style={{
@@ -109,8 +114,9 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({navigation}) => {
         }}
       />
 
+      {/*Saved Post */}
       <Pressable
-        onPress={() => signOut()}
+        onPress={() => navigation.navigate(SAVED_POST_NAVIGATOR)}
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
@@ -158,6 +164,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({navigation}) => {
         }}
       />
 
+      {/*LogOut */}
       <Pressable
         onPress={() => signOut()}
         style={{

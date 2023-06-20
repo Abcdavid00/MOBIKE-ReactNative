@@ -49,6 +49,15 @@ import {ProfileStackParamList} from '../../../navigations/ProfileNavigator';
 import TextField from '../../common/textField';
 import {useSelector} from 'react-redux';
 import {getThemeColor} from '../../../utils/getThemeColor';
+import {
+  POPPINS_BOLD,
+  POPPINS_MEDIUM,
+  POPPINS_REGULAR,
+  POPPINS_SEMI_BOLD,
+} from '../../../assets/fonts';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import {getFontSize} from '../../../utils/fontSizeResponsive';
+import CustomButton from '../../common/customButton';
 
 const heightScreen = Dimensions.get('window').height;
 const widthScreen = Dimensions.get('window').width;
@@ -406,7 +415,7 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
   // };
 
   const bottomSheetAddressRef = useRef<BottomSheet>(null);
-  const snapPointsAddress = useMemo(() => ['50%'], []);
+  const snapPointsAddress = useMemo(() => ['80%'], []);
 
   // callbacks
   const handleAddressSheetChange = useCallback((index: number) => {
@@ -619,8 +628,12 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
       <KeyboardAvoidingView
         style={{height: '100%'}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View style={{height: '100%'}}>
-          <Animated.View
+        <Animated.View
+          style={[
+            {height: '100%', backgroundColor: color.background},
+            // opacityAnimatedStyle,
+          ]}>
+          {/* <Animated.View
             style={[
               {
                 backgroundColor: '#000',
@@ -630,80 +643,124 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
               },
               opacityBlackAnimatedStyle,
             ]}
-          />
+          /> */}
+
+          <View style={styles.wrapperHeader}>
+            <Pressable
+              onPress={() => {
+                navigation.goBack();
+              }}
+              style={{
+                height: 70,
+                width: 50,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <SimpleLineIcons
+                name="arrow-left"
+                color={color.onBackground_light}
+                size={20}
+              />
+            </Pressable>
+            <View
+              style={{
+                height: 70,
+                width: 120,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={[styles.textHeader, {color: color.onBackground}]}>
+                Edit Profile
+              </Text>
+            </View>
+
+            <View
+              style={{
+                height: 70,
+                width: 50,
+              }}
+            />
+          </View>
           <Container
             keyboardShouldPersistTaps={'never'}
             styleScrollView={{
               backgroundColor: color.background,
               height: heightScreen,
             }}>
-            <Pressable
+            {/* <Pressable
               onPress={() => {
                 // changeBottomSheetVisibility(false);
                 // changeImageBottomSheetVisibility(false);
                 handleCloseAddressPress();
                 handleCloseImagePress();
-              }}>
-              <Animated.View
-                style={[
-                  {
-                    paddingHorizontal: 20,
-                    marginTop: 15,
-                    flex: 1,
-                    // opacity: Animated.add(0.3, Animated.multiply(fall, 1.0)),
-                    height: '100%',
-                  },
-                  opacityAnimatedStyle,
-                ]}>
-                {avatarImage ? (
-                  <Avatar.Image
-                    size={80}
-                    source={{uri: avatarImage.uri}}
-                    style={{alignSelf: 'center'}}
-                  />
-                ) : (
-                  <Avatar.Image
-                    size={80}
-                    source={
-                      form.profileImage != 0
-                        ? {
-                            uri:
-                              'https://abcdavid-knguyen.ddns.net:30001/image/get/' +
-                              form.profileImage,
-                          }
-                        : require('../../../assets/images/image-not-found.jpg')
-                    }
-                    style={{alignSelf: 'center'}}
-                  />
-                )}
-                <Pressable
-                  onPress={() => {
-                    // changeImageBottomSheetVisibility(true);
-                    handleImageSnapPress(0);
-                    setSelectedImage('avatar');
+              }}> */}
+
+            {/* <Animated.View
+              style={[
+                {
+                  backgroundColor: '#000',
+                  height: '100%',
+                  width: widthScreen,
+                  position: 'absolute',
+                },
+                opacityBlackAnimatedStyle,
+              ]}
+            /> */}
+            <Animated.View
+              style={[
+                {
+                  paddingHorizontal: 20,
+                  marginTop: 15,
+                  flex: 1,
+                  // opacity: Animated.add(0.3, Animated.multiply(fall, 1.0)),
+                  height: '100%',
+                },
+              ]}>
+              {avatarImage ? (
+                <Avatar.Image
+                  size={80}
+                  source={{uri: avatarImage.uri}}
+                  style={{alignSelf: 'center'}}
+                />
+              ) : (
+                <Avatar.Image
+                  size={80}
+                  source={
+                    form.profileImage != 0
+                      ? {
+                          uri:
+                            'https://abcdavid-knguyen.ddns.net:30001/image/get/' +
+                            form.profileImage,
+                        }
+                      : require('../../../assets/images/image-not-found.jpg')
+                  }
+                  style={{alignSelf: 'center'}}
+                />
+              )}
+              <Pressable
+                onPress={() => {
+                  // changeImageBottomSheetVisibility(true);
+                  handleImageSnapPress(0);
+                  setSelectedImage('avatar');
+                }}>
+                <Text
+                  style={{
+                    alignSelf: 'center',
+                    color: colors.primary,
+                    fontFamily: POPPINS_MEDIUM,
+                    marginTop: 5,
                   }}>
+                  Change avatar
+                </Text>
+              </Pressable>
+              <View style={{marginTop: 10}}>
+                {/*Name*/}
+                <View>
                   <Text
-                    style={{
-                      alignSelf: 'center',
-                      color: colors.primary,
-                      fontWeight: '500',
-                      marginTop: 5,
-                    }}>
-                    Change avatar
+                    style={[styles.styleTitle, {color: color.onBackground}]}>
+                    Name
                   </Text>
-                </Pressable>
-                <View style={{marginTop: 10}}>
-                  {/*Name*/}
-                  <View>
-                    <Text
-                      style={{
-                        marginBottom: 5,
-                        fontWeight: '500',
-                        color: '#555',
-                      }}>
-                      Name
-                    </Text>
-                    {/* <TextInputOutline
+                  {/* <TextInputOutline
                       label={'Name'}
                       iconClass={MaterialIcons}
                       iconName={'drive-file-rename-outline'}
@@ -726,33 +783,33 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
                         !isBottomSheetVisible && !isImageBottomSheetVisible
                       }
                     /> */}
-                    <TextField
-                      label={''}
-                      iconClass={MaterialIcons}
-                      iconName={'drive-file-rename-outline'}
-                      iconColor={color.primary}
-                      style={{width: '90%'}}
-                      onChangeText={value => {
-                        setName(value);
-                      }}
-                      editable={
-                        !isBottomSheetVisible && !isImageBottomSheetVisible
-                      }
-                      value={form.name}
-                    />
-                  </View>
+                  <TextField
+                    label={''}
+                    iconClass={MaterialIcons}
+                    iconName={'drive-file-rename-outline'}
+                    iconColor={color.primary}
+                    style={{
+                      width: '100%',
+                      alignSelf: 'center',
+                      marginBottom: 8,
+                    }}
+                    onChangeText={value => {
+                      setName(value);
+                    }}
+                    editable={
+                      !isBottomSheetVisible && !isImageBottomSheetVisible
+                    }
+                    value={form.name}
+                  />
+                </View>
 
-                  {/*Birthday*/}
-                  <View>
-                    <Text
-                      style={{
-                        marginBottom: 5,
-                        fontWeight: '500',
-                        color: '#555',
-                      }}>
-                      Birthday
-                    </Text>
-                    {/* <TextInputOutline
+                {/*Birthday*/}
+                <View>
+                  <Text
+                    style={[styles.styleTitle, {color: color.onBackground}]}>
+                    Birthday
+                  </Text>
+                  {/* <TextInputOutline
                       label={'Birthday'}
                       iconClass={MaterialIcons}
                       iconName={'date-range'}
@@ -775,110 +832,119 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
                       labelContainerStyle={{padding: 13}}
                       iconSize={20}
                     /> */}
-                    <TextField
-                      label={''}
-                      iconClass={MaterialIcons}
-                      iconName={'date-range'}
-                      iconColor={color.primary}
-                      style={{width: '85%'}}
-                      onTouchEnd={showDatePicker}
-                      editable={
-                        !show &&
-                        !isBottomSheetVisible &&
-                        !isImageBottomSheetVisible
-                      }
-                      value={form.birthday}
-                    />
-                  </View>
+                  <TextField
+                    label={''}
+                    iconClass={MaterialIcons}
+                    iconName={'date-range'}
+                    iconColor={color.primary}
+                    style={{
+                      width: '100%',
+                      alignSelf: 'center',
+                      marginBottom: 8,
+                    }}
+                    onTouchEnd={showDatePicker}
+                    editable={
+                      !show &&
+                      !isBottomSheetVisible &&
+                      !isImageBottomSheetVisible
+                    }
+                    value={form.birthday}
+                  />
+                </View>
 
-                  {/*Gender*/}
-                  <View style={{marginBottom: 12}}>
-                    <Text
-                      style={{
-                        marginBottom: 5,
-                        fontWeight: '500',
-                        color: '#555',
-                      }}>
-                      Gender
-                    </Text>
+                {/*Gender*/}
+                <View style={{marginBottom: 12}}>
+                  <Text
+                    style={[
+                      styles.styleTitle,
+                      {color: color.onBackground, marginBottom: 8},
+                    ]}>
+                    Gender
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
                     <View
                       style={{
                         flexDirection: 'row',
-                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        width: '48%',
+                        borderWidth: 1,
+                        borderColor: color.divider,
+                        borderRadius: 7,
+                        height: 44,
+                        backgroundColor: color.background,
+                        paddingStart: 10,
                       }}>
-                      <View
+                      <RadioButton
+                        value="Male"
+                        status={form.gender === 1 ? 'checked' : 'unchecked'}
+                        onPress={() => setGender(1)}
+                        disabled={
+                          isBottomSheetVisible || isImageBottomSheetVisible
+                        }
+                      />
+                      <Text
                         style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          width: '48%',
-                          borderWidth: 1,
-                          borderColor: '#555',
-                          borderRadius: 7,
-                          height: 44,
-                          backgroundColor: '#F5F5F5',
-                          paddingStart: 10,
+                          color:
+                            form.gender === 1
+                              ? colors.primary
+                              : color.onBackground_light,
+                          fontSize: getFontSize(14),
+                          top: 2,
+                          fontFamily: POPPINS_REGULAR,
+                          marginStart: 5,
                         }}>
-                        <RadioButton
-                          value="Male"
-                          status={form.gender === 1 ? 'checked' : 'unchecked'}
-                          onPress={() => setGender(1)}
-                          disabled={
-                            isBottomSheetVisible || isImageBottomSheetVisible
-                          }
-                        />
-                        <Text
-                          style={{
-                            color: form.gender === 1 ? colors.primary : '#555',
-                            fontSize: 14,
-                            marginStart: 5,
-                          }}>
-                          Male
-                        </Text>
-                      </View>
+                        Male
+                      </Text>
+                    </View>
 
-                      <View
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        width: '48%',
+                        borderWidth: 1,
+                        borderColor: color.divider,
+                        borderRadius: 7,
+                        height: 44,
+                        backgroundColor: color.background,
+                        paddingStart: 10,
+                      }}>
+                      <RadioButton
+                        value="Female"
+                        status={form.gender === 2 ? 'checked' : 'unchecked'}
+                        onPress={() => setGender(2)}
+                        disabled={
+                          isBottomSheetVisible || isImageBottomSheetVisible
+                        }
+                      />
+                      <Text
                         style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          width: '48%',
-                          borderWidth: 1,
-                          borderColor: '#555',
-                          borderRadius: 7,
-                          height: 44,
-                          backgroundColor: '#F5F5F5',
-                          paddingStart: 10,
+                          color:
+                            form.gender === 2
+                              ? colors.primary
+                              : color.onBackground_light,
+                          fontSize: getFontSize(14),
+                          top: 2,
+                          fontFamily: POPPINS_REGULAR,
+                          marginStart: 5,
                         }}>
-                        <RadioButton
-                          value="Female"
-                          status={form.gender === 2 ? 'checked' : 'unchecked'}
-                          onPress={() => setGender(2)}
-                          disabled={
-                            isBottomSheetVisible || isImageBottomSheetVisible
-                          }
-                        />
-                        <Text
-                          style={{
-                            color: form.gender === 2 ? colors.primary : '#555',
-                            fontSize: 14,
-                            marginStart: 5,
-                          }}>
-                          Female
-                        </Text>
-                      </View>
+                        Female
+                      </Text>
                     </View>
                   </View>
+                </View>
 
-                  {/*Phone number*/}
-                  <View>
-                    <Text
-                      style={{
-                        marginBottom: 5,
-                        fontWeight: '500',
-                        color: '#555',
-                      }}>
-                      Phone Number
-                    </Text>
-                    {/* <TextInputOutline
+                {/*Phone number*/}
+                <View>
+                  <Text
+                    style={[styles.styleTitle, {color: color.onBackground}]}>
+                    Phone Number
+                  </Text>
+                  {/* <TextInputOutline
                       label={'Phone Number'}
                       iconClass={Ionicons}
                       iconName={'call'}
@@ -902,34 +968,34 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
                         !isBottomSheetVisible && !isImageBottomSheetVisible
                       }
                     /> */}
-                    <TextField
-                      label={''}
-                      iconClass={Ionicons}
-                      iconName={'call'}
-                      iconColor={color.primary}
-                      style={{width: '85%'}}
-                      keyboardType={'number-pad'}
-                      onChangeText={value => {
-                        setPhoneNumber({name: 'phone number', value});
-                      }}
-                      editable={
-                        !isBottomSheetVisible && !isImageBottomSheetVisible
-                      }
-                      value={form.phone_number?.toString()}
-                    />
-                  </View>
+                  <TextField
+                    label={''}
+                    iconClass={Ionicons}
+                    iconName={'call'}
+                    iconColor={color.primary}
+                    style={{
+                      width: '100%',
+                      alignSelf: 'center',
+                      marginBottom: 8,
+                    }}
+                    keyboardType={'number-pad'}
+                    onChangeText={value => {
+                      setPhoneNumber({name: 'phone number', value});
+                    }}
+                    editable={
+                      !isBottomSheetVisible && !isImageBottomSheetVisible
+                    }
+                    value={form.phone_number?.toString()}
+                  />
+                </View>
 
-                  {/*Identification number*/}
-                  <View>
-                    <Text
-                      style={{
-                        marginBottom: 5,
-                        fontWeight: '500',
-                        color: '#555',
-                      }}>
-                      Identification Number
-                    </Text>
-                    {/* <TextInputOutline
+                {/*Identification number*/}
+                <View>
+                  <Text
+                    style={[styles.styleTitle, {color: color.onBackground}]}>
+                    Identification Number
+                  </Text>
+                  {/* <TextInputOutline
                       label={'Identification Number'}
                       iconClass={MaterialCommunityIcons}
                       iconName={'identifier'}
@@ -953,259 +1019,332 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
                         !isBottomSheetVisible && !isImageBottomSheetVisible
                       }
                     /> */}
-                    <TextField
-                      label={''}
-                      iconClass={MaterialCommunityIcons}
-                      iconName={'identifier'}
-                      iconColor={color.primary}
-                      style={{width: '85%'}}
-                      value={form.identification_number?.toString()}
-                      keyboardType={'number-pad'}
-                      onChangeText={value => {
-                        setIdentificationNumber(value);
-                      }}
-                      editable={
-                        !isBottomSheetVisible && !isImageBottomSheetVisible
-                      }
-                    />
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-around',
-                        marginTop: 5,
-                      }}>
-                      <View style={{alignItems: 'center', width: '48%'}}>
-                        <TouchableWithoutFeedback
-                          onPress={() => {
-                            // changeImageBottomSheetVisibility(true);
-                            handleImageSnapPress(0);
-                            setSelectedImage('front');
-                          }}>
-                          {FrontIDImage ? (
-                            <Image
-                              source={{uri: FrontIDImage.uri}}
-                              style={styles.images}
+                  <TextField
+                    label={''}
+                    iconClass={MaterialCommunityIcons}
+                    iconName={'identifier'}
+                    iconColor={color.primary}
+                    style={{
+                      width: '100%',
+                      alignSelf: 'center',
+                      marginBottom: 8,
+                    }}
+                    value={form.identification_number?.toString()}
+                    keyboardType={'number-pad'}
+                    onChangeText={value => {
+                      setIdentificationNumber(value);
+                    }}
+                    editable={
+                      !isBottomSheetVisible && !isImageBottomSheetVisible
+                    }
+                  />
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      marginTop: 5,
+                    }}>
+                    <View style={{alignItems: 'center', width: '48%'}}>
+                      <TouchableWithoutFeedback
+                        onPress={() => {
+                          // changeImageBottomSheetVisibility(true);
+                          handleImageSnapPress(0);
+                          setSelectedImage('front');
+                        }}>
+                        {FrontIDImage ? (
+                          <Image
+                            source={{uri: FrontIDImage.uri}}
+                            style={styles.images}
+                          />
+                        ) : form.idfrontImage ? (
+                          <Image
+                            source={{
+                              uri:
+                                'https://abcdavid-knguyen.ddns.net:30001/image/get/' +
+                                form.idfrontImage,
+                            }}
+                            style={styles.images}
+                          />
+                        ) : (
+                          <View
+                            style={[
+                              styles.images,
+                              {
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderRadius: 5,
+                                backgroundColor: color.background,
+                                borderColor: color.divider,
+                                borderWidth: 1,
+                                paddingHorizontal: 10,
+                              },
+                            ]}>
+                            <Entypo
+                              name="camera"
+                              size={36}
+                              color={color.primary}
                             />
-                          ) : form.idfrontImage ? (
-                            <Image
-                              source={{
-                                uri:
-                                  'https://abcdavid-knguyen.ddns.net:30001/image/get/' +
-                                  form.idfrontImage,
-                              }}
-                              style={styles.images}
-                            />
-                          ) : (
-                            <View
-                              style={[
-                                styles.images,
-                                {
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  borderRadius: 5,
-                                  backgroundColor: '#f5f5f5',
-                                  paddingHorizontal: 10,
-                                },
-                              ]}>
-                              <Entypo
-                                name="camera"
-                                size={36}
-                                color={colors.primary}
-                              />
-                              <Text
-                                style={{
-                                  fontSize: 10,
-                                  color: '#555',
-                                  textAlign: 'center',
-                                  marginTop: 5,
-                                }}>
-                                Upload the front side of your ID card
-                              </Text>
-                            </View>
-                          )}
-                        </TouchableWithoutFeedback>
+                            <Text
+                              style={{
+                                fontSize: getFontSize(10),
+                                fontFamily: POPPINS_REGULAR,
+                                color: color.onBackground_light,
+                                textAlign: 'center',
+                                marginTop: 5,
+                              }}>
+                              Upload the front side of your ID card
+                            </Text>
+                          </View>
+                        )}
+                      </TouchableWithoutFeedback>
 
-                        <Text
-                          style={{fontSize: 14, color: '#555', marginTop: 3}}>
-                          Front
-                        </Text>
-                      </View>
+                      <Text
+                        style={{
+                          fontSize: getFontSize(14),
+                          color: color.onBackground_light,
+                          fontFamily: POPPINS_REGULAR,
+                          marginTop: 3,
+                        }}>
+                        Front
+                      </Text>
+                    </View>
 
-                      <View style={{alignItems: 'center', width: '48%'}}>
-                        <TouchableWithoutFeedback
-                          onPress={() => {
-                            // changeImageBottomSheetVisibility(true);
-                            handleImageSnapPress(0);
-                            setSelectedImage('back');
-                          }}>
-                          {BackIDImage ? (
-                            <Image
-                              source={{uri: BackIDImage.uri}}
-                              style={styles.images}
+                    <View style={{alignItems: 'center', width: '48%'}}>
+                      <TouchableWithoutFeedback
+                        onPress={() => {
+                          // changeImageBottomSheetVisibility(true);
+                          handleImageSnapPress(0);
+                          setSelectedImage('back');
+                        }}>
+                        {BackIDImage ? (
+                          <Image
+                            source={{uri: BackIDImage.uri}}
+                            style={styles.images}
+                          />
+                        ) : form.idbackImage ? (
+                          <Image
+                            source={{
+                              uri:
+                                'https://abcdavid-knguyen.ddns.net:30001/image/get/' +
+                                form.idbackImage,
+                            }}
+                            style={styles.images}
+                          />
+                        ) : (
+                          <View
+                            style={[
+                              styles.images,
+                              {
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderRadius: 5,
+                                backgroundColor: color.background,
+                                borderColor: color.divider,
+                                borderWidth: 1,
+                                paddingHorizontal: 10,
+                              },
+                            ]}>
+                            <Entypo
+                              name="camera"
+                              size={36}
+                              color={color.primary}
                             />
-                          ) : form.idbackImage ? (
-                            <Image
-                              source={{
-                                uri:
-                                  'https://abcdavid-knguyen.ddns.net:30001/image/get/' +
-                                  form.idbackImage,
-                              }}
-                              style={styles.images}
-                            />
-                          ) : (
-                            <View
-                              style={[
-                                styles.images,
-                                {
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  borderRadius: 5,
-                                  backgroundColor: '#f5f5f5',
-                                  paddingHorizontal: 10,
-                                },
-                              ]}>
-                              <Entypo
-                                name="camera"
-                                size={36}
-                                color={colors.primary}
-                              />
-                              <Text
-                                style={{
-                                  fontSize: 10,
-                                  color: '#555',
-                                  textAlign: 'center',
-                                  marginTop: 5,
-                                }}>
-                                Upload the back side of your ID card
-                              </Text>
-                            </View>
-                          )}
-                        </TouchableWithoutFeedback>
+                            <Text
+                              style={{
+                                fontSize: getFontSize(10),
+                                fontFamily: POPPINS_REGULAR,
+                                color: color.onBackground_light,
+                                textAlign: 'center',
+                                marginTop: 5,
+                              }}>
+                              Upload the back side of your ID card
+                            </Text>
+                          </View>
+                        )}
+                      </TouchableWithoutFeedback>
 
-                        <Text
-                          style={{fontSize: 14, color: '#555', marginTop: 3}}>
-                          Backside
-                        </Text>
-                      </View>
+                      <Text
+                        style={{
+                          fontSize: getFontSize(14),
+                          color: color.onBackground_light,
+                          fontFamily: POPPINS_REGULAR,
+                          marginTop: 3,
+                        }}>
+                        Backside
+                      </Text>
                     </View>
                   </View>
+                </View>
 
-                  {/*Address*/}
-                  <FilterPropFrameComponent
-                    divider={false}
-                    // styleLabel={{fontWeight: '500', color: '#555'}}
-                    type={'Address'}
-                    onToggle={onToggle}
-                    show={showAddress}>
-                    <Animated.View
-                      entering={FadeInUp.duration(300).delay(100)}
-                      layout={Layout.stiffness(100)
-                        .damping(10)
-                        .duration(durationLayout)}>
-                      {addressList.length > 0
-                        ? addressList
-                            .filter(item => !item.IsDeleted)
-                            .map((item, index) => (
-                              <View key={index}>
+                {/*Address*/}
+                <FilterPropFrameComponent
+                  divider={false}
+                  styleLabel={{
+                    color: color.onBackground,
+                    fontSize: getFontSize(14),
+                    fontFamily: POPPINS_MEDIUM,
+                    marginStart: 0,
+                  }}
+                  type={'Address'}
+                  onToggle={onToggle}
+                  show={showAddress}>
+                  <Animated.View
+                    entering={FadeInUp.duration(300).delay(100)}
+                    layout={Layout.stiffness(100)
+                      .damping(10)
+                      .duration(durationLayout)}>
+                    {addressList.length > 0
+                      ? addressList
+                          .filter(item => !item.IsDeleted)
+                          .map((item, index) => (
+                            <View key={index}>
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  padding: 12,
+                                  paddingEnd: 20,
+                                }}>
                                 <View
                                   style={{
-                                    flexDirection: 'row',
-                                    padding: 12,
-                                    paddingEnd: 20,
+                                    width: 25,
+                                    justifyContent: 'center',
                                   }}>
-                                  <View
+                                  <Text
                                     style={{
-                                      width: 25,
-                                      justifyContent: 'center',
+                                      color: !item.IsTemporary
+                                        ? color.onBackground_light
+                                        : color.primary,
+                                      // fontWeight: item.IsTemporary
+                                      //   ? 'bold'
+                                      //   : '400',
+                                      fontFamily: item.IsTemporary
+                                        ? POPPINS_SEMI_BOLD
+                                        : POPPINS_REGULAR,
+                                      fontSize: getFontSize(14),
                                     }}>
+                                    {index + 1}
+                                  </Text>
+                                </View>
+                                <View
+                                  style={{
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    flex: 1,
+                                    marginEnd: 15,
+                                  }}>
+                                  {item.DetailAddress && (
                                     <Text
                                       style={{
-                                        color: !item.IsTemporary
-                                          ? colors.grey
-                                          : colors.primary,
-                                        fontWeight: item.IsTemporary
-                                          ? 'bold'
-                                          : '400',
+                                        color: color.onBackground,
+                                        fontFamily: POPPINS_REGULAR,
+                                        fontSize: getFontSize(14),
                                       }}>
-                                      {index + 1}
+                                      {item.DetailAddress}
                                     </Text>
-                                  </View>
-                                  <View
+                                  )}
+                                  <Text
                                     style={{
-                                      flexDirection: 'column',
-                                      justifyContent: 'center',
-                                      flex: 1,
-                                      marginEnd: 15,
+                                      color: color.onBackground,
+                                      fontFamily: POPPINS_REGULAR,
+                                      fontSize: getFontSize(14),
                                     }}>
-                                    {item.DetailAddress && (
-                                      <Text style={{color: 'black'}}>
-                                        {item.DetailAddress}
-                                      </Text>
-                                    )}
-                                    <Text style={{color: 'black'}}>
-                                      {wardNameFromID(item.Ward)},{' '}
-                                      {districtNameFromID(item.District)},{' '}
-                                      {cityNameFromID(item.City)}
-                                    </Text>
-                                  </View>
-                                  <View style={{justifyContent: 'center'}}>
-                                    <TouchableWithoutFeedback
-                                      onPress={() => {
-                                        OnAddressEdit(item.ID);
-                                      }}>
-                                      <FontAwesome5
-                                        name="edit"
-                                        size={18}
-                                        color={colors.primary}
-                                      />
-                                    </TouchableWithoutFeedback>
-                                  </View>
+                                    {wardNameFromID(item.Ward)},{' '}
+                                    {districtNameFromID(item.District)},{' '}
+                                    {cityNameFromID(item.City)}
+                                  </Text>
                                 </View>
-
-                                <View
-                                  style={{
-                                    height: 1,
-                                    borderBottomWidth: 1,
-                                    borderBottomColor: '#e9e9e9',
-                                    marginStart: 35,
-                                    marginEnd: 20,
-                                  }}
-                                />
+                                <View style={{justifyContent: 'center'}}>
+                                  <TouchableWithoutFeedback
+                                    onPress={() => {
+                                      OnAddressEdit(item.ID);
+                                    }}>
+                                    <FontAwesome5
+                                      name="edit"
+                                      size={18}
+                                      color={colors.primary}
+                                    />
+                                  </TouchableWithoutFeedback>
+                                </View>
                               </View>
-                            ))
-                        : null}
-                      <TouchableWithoutFeedback onPress={OnAddNewAddess}>
-                        <View
-                          style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            flexDirection: 'row',
-                            marginTop: 10,
-                          }}>
-                          <Ionicons
-                            name="add-circle-outline"
-                            size={24}
-                            color={color.primary}
-                          />
-                          <Text
-                            style={{
-                              fontSize: 16,
-                              // color: '#555',
-                              marginStart: 5,
-                              color: color.primary,
-                            }}>
-                            Add new address
-                          </Text>
-                        </View>
-                      </TouchableWithoutFeedback>
-                    </Animated.View>
-                  </FilterPropFrameComponent>
 
-                  <View style={{height: 150}}></View>
-                </View>
-              </Animated.View>
-            </Pressable>
+                              <View
+                                style={{
+                                  height: 1,
+                                  borderBottomWidth: 1,
+                                  borderBottomColor: '#e9e9e9',
+                                  marginStart: 35,
+                                  marginEnd: 20,
+                                }}
+                              />
+                            </View>
+                          ))
+                      : null}
+                    <TouchableWithoutFeedback onPress={OnAddNewAddess}>
+                      <View
+                        style={{
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          flexDirection: 'row',
+                          marginTop: 10,
+                        }}>
+                        <Ionicons
+                          name="add-circle-outline"
+                          size={24}
+                          color={color.primary}
+                        />
+                        <Text
+                          style={{
+                            fontSize: getFontSize(16),
+                            fontFamily: POPPINS_MEDIUM,
+                            // color: '#555',
+                            marginStart: 5,
+                            color: color.primary,
+                            top: 2,
+                          }}>
+                          Add new address
+                        </Text>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </Animated.View>
+                </FilterPropFrameComponent>
+
+                <View style={{height: 150}}></View>
+              </View>
+            </Animated.View>
+
+            <CustomButton
+              title="Apply Changes"
+              onPress={() => {
+                Save();
+              }}
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                left: 0,
+                marginBottom: 40,
+              }}
+            />
+
+            {/* <FAB
+              onPress={() => {
+                Save();
+              }}
+              label="Apply changes"
+              size="small"
+              style={{
+                position: 'absolute',
+                margin: 16,
+                marginHorizontal: 20,
+                bottom: 0,
+                right: 0,
+                left: 0,
+                backgroundColor: colors.secondary,
+              }}
+            /> */}
+            {/* </Pressable> */}
           </Container>
+
           {show && (
             <DateTimePicker
               testID="datetimePicker"
@@ -1262,7 +1401,7 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
             }}
             handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
             handleStyle={{
-              backgroundColor: color.background,
+              backgroundColor: color.background_bottomNav,
               borderTopRightRadius: 16,
               borderTopLeftRadius: 16,
             }}
@@ -1313,7 +1452,7 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
             }}
             handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
             handleStyle={{
-              backgroundColor: color.background,
+              backgroundColor: color.background_bottomNav,
               borderTopRightRadius: 16,
               borderTopLeftRadius: 16,
             }}
@@ -1325,24 +1464,7 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
             }}>
             {_renderContentImage()}
           </BottomSheet>
-
-          <FAB
-            onPress={() => {
-              Save();
-            }}
-            label="Apply changes"
-            size="small"
-            style={{
-              position: 'absolute',
-              margin: 16,
-              marginHorizontal: 20,
-              bottom: 0,
-              right: 0,
-              left: 0,
-              backgroundColor: colors.secondary,
-            }}
-          />
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
     </Root>
   );
@@ -1351,6 +1473,24 @@ const EditProfileComponent: React.FC<EditProfileComponentProps> = ({
 export default EditProfileComponent;
 
 const styles = StyleSheet.create({
+  wrapperHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: '2%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 70,
+  },
+  textHeader: {
+    fontSize: getFontSize(18),
+    fontFamily: POPPINS_BOLD,
+    height: 24,
+  },
+  resetText: {
+    fontSize: getFontSize(14),
+    fontFamily: POPPINS_MEDIUM,
+    marginTop: 4,
+    height: 24,
+  },
   header: {
     backgroundColor: '#fff',
     shadowColor: '#333333',
@@ -1383,6 +1523,10 @@ const styles = StyleSheet.create({
   images: {
     width: 120,
     height: 120,
+  },
+  styleTitle: {
+    fontSize: getFontSize(14),
+    fontFamily: POPPINS_MEDIUM,
   },
 });
 function alert(customButton: any) {

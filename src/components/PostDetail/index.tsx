@@ -42,6 +42,8 @@ import {
   GetPersonalPostDetail,
   GetPost,
   GetUserInfo,
+  LikePost,
+  UnlikePost,
 } from '../../backendAPI';
 // import SkeletonContent from 'react-native-skeleton-content-nonexpo';
 import {useSelector} from 'react-redux';
@@ -61,6 +63,7 @@ import PostPreview from '../PostPreview/listItem';
 import {POST_DETAIL_NAVIGATOR} from '../../constants/routeNames';
 import {FAB} from 'react-native-paper';
 import Feather from 'react-native-vector-icons/Feather';
+import {getSavedPostList, savePost} from '../../services/SavedPost';
 
 const widthScreen = Dimensions.get('window').width;
 const heightScreen = Dimensions.get('window').height;
@@ -805,15 +808,44 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     getThemeColor(state.theme),
   );
 
+  // const {navigate} = useNavigation();
+
   //Header
   const onGoBack = () => {
     navigation.goBack();
+    // navigate.g
   };
 
   const onLikePost = () => {
+    onSavePost(selectedPost);
     setIsLiked(!isLiked);
   };
   const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [savedPostList, setSavedPostList] = useState<number[] | null>();
+
+  useEffect(() => {
+    const getDataSavedPostList = async () => {
+      let arr: number[] | null = await getSavedPostList();
+      setSavedPostList(arr);
+    };
+    getDataSavedPostList();
+  }, []);
+
+  const onSavePost = async (id: number | null) => {
+    if (id == null) return;
+    if (savedPostList != null) {
+      let arr = [...savedPostList];
+      if (arr.includes(id)) {
+        arr.splice(arr.indexOf(id), 1);
+      }
+      arr.unshift(id);
+      setSavedPostList(arr);
+      await savePost(arr);
+    } else {
+      setSavedPostList([id]);
+      await savePost([id]);
+    }
+  };
 
   return (
     <View style={{height: '100%', position: 'relative'}}>

@@ -265,7 +265,7 @@ export const PostFilter = (
     page?: Number,
     numperPage?: Number,
     asc?: Boolean,
-    orderType? : string,
+    orderType?: string,
     priceStart?: Number,
     priceEnd?: Number,
     brand?: Number,
@@ -279,7 +279,7 @@ export const PostFilter = (
         page: page,
         numperpage: numperPage,
         order: asc ? "asc" : "desc",
-        ordertype: orderType? orderType : "time",
+        ordertype: orderType ? orderType : "time",
         pricestart: priceStart,
         priceend: priceEnd,
         brand: brand,
@@ -298,8 +298,10 @@ export const PostFilter = (
     return stringBuilder;
 }
 
+const NUMBER_PAGE = 20;
+
 export const GetAllPosts = async (args: string) => {
-    const postResponse = await HttpRequest.GetRequest("search/post/all" + (args ? "?" + args : ""));
+    const postResponse = await HttpRequest.GetRequest("search/post/all?numperpage=" + NUMBER_PAGE + (args ? "&" + args : ""));
     if (postResponse.msg == "Completed") {
         return postResponse.info;
     }

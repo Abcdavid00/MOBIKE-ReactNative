@@ -3,6 +3,8 @@ import {
   TouchableWithoutFeedback,
   Pressable,
   StyleSheet,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 import Animated, {
   Easing,
@@ -29,9 +31,8 @@ type FilterPropFrameComponentProps = {
   show: boolean;
   animate?: boolean;
   divider?: boolean;
-  styleLabel?: Animated.AnimateProps<
-    React.ComponentProps<typeof View>
-  >['style'];
+  styleLabel?: TextStyle;
+  styleWrapper?: ViewStyle;
 };
 
 const FilterPropFrameComponent: React.FC<FilterPropFrameComponentProps> = ({
@@ -42,6 +43,7 @@ const FilterPropFrameComponent: React.FC<FilterPropFrameComponentProps> = ({
   animate = true,
   divider = true,
   styleLabel,
+  styleWrapper,
 }) => {
   const rotateAnim = useSharedValue('0deg');
   const durationLayout = 300;
@@ -72,7 +74,7 @@ const FilterPropFrameComponent: React.FC<FilterPropFrameComponentProps> = ({
   return (
     <Animated.View
       layout={Layout.stiffness(100).damping(10).duration(durationLayout)}>
-      <View style={styles.styleWrapper}>
+      <View style={[styles.styleWrapper, styleWrapper]}>
         <Animated.Text
           layout={Layout.stiffness(100).damping(10).duration(durationLayout)}
           style={[styles.styleLabel, {color: color.onBackground}, styleLabel]}>
