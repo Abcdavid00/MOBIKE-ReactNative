@@ -6417,7 +6417,7 @@ pkg-dir@^4.2.0:
 
 popup-ui@^1.2.2:
   version "1.2.2"
-  resolved "https://registry.npmjs.org/popup-ui/-/popup-ui-1.2.2.tgz"
+  resolved "https://registry.yarnpkg.com/popup-ui/-/popup-ui-1.2.2.tgz#48a90de15dfcfd114bc2f3eb9e18a540e33bb9cf"
   integrity sha512-2vJZ79lOSyHuVEH0zHfB8ga3LY9xYpuggKA2sT9tTKbcOsKlJnuvY/kEugIM1xW0+svxWE9Orku1tRQQvR9Hog==
 
 posix-character-classes@^0.1.0:

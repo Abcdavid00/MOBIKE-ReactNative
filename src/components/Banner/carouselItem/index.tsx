@@ -28,10 +28,28 @@ const CarouselItem: React.FC<CarouselItemProps> = ({
         />
       );
     } else if (isImageID) {
+      if (item < 0)
+        return (
+          <Image
+            source={require('../../../assets/images/image-not-found.jpg')}
+            style={{
+              height: '100%',
+              width: width - 50,
+              borderRadius: 10,
+              resizeMode: 'cover',
+            }}
+            key={index}
+          />
+        );
       return (
         <MobikeImage
           imageID={item}
-          style={[styles.image, {height: width / 1.5}]}
+          style={{
+            height: '100%',
+            width: width - 50,
+            borderRadius: 10,
+            resizeMode: 'cover',
+          }}
           key={index}
         />
       );
@@ -40,7 +58,11 @@ const CarouselItem: React.FC<CarouselItemProps> = ({
     }
   };
 
-  return <View style={styles.cardView}>{_renderContent()}</View>;
+  return (
+    <View style={[styles.cardView, isImageID && {height: height / 4}]}>
+      {_renderContent()}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
