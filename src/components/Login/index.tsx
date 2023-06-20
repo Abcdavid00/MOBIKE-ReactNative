@@ -139,7 +139,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
 
           <CustomButton onPress={onSubmit} title="Sign in" />
 
-          <View
+          {/* <View
             style={{alignSelf: 'center', paddingTop: 40, alignItems: 'center'}}>
             <Text
               style={{
@@ -169,7 +169,7 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
                 />
               </Pressable>
             </View>
-          </View>
+          </View> */}
         </View>
 
         <View>

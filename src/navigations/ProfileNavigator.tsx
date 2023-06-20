@@ -1,24 +1,31 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Header from '../components/common/header';
-import {EDIT_ACCOUNT, EDIT_PTOFILE, PROFILE} from '../constants/routeNames';
+import {EDIT_ACCOUNT, EDIT_PROFILE, PROFILE} from '../constants/routeNames';
 import EditAccount from '../screens/EditAccount';
-import EditProfile from '../screens/EditProfile';
-import Profile from '../screens/Profile';
+import EditProfileScreen from '../screens/EditProfile';
+import ProfileScreen from '../screens/Profile';
+import {createStackNavigator} from '@react-navigation/stack';
+import React from 'react';
 
-const Stack = createNativeStackNavigator();
+export type ProfileStackParamList = {
+  [PROFILE]: undefined;
+  [EDIT_PROFILE]: undefined;
+};
+
+const Stack = createStackNavigator<ProfileStackParamList>();
 
 const ProfileNavigator = () => {
   return (
     <Stack.Navigator initialRouteName={PROFILE}>
       <Stack.Screen
         name={PROFILE}
-        component={Profile}
+        component={ProfileScreen}
         options={{headerShown: false}}
         //options={{header: () => <HeaderSearch />}}
       />
       <Stack.Screen
-        name={EDIT_PTOFILE}
-        component={EditProfile}
+        name={EDIT_PROFILE}
+        component={EditProfileScreen}
         options={{
           header: ({navigation}) => (
             <Header
@@ -30,7 +37,7 @@ const ProfileNavigator = () => {
           ),
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name={EDIT_ACCOUNT}
         component={EditAccount}
         options={{
@@ -43,7 +50,7 @@ const ProfileNavigator = () => {
             />
           ),
         }}
-      />
+      /> */}
     </Stack.Navigator>
   );
 };

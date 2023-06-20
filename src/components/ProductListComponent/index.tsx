@@ -50,6 +50,11 @@ type PostListItem = {
 
 type PostList = PostListItem[];
 
+type SortType = {
+  asc: boolean;
+  orderType: 'price' | 'time';
+};
+
 const ProductListComponent: React.FC<ProductListComponentProps> = ({
   navigation,
 }) => {
@@ -60,7 +65,8 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
         filter.title,
         undefined,
         undefined,
-        true,
+        sortSelected.asc,
+        sortSelected.orderType,
         filter.priceRange.min * 1000000,
         filter.priceRange.max * 1000000,
         filter.brand,
@@ -72,6 +78,19 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
     );
     console.log('First time Filter State: ' + JSON.stringify(filter));
   }, []);
+
+  const getSortOptionFromID = (ID: number) => {
+    const tmp: SortType = {
+      asc: ID == 1 || ID == 3,
+      orderType: ID == 1 || ID == 2 ? 'time' : 'price',
+    };
+    return tmp;
+  };
+
+  const sortSelected = useSelector<RootState, SortType>(state => {
+    const tmp: SortType = getSortOptionFromID(state.sort);
+    return tmp;
+  });
 
   const getFilterPostList = async (agrs: string) => {
     const postListTmp = await GetAllPosts(agrs);
@@ -107,7 +126,8 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
           filter.title,
           undefined,
           undefined,
-          true,
+          sortSelected.asc,
+          sortSelected.orderType,
           filter.priceRange.min * 1000000,
           filter.priceRange.max * 1000000,
           filter.brand,
@@ -127,6 +147,24 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
   );
   const onSetOptionSelected = (id: number) => {
     dispatch(setSort(id));
+    setIsLoading(true);
+    const sortTmp: SortType = getSortOptionFromID(id);
+    getFilterPostList(
+      PostFilter(
+        filter.title,
+        undefined,
+        undefined,
+        sortTmp.asc,
+        sortTmp.orderType,
+        filter.priceRange.min * 1000000,
+        filter.priceRange.max * 1000000,
+        filter.brand,
+        filter.lineup,
+        filter.vehicleType,
+        filter.color,
+        filter.manufacturerYear,
+      ),
+    );
   };
 
   const onNavigateFilter = () => {
@@ -244,7 +282,11 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
           }}>
           {isFiltered ? (
             <Image
-              source={theme=='light'? require('../../assets/images/filter_on_light.png') : require('../../assets/images/filter_on_dark.png')}
+              source={
+                theme == 'light'
+                  ? require('../../assets/images/filter_on_light.png')
+                  : require('../../assets/images/filter_on_dark.png')
+              }
               style={{width: 24, height: 24, resizeMode: 'cover'}}
             />
           ) : (

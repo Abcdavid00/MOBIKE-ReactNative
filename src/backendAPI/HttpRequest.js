@@ -5,7 +5,7 @@ const port = '30001';
 const retryInterval = 100;
 const maxRetry = 10;
 
-const ResquestLog = false;
+const ResquestLog = true;
 
 const log = (message: string) => {
   if (ResquestLog) {
@@ -389,7 +389,7 @@ export const UploadIdentityImage = async (
     log(res);
     return res.msg == 'Completed';
   } catch (error) {
-    log('Set Identity Image Error: ' + error);
+    console.log('Set Identity Image Error: ' + error);
     return false;
   }
 };

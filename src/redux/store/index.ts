@@ -4,7 +4,7 @@ import loadingReducer from '../slice/loadingSlice';
 import personalInfo from '../clientDatabase/personalInfo';
 import imageType from '../clientDatabase/imageType';
 import location from '../clientDatabase/location';
-import vehicleModel from '../clientDatabase/vehicleModel.ts';
+import vehicleModel from '../clientDatabase/vehicleModel';
 import vehicleType from '../clientDatabase/vehicleType';
 import vehicleCondition from '../clientDatabase/vehicleCondition';
 import color from '../clientDatabase/color';

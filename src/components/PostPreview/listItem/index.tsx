@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect} from 'react';
+import React, {memo, useEffect} from 'react';
 import {
   Dimensions,
   Pressable,
@@ -242,12 +242,7 @@ const PostPreview: React.FC<PostPreviewProps> = ({
 
   return (
     <Pressable onPress={pressable ? onPressItem : null} key={postID} {...props}>
-      {isLoading ? (
-        // _renderSkeleton()
-        <View />
-      ) : (
-        _renderContent()
-      )}
+        {_renderContent()}
     </Pressable>
   );
 };
@@ -296,4 +291,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostPreview;
+export default memo(PostPreview);

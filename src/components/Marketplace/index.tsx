@@ -34,8 +34,10 @@ import {imageVehicleTypes} from '../../data/imageVehicleTypes';
 import {getFontSize} from '../../utils/fontSizeResponsive';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
 import PostPreview from '../PostPreview/listItem';
+import {setSort} from '../../redux/slice/sortSlice';
 
 const widthScreen = Dimensions.get('window').width;
+const ITEM_HEIGHT = widthScreen * 0.42 * 1.45;
 
 type MarketplaceComponentProps = {
   navigation: StackNavigationProp<MarketplaceStackParamList, 'Marketplace'>;
@@ -57,8 +59,8 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
     const postListTmp = await GetAllPosts(
       page ? 'page=' + page.toString() : '',
     );
-    console.log('postList: ' + JSON.stringify(postListTmp));
-    let tmp: Array<number> = Array.from(postList);
+    // console.log('postList: ' + JSON.stringify(postListTmp));
+    let tmp: Array<number> = [...postList];
     for (let i = 0; i < postListTmp.length; i++) {
       tmp.push(postListTmp[i].ID);
     }
@@ -86,32 +88,59 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
 
   //Infinite Scroll
   const [page, setPage] = useState(1);
-  // const [isScrollEndReached, setIsScrollEndReached] = useState(false);
+  const [isScrollEndReached, setIsScrollEndReached] = useState(false);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const contentHeight = event.nativeEvent.contentSize.height;
     const layoutHeight = event.nativeEvent.layoutMeasurement.height;
-    if (offsetY + layoutHeight >= contentHeight) {
-      // setIsScrollEndReached(true);
-      getFilterPostList(page + 1);
-      // setIsLoading(true);
+    if (
+      offsetY + layoutHeight >= contentHeight - 100 &&
+      !isScrollEndReached &&
+      !isLoading
+    ) {
+      setIsScrollEndReached(true);
+      setIsLoading(true);
       setPage(page + 1);
     }
   };
 
-  // useEffect(() => {
-  //   if (isScrollEndReached) {
-  //     console.log('page: ' + page);
-  //     getFilterPostList(page);
-  //     setIsScrollEndReached(false);
-  //   }
-  // }, [isScrollEndReached]);
+  useEffect(() => {
+    if (isScrollEndReached) {
+      console.log('page: ' + page);
+      setIsScrollEndReached(false);
+      getFilterPostList(page);
+    }
+  }, [isScrollEndReached]);
+
+  // const renderItemPostPreview: ListRenderItem<number> = ({item, index}) => (
+  //   <PostPreview
+  //     postID={item}
+  //     key={item}
+  //     styleWrapper={{marginTop: 13}}
+  //     isActivePost={true}
+  //     pressable={true}
+  //     onPress={() => {
+  //       navigation.navigate(POST_DETAIL_NAVIGATOR);
+  //     }}
+  //     index={index}
+  //   />
+  // );
+
+  // const keyExtractorPostPreview = (item: number) => {
+  //   return item.toString();
+  // };
+
+  // const getItemLayout = (data: number[] | undefined | null, index: number) => ({
+  //   length: ITEM_HEIGHT,
+  //   offset: ITEM_HEIGHT * index,
+  //   index,
+  // });
 
   return (
     <Container
       keyboardShouldPersistTaps="always"
-      // onScroll={e => handleScroll(e)}
+      // onScroll={handleScroll}
       styleScrollView={{backgroundColor: color.background}}>
       {/* Header */}
       <View style={styles.wrapperHeader}>
@@ -158,6 +187,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
           onPress={() => {
             onNavigateProductList();
             dispatch(setInitial);
+            dispatch(setSort(2));
           }}>
           <Text style={[styles.seeMoreHeading, {color: color.text}]}>
             {'See more >'}
@@ -196,7 +226,27 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
         </View>
       </View>
 
-      <View style={{height: 100}} />
+      {/* <FlatList
+        data={postList}
+        scrollEnabled={false}
+        numColumns={2}
+        keyExtractor={keyExtractorPostPreview}
+        renderItem={renderItemPostPreview}
+        initialNumToRender={6}
+        maxToRenderPerBatch={20}
+        getItemLayout={getItemLayout}
+        windowSize={10}
+        ListFooterComponent={isLoading ? <PostPreviewLoader /> : null}
+        onEndReached={() => {
+          // if (!isScrollEndReached && !isLoading) {
+          //   setIsLoading(true);
+          //   setIsScrollEndReached(true);
+          //   setPage(page + 1);
+          // }
+          console.log('Hello there');
+        }}
+        onEndReachedThreshold={0.3}
+      /> */}
     </Container>
   );
 };

@@ -1,5 +1,12 @@
 import React from 'react';
-import {View, StyleSheet, Dimensions, FlatList, Animated} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  FlatList,
+  Animated,
+  ViewStyle,
+} from 'react-native';
 import CarouselItem from '../carouselItem';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/store';
@@ -9,10 +16,11 @@ import colors from '../../../assets/theme/colors';
 const {width, height} = Dimensions.get('window');
 
 type CarouselProps = {
-  data: Array<String>;
+  data: Array<string> | Array<number>;
   isUri?: boolean;
   isImageID?: boolean;
   havingBackground?: boolean;
+  style?: ViewStyle;
 };
 
 const Carousel: React.FC<CarouselProps> = ({
@@ -20,15 +28,16 @@ const Carousel: React.FC<CarouselProps> = ({
   isUri = false,
   isImageID = false,
   havingBackground = false,
+  style,
 }) => {
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
-  
+
   const scrollX = new Animated.Value(0);
   let position = Animated.divide(scrollX, width);
-  if (data && data.length) {
+  // if (data && data.length) {
     return (
-      <View style={{}}>
+      <View style={style}>
         <FlatList
           data={data}
           keyExtractor={(item, index) => 'key' + index}
@@ -54,42 +63,44 @@ const Carousel: React.FC<CarouselProps> = ({
             {useNativeDriver: false},
           )}
         />
-
-        <View
-          style={[
-            styles.dotView,
-            havingBackground && {
-              backgroundColor: theme=='light' ? '#ffffff55': '#00000055',
-              borderRadius: 10,
-            },
-          ]}>
-          {data.map((_, i) => {
-            let opacity = position.interpolate({
-              inputRange: [i - 1, i, i + 1],
-              outputRange: [0.3, 1, 0.3],
-              extrapolate: 'clamp',
-            });
-            return (
-              <Animated.View
-                key={i}
-                style={{
-                  opacity,
-                  height: 5,
-                  width: 5,
-                  backgroundColor: color.onBackground,
-                  margin: 2,
-                  borderRadius: 5,
-                }}
-              />
-            );
-          })}
-        </View>
+        {data.length > 1 && (
+          <View
+            style={[
+              styles.dotView,
+              havingBackground && {
+                backgroundColor: theme == 'light' ? '#ffffff55' : '#00000055',
+                borderRadius: 10,
+                bottom: 28,
+              },
+            ]}>
+            {data.map((_, i) => {
+              let opacity = position.interpolate({
+                inputRange: [i - 1, i, i + 1],
+                outputRange: [0.3, 1, 0.3],
+                extrapolate: 'clamp',
+              });
+              return (
+                <Animated.View
+                  key={i}
+                  style={{
+                    opacity,
+                    height: 5,
+                    width: 5,
+                    backgroundColor: color.onBackground,
+                    margin: 2,
+                    borderRadius: 5,
+                  }}
+                />
+              );
+            })}
+          </View>
+        )}
       </View>
     );
   }
-  console.log('Please provide Images');
-  return null;
-};
+  // console.log('Please provide Images');
+  // return null;
+// };
 
 const styles = StyleSheet.create({
   dotView: {
