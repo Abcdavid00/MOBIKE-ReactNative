@@ -27,6 +27,7 @@ import {POST_DETAIL_NAVIGATOR} from '../../constants/routeNames';
 import {GetLikedPosts} from '../../backendAPI';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
 import PostPreview from '../PostPreview/listItem';
+import {getSavedPostList} from '../../services/SavedPost';
 
 type SavedPostComponentProps = {
   navigation: StackNavigationProp<SavedPostStackParamList, 'SavedPost'>;
@@ -46,18 +47,14 @@ const SavedPostComponent: React.FC<SavedPostComponentProps> = ({
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
-    getFilterPostList();
+    getData();
   }, []);
 
-  const getFilterPostList = async (page?: number) => {
-    const postListTmp = await GetLikedPosts();
-    console.log('Saved Post: ' + JSON.stringify(postListTmp));
-    console.log('Page: ' + page);
-    let tmp: Array<number> = [...postList];
-    for (let i = 0; i < postListTmp.length; i++) {
-      tmp.push(postListTmp[i].ID);
+  const getData = async () => {
+    const postListTmp = await getSavedPostList();
+    if (postListTmp) {
+      setPostList(postListTmp);
     }
-    setPostList(tmp);
     setIsLoading(false);
   };
 

@@ -1,6 +1,6 @@
 const scheme = 'https';
-const host = 'abcdavid-knguyen.ddns.net';
-const port = '30001';
+const host = 'mobike.ddns.net';
+const port = null;
 
 const retryInterval = 100;
 const maxRetry = 10;

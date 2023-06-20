@@ -12,7 +12,7 @@ import store, {RootState} from '../../redux/store';
 import MobikeImage from '../common/image';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {ProfileStackParamList} from '../../navigations/ProfileNavigator';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {getThemeColor} from '../../utils/getThemeColor';
 import {getFontSize} from '../../utils/fontSizeResponsive';
 import {POPPINS_MEDIUM, POPPINS_REGULAR} from '../../assets/fonts';
@@ -21,6 +21,9 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {Switch} from 'react-native-paper';
+import {ThemeState, setTheme} from '../../redux/slice/themeSlice';
 
 type ProfileComponentProps = {
   navigation: StackNavigationProp<ProfileStackParamList, 'Profile'>;
@@ -31,6 +34,14 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({navigation}) => {
   const color = useSelector<RootState, ColorThemeProps>(state =>
     getThemeColor(state.theme),
   );
+  const theme = useSelector<RootState, ThemeState>(state => state.theme);
+  const [isSwitchOn, setIsSwitchOn] = React.useState(theme == 'dark');
+
+  const dispatch = useDispatch();
+  const onToggleSwitch = () => {
+    dispatch(setTheme(isSwitchOn ? 'light' : 'dark'));
+    setIsSwitchOn(!isSwitchOn);
+  };
   return (
     <View
       style={{
@@ -155,6 +166,56 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({navigation}) => {
           />
         </View>
       </Pressable>
+      <View
+        style={{
+          height: 1,
+          width: '90%',
+          backgroundColor: color.divider,
+          marginVertical: 10,
+        }}
+      />
+
+      {/*Theme */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          width: '100%',
+          paddingHorizontal: 20,
+          marginVertical: 10,
+        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            paddingHorizontal: 20,
+            marginVertical: 10,
+          }}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="moon" color={color.onBackground_light} size={20} />
+
+            <Text
+              style={{
+                color: color.onBackground,
+                fontSize: getFontSize(18),
+                fontFamily: POPPINS_REGULAR,
+                marginLeft: 8,
+                top: 2,
+              }}>
+              Dark Theme
+            </Text>
+          </View>
+
+          <Switch
+            value={isSwitchOn}
+            onValueChange={onToggleSwitch}
+            style={{right: -12}}
+          />
+        </View>
+      </View>
+
       <View
         style={{
           height: 1,
