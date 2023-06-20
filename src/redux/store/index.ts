@@ -14,6 +14,8 @@ import selectedPostReducer from '../slice/selectedPostSlice';
 import likeReducer from '../slice/likeSlice';
 import themeReducer from '../slice/themeSlice';
 import sortReducer from '../slice/sortSlice';
+import roomReducer from '../slice/roomSlice';
+import messageReducer from '../slice/messageSlice';
 
 const store = configureStore({
   reducer: {
@@ -32,6 +34,8 @@ const store = configureStore({
     like: likeReducer,
     theme: themeReducer,
     sort: sortReducer,
+    room: roomReducer,
+    message: messageReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
