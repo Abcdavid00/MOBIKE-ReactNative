@@ -9,7 +9,7 @@ type MobikeImageProps = {
 const MobikeImage: React.FC<MobikeImageProps> = ({imageID, style}) => (
   <Image
     source={{
-      uri: 'https://abcdavid-knguyen.ddns.net:30001/image/get/' + imageID,
+      uri: 'https://mobike.ddns.net/image/get/' + imageID,
     }}
     style={[
       {
