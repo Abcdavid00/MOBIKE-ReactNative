@@ -20,8 +20,12 @@ import {
 import store, {RootState} from './src/redux/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TokenStorage from './src/services/TokenStorage';
+import ChatDrawer from './src/services/ChatDrawer';
 import ClientDatabase from './src/services/ClientDatabase';
 import {setLoading} from './src/redux/slice/loadingSlice';
+import {GetRoomByUser, CreateRoom} from './src/backendAPI';
+import HttpRequest from './src/backendAPI/HttpRequest';
+import { sendMessage } from './src/services/ChatDrawer';
 
 const theme_light = {
   ...DefaultTheme,
@@ -115,25 +119,20 @@ const theme_dark = {
   },
 };
 
-import io from 'socket.io-client';
-
 function App(): JSX.Element {
-
   useEffect(() => {
     console.log('Main');
-    
+
     const sandbox = async () => {
       try {
-        const uid = store.getState().auth.ID;
-        const socket = io('https://mobike.ddns.net:443');
-        socket.emit('set user', uid);
-        socket.emit('chat message', "Hello from React Native");
-        socket.on('connect', () => {
-          console.log('Socket Connected');
-        });
-        socket.on('chat message', (msg: string) => {
-          console.log('Socket Message: ' + msg);
-        })
+        // let r = CreateRoom(2, [6, 152]);
+        // let r = await HttpRequest.PostRequest('/chat/room/create', {postId: 2, users: [6, 152]});
+        // let r = await CreateRoom(2, [6, 152]);
+        // console.log('Sandbox: ', JSON.stringify(r));
+        // setTimeout(() => {
+        //   sendMessage("649214af6b1d361ba85359f1", "Hello world!")
+        // }, 5000)
+        
       } catch (error) {
         console.log('Sandbox error: ' + error);
       }
@@ -143,7 +142,8 @@ function App(): JSX.Element {
       // await AsyncStorage.clear();
       await TokenStorage.init();
       await ClientDatabase.init();
-      // TokenStorage.print(); 
+      await ChatDrawer.init();
+      // TokenStorage.print();
       // ClientDatabase.print();
       dispatch(setLoading(false));
       sandbox();
@@ -168,7 +168,7 @@ function App(): JSX.Element {
 
   return (
     <PaperProvider theme={theme == 'light' ? theme_light : theme_dark}>
-      <AppNavContainer />
+      {/* <AppNavContainer /> */}
     </PaperProvider>
   );
 }
