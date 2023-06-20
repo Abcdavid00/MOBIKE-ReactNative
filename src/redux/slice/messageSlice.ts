@@ -2,22 +2,24 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export interface Message {
     roomId: string;
-    senderId: string[];
+    senderId: number[];
     content: string | null;
     timestamp: Date | null;
 }
 
 export type MessageDictionary = Record<string, Message>;
 
-const initialState: MessageDictionary = {};
+export type MessageInRoom = Record<string, MessageDictionary>;
+
+const initialState: MessageInRoom = {};
 
 const messageSlice = createSlice({
     name: "message",
     initialState,
     reducers: {
-        setMessage: (state, action: PayloadAction<Message>) => {
-            const message = action.payload;
-            state[message.roomId] = message;
+        setMessage: (state, action: PayloadAction<[string, Message]>) => {
+            const [messageId, message] = action.payload;
+            state[message.roomId][messageId] = message;
         },
     },
 });

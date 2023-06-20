@@ -1,11 +1,11 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export interface Room {
-    postId: string;
-    users: string[];
+    postTitle: string;
+    users: number[];
     latestMessage: string | null;
     latestTimestamp: Date | null;
-    imageId: string | null;
+    imageId: number | null;
 }
 
 export type RoomDictionary = Record<string, Room>;
@@ -16,9 +16,9 @@ const roomSlice = createSlice({
     name: "room",
     initialState,
     reducers: {
-        setRoom: (state, action: PayloadAction<Room>) => {
-            const room = action.payload;
-            state[room.postId] = room;
+        setRoom: (state, action: PayloadAction<[string,Room]>) => {
+            const [roomId, room] = action.payload;
+            state[roomId] = room;
         },
     },
 });
