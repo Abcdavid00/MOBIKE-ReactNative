@@ -1125,7 +1125,7 @@
   dependencies:
     prop-types "^15.7.2"
 
-"@gorhom/bottom-sheet@^4":
+"@gorhom/bottom-sheet@^4.4.7":
   version "4.4.7"
   resolved "https://registry.yarnpkg.com/@gorhom/bottom-sheet/-/bottom-sheet-4.4.7.tgz#fc80b3f0b7ebab056ce226f3aa3a89b2db8660dd"
   integrity sha512-ukTuTqDQi2heo68hAJsBpUQeEkdqP9REBcn47OpuvPKhdPuO1RBOOADjqXJNCnZZRcY+HqbnGPMSLFVc31zylQ==
