@@ -827,6 +827,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     const getDataSavedPostList = async () => {
       let arr: number[] | null = await getSavedPostList();
       setSavedPostList(arr);
+      if (selectedPost != null && arr?.includes(selectedPost)) setIsLiked(true);
     };
     getDataSavedPostList();
   }, []);

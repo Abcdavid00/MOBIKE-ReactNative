@@ -78,11 +78,6 @@ const ActiveRoute = ({
                 </View>
             </Container>
 
-            <FAB
-                icon="plus"
-                style={{ position: 'absolute', margin: 16, right: 0, bottom: 0, backgroundColor: colors.secondary }}
-                onPress={() => navigate(ADD_POST)}
-            />
         </View>
     )
 };
