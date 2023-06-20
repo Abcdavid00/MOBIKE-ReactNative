@@ -6,7 +6,7 @@ import {ColorThemeProps} from '../../../assets/theme/colors';
 import {getThemeColor} from '../../../utils/getThemeColor';
 
 type MobikeImageProps = {
-  imageID?: number;
+  imageID?: number | null;
   style?: ImageStyle;
   avatar?: boolean;
 };
