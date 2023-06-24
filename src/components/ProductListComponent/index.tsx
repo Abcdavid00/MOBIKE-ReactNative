@@ -3,15 +3,16 @@ import {useEffect} from 'react';
 import {
   Dimensions,
   Image,
+  ListRenderItem,
   Pressable,
   ScrollView,
   StyleSheet,
 } from 'react-native';
 import {Text, View} from 'react-native';
-import {GetAllPosts, PostFilter} from '../../backendAPI';
+import {GetAllPosts, GetPost, PostFilter} from '../../backendAPI';
 import {RootState} from '../../redux/store';
 import Container from '../common/container';
-import PostPreview from '../PostPreview/listItem';
+import PostPreview, {PostPreviewType} from '../PostPreview';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {MarketplaceStackParamList} from '../../navigations/MarketplaceNavigator';
 import {useDispatch, useSelector} from 'react-redux';
@@ -33,6 +34,8 @@ import {SortOptionType, sortOption} from '../../data/sortOption';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {SortState, setInitialSort, setSort} from '../../redux/slice/sortSlice';
 import {useIsFocused} from '@react-navigation/native';
+import PostPreviewList from '../PostPreviewList';
+import {selectPost} from '../../redux/slice/selectedPostSlice';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -55,29 +58,48 @@ type SortType = {
   orderType: 'price' | 'time';
 };
 
+export type FilterObjectType = {
+  title?: string;
+  page?: Number;
+  numperPage?: Number;
+  asc?: Boolean;
+  orderType?: string;
+  priceStart?: Number;
+  priceEnd?: Number;
+  brand?: Number;
+  lineup?: Number;
+  type?: Number;
+  color?: Number;
+  manufacturerYear?: Number;
+};
+
+const NUM_PER_PAGE = 20;
+
 const ProductListComponent: React.FC<ProductListComponentProps> = ({
   navigation,
 }) => {
+  const GenerateFilterObject = (filterState: FilterState): FilterObjectType => {
+    return {
+      title: filterState.title,
+      page: page,
+      numperPage: NUM_PER_PAGE,
+      asc: sortSelected.asc,
+      orderType: sortSelected.orderType,
+      priceStart: filter.priceRange.min * 1000000,
+      priceEnd: filter.priceRange.max * 1000000,
+      brand: filter.brand,
+      lineup: filter.lineup,
+      type: filter.vehicleType,
+      color: filter.color,
+      manufacturerYear: filter.manufacturerYear,
+    };
+  };
+
   const filter = useSelector<RootState, FilterState>(state => state.filter);
-  useEffect(() => {
-    getFilterPostList(
-      PostFilter(
-        filter.title,
-        undefined,
-        undefined,
-        sortSelected.asc,
-        sortSelected.orderType,
-        filter.priceRange.min * 1000000,
-        filter.priceRange.max * 1000000,
-        filter.brand,
-        filter.lineup,
-        filter.vehicleType,
-        filter.color,
-        filter.manufacturerYear,
-      ),
-    );
-    console.log('First time Filter State: ' + JSON.stringify(filter));
-  }, []);
+  // useEffect(() => {
+  //   getFilterPostList(PostFilter(GenerateFilterObject(filter)));
+  //   console.log('First time Filter State: ' + JSON.stringify(filter));
+  // }, []);
 
   const getSortOptionFromID = (ID: number) => {
     const tmp: SortType = {
@@ -94,14 +116,28 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
 
   const getFilterPostList = async (agrs: string) => {
     const postListTmp = await GetAllPosts(agrs);
+    let tmp: Array<PostPreviewType> = [...postList];
+    for (let i = 0; i < postListTmp.length; i++) {
+      tmp.push(await GetPost(postListTmp[i].ID));
+    }
+    setPostList(tmp);
     // console.log('In function get: ' + agrs);
-    // console.log('postList: ' + JSON.stringify(postListTmp));
-    setPostList(postListTmp);
+    // console.log('postListLoaded: ' + JSON.stringify(postListTmp));
+    // console.log('postListCurrent: ' + JSON.stringify(tmp.length));
     setIsLoading(false);
     setIsReady(true);
+    //trick
+    if (tmp.length % 2 != 0) {
+      setIsEnd(true);
+    }
+
+    if (postListTmp.length == 0) setIsEnd(true);
+    if (tmp.length == 0) setIsEmpty(true);
+
+    if (isSortSelecting) setSortSlecting(false);
   };
 
-  const [postList, setPostList] = React.useState<PostList>([]);
+  const [postList, setPostList] = React.useState<PostPreviewType[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const loadingArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const onNavigateSearch = () => {
@@ -118,26 +154,13 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
 
   useEffect(() => {
     if (isFocused) {
-      // console.log('PostList length: ' + postList.length);
-      // console.log('Loading: ' + isLoading);
-      console.log('In fuction get: ' + JSON.stringify(filter));
-      getFilterPostList(
-        PostFilter(
-          filter.title,
-          undefined,
-          undefined,
-          sortSelected.asc,
-          sortSelected.orderType,
-          filter.priceRange.min * 1000000,
-          filter.priceRange.max * 1000000,
-          filter.brand,
-          filter.lineup,
-          filter.vehicleType,
-          filter.color,
-          filter.manufacturerYear,
-        ),
-      );
+      // console.log('Is Focused: ' + isFocused);
+      setIsEmpty(false);
+      setIsEnd(false);
+      setIsLoading(true);
+      getFilterPostList(PostFilter(GenerateFilterObject(filter)));
     } else {
+      // console.log('Is Focused: ' + isFocused);
       onClose();
     }
   }, [isFocused]);
@@ -147,92 +170,38 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
   );
   const onSetOptionSelected = (id: number) => {
     dispatch(setSort(id));
-    setIsLoading(true);
     const sortTmp: SortType = getSortOptionFromID(id);
-    getFilterPostList(
-      PostFilter(
-        filter.title,
-        undefined,
-        undefined,
-        sortTmp.asc,
-        sortTmp.orderType,
-        filter.priceRange.min * 1000000,
-        filter.priceRange.max * 1000000,
-        filter.brand,
-        filter.lineup,
-        filter.vehicleType,
-        filter.color,
-        filter.manufacturerYear,
-      ),
-    );
+    onChooseSort();
   };
+  const onChooseSort = () => {
+    setPostList([]);
+    setPage(1);
+    setIsEmpty(false);
+    setIsEnd(false);
+    setSortSlecting(true);
+  };
+
+  const [isSortSelecting, setSortSlecting] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isSortSelecting) {
+      // console.log('Render by Sort useEffect' + page);
+      setIsLoading(true);
+      getFilterPostList(PostFilter(GenerateFilterObject(filter)));
+    }
+  }, [isSortSelecting]);
 
   const onNavigateFilter = () => {
     navigation.navigate(FILTERS_POP_UP);
   };
 
   const onClose = () => {
-    // setIsLoading(true);
     setPostList([]);
-    setIsReady(false);
-    console.log('Clear');
+    setPage(1);
+    // console.log('Clear');
   };
 
   const [isReady, setIsReady] = useState(false);
-  const _renderContent = () => {
-    if (postList.length != 0) {
-      return postList.map((item, index) => {
-        return (
-          <PostPreview
-            postID={item.ID}
-            key={index}
-            styleWrapper={{marginTop: 13}}
-            isActivePost={true}
-            pressable={true}
-            onPress={() => {
-              navigation.navigate(POST_DETAIL_NAVIGATOR);
-            }}
-            index={index}
-          />
-        );
-      });
-    } else if (isFocused && isReady) {
-      return (
-        <View
-          style={{
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: widthScreen,
-            marginLeft: widthScreen * -0.01,
-          }}>
-          <Image
-            source={require('../../assets/images/not-found.png')}
-            style={{width: '30%', height: '30%'}}
-          />
-          <Text
-            style={{
-              fontSize: getFontSize(16),
-              fontFamily: POPPINS_SEMI_BOLD,
-              textAlign: 'center',
-              marginTop: '5%',
-            }}>
-            No matching posts found
-          </Text>
-          <Text
-            style={{
-              fontSize: getFontSize(12),
-              fontFamily: POPPINS_REGULAR,
-              textAlign: 'center',
-              paddingHorizontal: '10%',
-            }}>
-            There are no matches for the selected keyword or filter. Try
-            changing keywords or filter criteria
-          </Text>
-        </View>
-      );
-    }
-  };
 
   const isFiltered = useSelector<RootState, Boolean>(
     state => state.filter.isFiltered,
@@ -241,8 +210,75 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
 
-  return (
-    <View style={{backgroundColor: color.background, flex: 1}}>
+  //Render Post Preview List
+  const [page, setPage] = useState(1);
+  const [
+    onEndReachedCalledDuringMomentum,
+    setOnEndReachedCalledDuringMomentum,
+  ] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (page != 1 && !isSortSelecting) {
+      // console.log('Render by Page useEffect : ' + page);
+      setIsLoading(true);
+      getFilterPostList(PostFilter(GenerateFilterObject(filter)));
+    }
+  }, [page]);
+
+  const renderItemPostPreview: ListRenderItem<PostPreviewType> = ({
+    item,
+    index,
+  }) => (
+    <PostPreview
+      postID={item.post.ID}
+      post={item}
+      key={index}
+      styleWrapper={{marginTop: 13}}
+      isActivePost={true}
+      pressable={true}
+      onPress={() => {
+        dispatch(
+          selectPost({
+            ID: item.post.ID,
+            isActivePost: true,
+            isAdmin: false,
+          }),
+        );
+        navigation.navigate(POST_DETAIL_NAVIGATOR);
+      }}
+      index={index}
+      color={color}
+    />
+  );
+
+  const keyExtractorPostPreview = (item: PostPreviewType) => {
+    return item.post.ID.toString();
+  };
+
+  const onEndReached = () => {
+    if (
+      !onEndReachedCalledDuringMomentum &&
+      !isEnd &&
+      !isSortSelecting &&
+      !isLoading
+    ) {
+      // console.log('Page increase by Scroll');
+      // console.log('Current page on scroll: ' + page);
+      // console.log('Future page on scroll: ' + (page + 1));
+      setPage(page + 1);
+      setOnEndReachedCalledDuringMomentum(true);
+    }
+  };
+
+  const onMomentumScrollBegin = () => {
+    setOnEndReachedCalledDuringMomentum(false);
+  };
+
+  const [isEnd, setIsEnd] = useState<boolean>(false);
+  const [isEmpty, setIsEmpty] = useState<boolean>(false);
+
+  const renderHeader = () => (
+    <View style={{marginBottom: '3%'}}>
       <View style={styles.wrapperHeader}>
         <Pressable onPress={onGoBack}>
           <SimpleLineIcons
@@ -371,8 +407,12 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
           })}
         </ScrollView>
       </View>
+    </View>
+  );
 
-      <Container
+  return (
+    <View style={{backgroundColor: color.background, flex: 1, height: '100%'}}>
+      {/* <Container
         keyboardShouldPersistTaps="always"
         styleScrollView={{
           backgroundColor: color.background,
@@ -393,7 +433,20 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
               : _renderContent()}
           </View>
         </View>
-      </Container>
+      </Container> */}
+
+      {renderHeader()}
+
+      <PostPreviewList
+        data={postList}
+        renderItem={renderItemPostPreview}
+        keyExtractor={keyExtractorPostPreview}
+        color={color}
+        onEndReached={onEndReached}
+        onMomentumScrollBegin={onMomentumScrollBegin}
+        isEnd={isEnd}
+        isEmpty={isEmpty}
+      />
     </View>
   );
 };

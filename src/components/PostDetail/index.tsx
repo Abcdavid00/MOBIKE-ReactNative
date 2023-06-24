@@ -39,6 +39,7 @@ import {
 } from '../../utils/idToProperty';
 import {
   AppAdminGetPost,
+  AppAdminSetStatus,
   GetPersonalPostDetail,
   GetPost,
   GetUserInfo,
@@ -60,7 +61,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {PostDetailStackParamList} from '../../navigations/PostDetailNavigator';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
 import PostPreview from '../PostPreview/listItem';
-import {POST_DETAIL_NAVIGATOR} from '../../constants/routeNames';
+import {APPLICATION_ADMIN, POST_DETAIL_NAVIGATOR} from '../../constants/routeNames';
 import {FAB} from 'react-native-paper';
 import Feather from 'react-native-vector-icons/Feather';
 import {getSavedPostList, savePost} from '../../services/SavedPost';
@@ -358,9 +359,9 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   };
 
   const ApprovePost = async () => {
-    // const approveRes = await AppAdminSetStatus(postID, 1, message);
-    // console.log('Approve post: ' + JSON.stringify(approveRes));
-    // navigate(APPLICATION_ADMIN);
+    const approveRes = await AppAdminSetStatus(postID, 1, message);
+    console.log('Approve post: ' + JSON.stringify(approveRes));
+    navigate(APPLICATION_ADMIN);
   };
 
   const renderStarRating = (rating: number) => {
@@ -1034,71 +1035,74 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
               }}
             />
 
+      
+
             {/*Seller Info */}
-            <View
-              style={{
-                flexDirection: 'row',
-                paddingTop: 10,
-                paddingBottom: 12,
-                marginLeft: 20,
-              }}>
-              <MobikeImage
-                imageID={postInfo && postInfo.user.ID_Image_Profile}
-                avatar={true}
-              />
+            {!isAdmin && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  paddingTop: 10,
+                  paddingBottom: 12,
+                  marginLeft: 20,
+                }}>
+                <MobikeImage
+                  imageID={postInfo && postInfo.user.ID_Image_Profile}
+                  avatar={true}
+                />
 
-              <View style={{marginHorizontal: 15, flex: 1}}>
-                {/* Name & View Page */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  <Text
+                <View style={{marginHorizontal: 15, flex: 1}}>
+                  {/* Name & View Page */}
+                  <View
                     style={{
-                      color: color.onBackground,
-                      fontFamily: POPPINS_MEDIUM,
-                      fontSize: 14,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
+                    <Text
+                      style={{
+                        color: color.onBackground,
+                        fontFamily: POPPINS_MEDIUM,
+                        fontSize: 14,
+                        flex: 1,
+                        marginStart: 16,
+                      }}>
+                      {postInfo ? postInfo.user.Name : '--'}
+                    </Text>
+                  </View>
+
+                  {/* Address */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      marginEnd: 15,
+                      alignItems: 'flex-start',
                       flex: 1,
-                      marginStart: 16,
                     }}>
-                    {postInfo ? postInfo.user.Name : '--'}
-                  </Text>
-                </View>
+                    <SimpleLineIcons
+                      name="location-pin"
+                      size={12}
+                      color={color.onBackground}
+                      style={{marginTop: 2}}
+                    />
+                    <Text
+                      style={{
+                        color: color.onBackground_light,
+                        fontFamily: POPPINS_ITALIC,
+                        fontSize: getFontSize(12),
+                        marginLeft: 5,
+                      }}>
+                      {wardNameFromID(postInfo && postInfo.address.ID_Ward) +
+                        ', ' +
+                        districtNameFromID(
+                          postInfo && postInfo.address.ID_District,
+                        ) +
+                        ', ' +
+                        cityNameFromID(postInfo && postInfo.address.ID_City)}
+                    </Text>
+                  </View>
 
-                {/* Address */}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    marginEnd: 15,
-                    alignItems: 'flex-start',
-                    flex: 1,
-                  }}>
-                  <SimpleLineIcons
-                    name="location-pin"
-                    size={12}
-                    color={color.onBackground}
-                    style={{marginTop: 2}}
-                  />
-                  <Text
-                    style={{
-                      color: color.onBackground_light,
-                      fontFamily: POPPINS_ITALIC,
-                      fontSize: getFontSize(12),
-                      marginLeft: 5,
-                    }}>
-                    {wardNameFromID(postInfo && postInfo.address.ID_Ward) +
-                      ', ' +
-                      districtNameFromID(
-                        postInfo && postInfo.address.ID_District,
-                      ) +
-                      ', ' +
-                      cityNameFromID(postInfo && postInfo.address.ID_City)}
-                  </Text>
-                </View>
-
-                {/* Feature */}
-                {/* <View style={{flexDirection: 'row', marginTop: 5}}>
+                  {/* Feature */}
+                  {/* <View style={{flexDirection: 'row', marginTop: 5}}>
                   <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
                     <Text style={{fontSize: 12, color: colors.text}}>50</Text>
                     <Text
@@ -1139,11 +1143,12 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
                     </Text>
                   </View>
                 </View> */}
+                </View>
               </View>
-            </View>
+            )}
 
             {/*Other post from user */}
-            {postList.length > 0 && (
+            {postList.length > 0 && !isAdmin && (
               <View>
                 <Text
                   style={{
@@ -1209,8 +1214,11 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
           }}
           onPress={() => {
             // TODO: Navigate to chat screen
+            if(isAdmin){
+              
+            }
           }}>
-          <Ionicons name="chatbubbles-outline" size={24} color={'#8DEE8B'} />
+           {!isAdmin && <Ionicons name="chatbubbles-outline" size={24} color={'#8DEE8B'} />}
           <Text
             style={{
               marginStart: 12,
@@ -1218,7 +1226,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
               fontFamily: POPPINS_REGULAR,
               color: color.onBackground_light,
             }}>
-            Chat
+            {isAdmin? 'Approve': 'Chat'}
           </Text>
         </Pressable>
         <View
@@ -1234,11 +1242,16 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
             flexGrow: 1,
           }}
           onPress={() => {
+            if(isAdmin){
+              OnApprovePost();
+              return;
+            }
             Linking.openURL(
               `tel:${userInfo && userInfo.accountinfo.Phone_number}`,
             );
           }}>
-          <Feather name="phone-call" size={24} color={'#8DEE8B'} />
+
+          {!isAdmin && <Feather name="phone-call" size={24} color={'#8DEE8B'} />}
           <Text
             style={{
               marginStart: 12,
@@ -1246,7 +1259,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
               fontFamily: POPPINS_REGULAR,
               color: color.onBackground_light,
             }}>
-            Call
+            {isAdmin? 'Decline': 'Call'}
           </Text>
         </Pressable>
       </View>

@@ -168,7 +168,7 @@ function App(): JSX.Element {
 
   return (
     <PaperProvider theme={theme == 'light' ? theme_light : theme_dark}>
-      {/* <AppNavContainer /> */}
+      <AppNavContainer />
     </PaperProvider>
   );
 }

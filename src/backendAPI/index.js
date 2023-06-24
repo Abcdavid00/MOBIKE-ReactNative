@@ -188,7 +188,7 @@ export const UploadPost = async (
     const token = getToken();
     const pros = [];
     images.forEach(image => {
-        pros.push(ProtectedUploadImage("personal/post/image/new", image, token));
+        pros.push(ProtectedUploadImage("personal/post/new/image", image, token));
     });
     console.log("Uploading post images");
     const imageResponses = await Promise.all(pros);
@@ -208,7 +208,7 @@ export const UploadPost = async (
             color: vehicleColorID,
         }
         console.log("Uploading vehicle info");
-        const vehicleInfoResponse = await HttpRequest.ProtectedPostRequest("personal/post/vehicle/new", body, token);
+        const vehicleInfoResponse = await HttpRequest.ProtectedPostRequest("personal/post/new/vehicle", body, token);
         console.log("Vehicle info response: " + JSON.stringify(vehicleInfoResponse));
         if (vehicleInfoResponse.msg == "Completed") {
             const vehicleID = vehicleInfoResponse.info;
@@ -223,6 +223,7 @@ export const UploadPost = async (
             console.log("Uploading post info");
             const postInfoResponse = await HttpRequest.ProtectedPostRequest("personal/post/new", body, token);
             console.log("Post info response: " + JSON.stringify(postInfoResponse));
+            // console.log(postInfoResponse.msg == "Completed")
             return postInfoResponse.msg == "Completed";
         }
     }
@@ -261,32 +262,21 @@ export const GetUserInfo = async (ID) => {
 }
 
 export const PostFilter = (
-    title?: string,
-    page?: Number,
-    numperPage?: Number,
-    asc?: Boolean,
-    orderType?: string,
-    priceStart?: Number,
-    priceEnd?: Number,
-    brand?: Number,
-    lineup?: Number,
-    type?: Number,
-    color?: Number,
-    manufacturerYear?: Number,
+    filter
 ) => {
     const args = {
-        string: title,
-        page: page,
-        numperpage: numperPage,
-        order: asc ? "asc" : "desc",
-        ordertype: orderType ? orderType : "time",
-        pricestart: priceStart,
-        priceend: priceEnd,
-        brand: brand,
-        lineup: lineup,
-        type: type,
-        color: color,
-        mnfyear: manufacturerYear,
+        string: filter.title,
+        page: filter.page,
+        numperpage: filter.numperPage,
+        order: filter.asc ? "asc" : "desc",
+        ordertype: filter.orderType ? filter.orderType : "time",
+        pricestart: filter.priceStart,
+        priceend: filter.priceEnd,
+        brand: filter.brand,
+        lineup: filter.lineup,
+        type: filter.type,
+        color: filter.color,
+        mnfyear: filter.manufacturerYear,
     }
     const argsString = Object.keys(args).map(key => { if (args[key]) return `${key}=${args[key]}` });
     let stringBuilder = "";
@@ -298,10 +288,10 @@ export const PostFilter = (
     return stringBuilder;
 }
 
-const NUMBER_PAGE = 20;
+export const NUM_PER_PAGE = 20;
 
 export const GetAllPosts = async (args: string) => {
-    const postResponse = await HttpRequest.GetRequest("search/post/all?numperpage=" + NUMBER_PAGE + (args ? "&" + args : ""));
+    const postResponse = await HttpRequest.GetRequest("search/post/all?numperpage=" + NUM_PER_PAGE + (args ? "&" + args : ""));
     if (postResponse.msg == "Completed") {
         return postResponse.info;
     }

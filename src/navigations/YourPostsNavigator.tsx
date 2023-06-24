@@ -6,7 +6,7 @@ import {
   POST_PREVIEW,
   YOUR_POSTS,
 } from '../constants/routeNames';
-import AddPost from '../screens/AddPost';
+import AddPostScreen from '../screens/AddPost';
 import YourPosts from '../screens/YourPosts';
 import PostPreview from '../screens/PostPreview';
 import PostDetailNavigator from './PostDetailNavigator';
@@ -33,7 +33,7 @@ const YourPostsNavigator = () => {
       />
       <Stack.Screen
         name={ADD_POST}
-        component={AddPost}
+        component={AddPostScreen}
         options={{
           header: ({navigation}) => (
             <Header

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Text, View } from 'react-native';
-import { Root } from 'popup-ui'
+import { Image, Text, View } from 'react-native';
+import { Root, Popup } from 'popup-ui';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
@@ -19,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { YOUR_POSTS } from '../../constants/routeNames';
 import MobikeImage from '../common/image';
 import { ADD_POST } from './../../constants/routeNames';
+import { UploadPost } from '../../backendAPI';
 
 const widthScreen = Dimensions.get('window').width;
 const PostPreviewComponent = ({
@@ -109,6 +110,58 @@ const PostPreviewComponent = ({
     const onClose = () => {
         navigate(YOUR_POSTS);
     }
+
+    const Post = async () => {
+        console.log('Posting...');
+        Popup.show({
+            title: 'Posting...',
+            button: false,
+            callback: () => { },
+            icon: (
+                <Image source={require('../../assets/images/loading-wheel.gif')} />
+            ),
+        });
+        const postres = await UploadPost(
+            form.images,
+            form.title,
+            form.content || '',
+            form.price,
+            form.address.ID,
+            form.name,
+            form.odometer || '-1',
+            form.licensePlate || '',
+            form.manufacturerYear || '-1',
+            form.cubicPower || '-1',
+            form.brand,
+            form.lineup,
+            form.type,
+            form.condition,
+            form.color,
+        );
+        if (postres) {
+            Popup.show({
+                type: 'Success',
+                title: 'Post successful',
+                button: true,
+                textBody: 'Your post has been successfully posted',
+                buttonText: 'OK',
+                callback: () => {
+                    Popup.hide();
+                    navigate(YOUR_POSTS);
+                },
+            });
+        } else {
+            Popup.show({
+                type: 'Danger',
+                title: 'Post failed',
+                button: true,
+                textBody: 'Your post has failed to be posted',
+                buttonText: 'OK',
+                callback: () => Popup.hide(),
+            });
+        }
+
+    };
 
     return (
         <Root style={{ height: '100%', position: 'relative' }}>
@@ -255,7 +308,12 @@ const PostPreviewComponent = ({
 
             </Container>
             <FAB
-                onPress={onPost}
+                onPress={() => {
+                    console.log('Press');
+                    console.log(JSON.stringify(form))
+                    // onPost();
+                    Post();
+                }}
                 label='Post'
                 variant='extended'
                 size='small'

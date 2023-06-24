@@ -9,6 +9,7 @@ import PostPreview from '../../PostPreview/listItem';
 import { FAB } from 'react-native-paper';
 import colors from '../../../assets/theme/colors';
 import { useNavigation } from '@react-navigation/native';
+import { signOut } from '../../../services/TokenStorage';
 
 const PostRoute = ({
     params,
@@ -19,14 +20,14 @@ const PostRoute = ({
 
     const navigation = useNavigation();
 
-    useEffect(() => {
-        const focusListener = navigation.addListener('focus', () => {
-            refresh();
-        });
-        return () => {
-            focusListener.remove();
-        };
-    }, []);
+    // useEffect(() => {
+    //     const focusListener = navigation.addListener('focus', () => {
+    //         refresh();
+    //     });
+    //     return () => {
+    //         focusListener.remove();
+    //     };
+    // }, []);
 
     const getAppAdminGetInactivePost = async () => {
         const post = await AppAdminGetInactivePost();
@@ -116,13 +117,23 @@ const PostRoute = ({
                     </View>
                 </View>
             </Container>
-            <FAB
+            {/* <FAB
                 onPress={refresh}
                 icon="refresh"
                 style={{ backgroundColor: colors.secondary, position: 'absolute', margin: 16, right: 0, bottom: 0 }}
                 variant='extended'
                 size='small'
             >
+            </FAB> */}
+            <FAB
+                onPress={() => {
+                    signOut();
+                }}
+                style={{ backgroundColor: colors.secondary, position: 'absolute', margin: 16, left: 0, bottom: 0 }}
+                variant='extended'
+                size='small'
+            >
+                Sign out
             </FAB>
         </View>
     )
