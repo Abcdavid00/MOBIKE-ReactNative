@@ -7,7 +7,7 @@
 
 import React, {useEffect} from 'react';
 import type {PropsWithChildren} from 'react';
-import {StatusBar, StyleSheet, useColorScheme} from 'react-native';
+import {StatusBar,LogBox, StyleSheet, useColorScheme} from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import AppNavContainer from './src/navigations';
 import {getThemeState} from './src/services/ThemeStorage';
@@ -24,7 +24,10 @@ import ChatDrawer from './src/services/ChatDrawer';
 import ClientDatabase from './src/services/ClientDatabase';
 import {setLoading} from './src/redux/slice/loadingSlice';
 import HttpRequest from './src/backendAPI/HttpRequest';
-import {getThemeColor} from './src/utils/getThemeColor';
+import {sendMessage} from './src/services/ChatDrawer';
+import { getThemeColor } from './src/utils/getThemeColor';
+
+LogBox.ignoreAllLogs();
 
 const theme_light = {
   ...DefaultTheme,
@@ -129,8 +132,26 @@ function App(): JSX.Element {
         // let r = await CreateRoom(2, [6, 152]);
         // console.log('Sandbox: ', JSON.stringify(r));
         // setTimeout(() => {
-        //   sendMessage("649214af6b1d361ba85359f1", "Hello world!")
-        // }, 5000)
+        //   console.log('Sending message')
+        //   sendMessage("649214af6b1d361ba85359f1", "Hello World")
+        // }, 10000)
+        // Count to 10 every minutes and send message
+        // const countOrSend = (current) => {
+        //   if (current <= 0) {
+        //     console.log('Sending message');
+        //     sendMessage('649214af6b1d361ba85359f1', 'Hello World');
+        //     return;
+        //   }
+        //   console.log('Waiting before send message: ' + current);
+        //   setTimeout(() => {
+        //     countOrSend(current - 1);
+        //   }, 1000)
+        // }
+        // countOrSend(10);
+        // await CreateRoom(1, [6, 142]);
+        // sendMessage("6495bf4a2f559fe339e2b8b2", "Hi Hi")
+        // const messages = store.getState().message;
+        // console.log("Messages: " + JSON.stringify(messages));
       } catch (error) {
         console.log('Sandbox error: ' + error);
       }

@@ -372,4 +372,28 @@ export const AppAdminSetStatus = async (PostID, status, info) => {
     return postResponse.msg == "Completed";
 }
 
+export const CreateRoom = async (PostID, UserIDs) => {
+    const body = {
+        postId: PostID,
+        users: UserIDs,
+    }
+    const roomResponse = await HttpRequest.PostRequest("chat/room/create", body);
+    return roomResponse;
+}
+
+export const GetRoomByUser = async (ID) => {
+    const roomResponse = await HttpRequest.GetRequest("chat/room/latest/" + ID);
+    return roomResponse
+}
+
+export const GetMessageByRoom = async (ID) => {
+    const messageResponse = await HttpRequest.GetRequest("chat/message/latest/" + ID);
+    return messageResponse;
+}
+
+export const GetRoom = async (ID) => {
+    const roomResponse = await HttpRequest.GetRequest("chat/room/" + ID);
+    return roomResponse;
+}
+
 export default { me, isEmailExist, isUsernameExist, isPhoneExist };

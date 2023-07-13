@@ -5,12 +5,15 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootState} from '../../redux/store';
 import {ChatStackParamList} from '../../navigations/ChatNavigator';
 
-type ChatRoomScreenProps = {
-  navigation: StackNavigationProp<ChatStackParamList, 'ChatRoom'>;
-};
+// type ChatRoomScreenProps = {
+//   navigation: StackNavigationProp<ChatStackParamList, 'ChatRoom'>;
+// };
 
-const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({navigation}) => {
-  return <ChatRoomComponent navigation={navigation} />;
+import { RoomStackScreenProps } from '../../navigations/ChatNavigator';
+
+const ChatRoomScreen: React.FC<RoomStackScreenProps> = ({navigation, route}) => {
+  const roomID = route.params.roomID;
+  return <ChatRoomComponent navigation={navigation} roomID={roomID} />;
 };
 
 export default ChatRoomScreen;
