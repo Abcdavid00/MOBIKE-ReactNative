@@ -5,7 +5,7 @@ const port = null;
 const retryInterval = 100;
 const maxRetry = 10;
 
-const ResquestLog = false;
+const ResquestLog = true;
 
 const log = (message: string) => {
   if (ResquestLog) {
@@ -23,11 +23,11 @@ export const GenerateRequestUrl = (path: String) => {
 const ProcessResponse = async (response: Response) => {
   const contentType = response.headers.get('content-type');
   if (contentType && contentType.indexOf('application/json') !== -1) {
-    // log("ProcessResponse: " + contentType + " in Json format")
+    // log("ProcessResponse:"+ JSON.stringify(response) +  "\t" + contentType + " in Json format")
     const json = await response.json();
     return json;
   } else {
-    // log("ProcessResponse: " + contentType + " in Text format")
+    log("ProcessResponse: " + contentType + " in Text format")
     const text = await response.text();
     return text;
   }

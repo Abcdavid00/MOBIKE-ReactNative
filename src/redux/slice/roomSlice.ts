@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export interface Room {
+    id: string;
     postTitle: string;
     users: number[];
     latestMessage: string | null;

@@ -2,7 +2,7 @@ import {View, Text, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {ChatStackParamList} from '../../navigations/ChatNavigator';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {Room} from '../../redux/slice/roomSlice';
+import { Room, RoomDictionary } from '../../redux/slice/roomSlice';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/store';
 import {ColorThemeProps} from '../../assets/theme/colors';
@@ -23,58 +23,24 @@ type ChatListComponentProps = {
   navigation: StackNavigationProp<ChatStackParamList, 'ChatList'>;
 };
 const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
-  const data: Room[] = [
-    {
-      postTitle: 'MotorBike afwfawfawaaaaaaaaaaaaaaaaaaa',
-      users: [6, 152],
-      latestMessage: 'Hello friend',
-      latestTimestamp: new Date('2023-05-31T12:34:56'),
-      imageId: 1,
-    },
-    {
-      postTitle: 'MotorBike 1111111111111111111111111111',
-      users: [6, 152],
-      latestMessage: 'Hello friend',
-      latestTimestamp: new Date('2023-09-20T21:15:40'),
-      imageId: 2,
-    },
-    {
-      postTitle: '1',
-      users: [6, 152],
-      latestMessage:
-        'Hello friend Hello friend Hello friend Hello friend Hello friend',
-      latestTimestamp: new Date('2023-08-05T14:20:10'),
-      imageId: 3,
-    },
-    {
-      postTitle: '1',
-      users: [6, 152],
-      latestMessage: 'Hello friend',
-      latestTimestamp: new Date('2023-07-10T18:45:23'),
-      imageId: 4,
-    },
-    {
-      postTitle: '1',
-      users: [6, 152],
-      latestMessage: 'Hello friend',
-      latestTimestamp: new Date('2023-06-15T09:30:00'),
-      imageId: 5,
-    },
-  ];
+
+  
 
   const [chatRoomList, setChatRoomList] = useState<Room[]>([]);
+  let data = Object.values(useSelector<RootState, Room[]>(state => state.room));
 
-  useEffect(() => {
-    let arr: Room[] = Array.from(
-      data.sort((a, b) => {
-        if (a.latestTimestamp && b.latestTimestamp) {
-          return b.latestTimestamp.getTime() - a.latestTimestamp.getTime();
-        }
-        return 0;
-      }),
-    );
-    setChatRoomList(arr);
-  }, []);
+useEffect(() => {
+     data = data
+          .sort((a, b) => {
+               if (a.latestTimestamp && b.latestTimestamp) {
+                    return b.latestTimestamp.getTime() - a.latestTimestamp.getTime();
+               }
+               return 0;
+          })
+          .map((item) => item);
+     console.log("ChatList: " + JSON.stringify(data));
+     setChatRoomList(data);
+}, []);
 
   const color = useSelector<RootState, ColorThemeProps>(state =>
     getThemeColor(state.theme),
@@ -86,8 +52,8 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
     }
     return text;
   };
-  const onPress = () => {
-    navigation.navigate(CHAT_ROOM);
+  const onPress = (roomID: string) => {
+    navigation.navigate(CHAT_ROOM, {roomID: roomID});
   };
   const _renderContent = (data: Room[]) => {
     if (data.length == 0) {
@@ -101,7 +67,8 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
         <View>
           {data.map((item, index) => (
             <Pressable
-              onPress={onPress}
+              onPress={()=>onPress(item.id)}
+              key={index}
               style={{
                 flexDirection: 'row',
                 marginVertical: 8,
@@ -116,7 +83,7 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
                     fontFamily: POPPINS_MEDIUM,
                     color: color.onBackground,
                   }}>
-                  {truncateText(item.postTitle, 26)}
+                  {truncateText(item.id, 26)}
                 </Text>
                 <View
                   style={{
@@ -137,16 +104,19 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
                       fontFamily: POPPINS_LIGHT_ITALIC,
                       color: color.onBackground_light,
                     }}>
-                    {item.latestTimestamp?.getDay().toString() +
-                      '/' +
-                      item.latestTimestamp?.getMonth().toString() +
-                      '/' +
-                      item.latestTimestamp?.getFullYear().toString()}
+                      {/* date and time*/}
+                      {item.latestTimestamp && item.latestTimestamp.toLocaleDateString() + ' ' + item.latestTimestamp.toLocaleTimeString()}
+                    {/* {(item.latestTimestamp && item.latestTimestamp.toLocaleDateString()) || ''} */}
                   </Text>
                 </View>
               </View>
             </Pressable>
-          ))}
+          )).sort((a, b) => {
+                if (a.latestTimestamp && b.latestTimestamp) {
+                      return b.latestTimestamp.getTime() - a.latestTimestamp.getTime();
+                }
+                return 0;
+          })}
         </View>
       );
     }
