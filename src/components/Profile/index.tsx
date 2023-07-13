@@ -1,5 +1,5 @@
 import {View, Text, TouchableWithoutFeedback, Pressable} from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import colors, {ColorThemeProps} from '../../assets/theme/colors';
 import {signOut} from '../../services/TokenStorage';
 import {
@@ -7,7 +7,7 @@ import {
   EDIT_PROFILE,
   SAVED_POST_NAVIGATOR,
 } from '../../constants/routeNames';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useTheme} from '@react-navigation/native';
 import store, {RootState} from '../../redux/store';
 import MobikeImage from '../common/image';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -24,6 +24,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Switch} from 'react-native-paper';
 import {ThemeState, setTheme} from '../../redux/slice/themeSlice';
+import {saveThemeState} from '../../services/ThemeStorage';
 
 type ProfileComponentProps = {
   navigation: StackNavigationProp<ProfileStackParamList, 'Profile'>;
@@ -31,17 +32,25 @@ type ProfileComponentProps = {
 
 const ProfileComponent: React.FC<ProfileComponentProps> = ({navigation}) => {
   const userInfo = store.getState().personalInfo;
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
+  const color = useTheme().colors.customColors;
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const [isSwitchOn, setIsSwitchOn] = React.useState(theme == 'dark');
 
   const dispatch = useDispatch();
   const onToggleSwitch = () => {
-    dispatch(setTheme(isSwitchOn ? 'light' : 'dark'));
     setIsSwitchOn(!isSwitchOn);
+    dispatch(setTheme(isSwitchOn ? 'light' : 'dark'));
+    saveThemeState(isSwitchOn ? 'light' : 'dark');
   };
+  useEffect(() => {
+    navigation.getParent()?.setOptions({
+      tabBarStyle: {
+        backgroundColor: color.background_bottomNav,
+        minHeight: 56,
+        maxHeight: 80,
+      },
+    });
+  }, [isSwitchOn]);
   return (
     <View
       style={{

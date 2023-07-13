@@ -20,13 +20,32 @@ const CarouselItem: React.FC<CarouselItemProps> = ({
   const _renderContent = () => {
     if (isUri) {
       const {uri} = item;
-      return (
-        <Image
-          source={{uri: uri}}
-          style={[styles.image, {height: width / 1.5}]}
-          key={index}
-        />
-      );
+      if (uri)
+        return (
+          <Image
+            source={{uri: uri}}
+            style={{
+              height: '100%',
+              width: width - 50,
+              borderRadius: 10,
+              resizeMode: 'cover',
+            }}
+            key={index}
+          />
+        );
+      else
+        return (
+          <Image
+            source={require('../../../assets/images/image-not-found.jpg')}
+            style={{
+              height: '100%',
+              width: width - 50,
+              borderRadius: 10,
+              resizeMode: 'cover',
+            }}
+            key={index}
+          />
+        );
     } else if (isImageID) {
       if (item < 0)
         return (

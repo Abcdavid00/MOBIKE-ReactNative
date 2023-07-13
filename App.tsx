@@ -7,7 +7,7 @@
 
 import React, {useEffect} from 'react';
 import type {PropsWithChildren} from 'react';
-import {StyleSheet, useColorScheme} from 'react-native';
+import {StatusBar, StyleSheet, useColorScheme} from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import AppNavContainer from './src/navigations';
 import {getThemeState} from './src/services/ThemeStorage';
@@ -23,9 +23,8 @@ import TokenStorage from './src/services/TokenStorage';
 import ChatDrawer from './src/services/ChatDrawer';
 import ClientDatabase from './src/services/ClientDatabase';
 import {setLoading} from './src/redux/slice/loadingSlice';
-import {GetRoomByUser, CreateRoom} from './src/backendAPI';
 import HttpRequest from './src/backendAPI/HttpRequest';
-import { sendMessage } from './src/services/ChatDrawer';
+import {getThemeColor} from './src/utils/getThemeColor';
 
 const theme_light = {
   ...DefaultTheme,
@@ -132,7 +131,6 @@ function App(): JSX.Element {
         // setTimeout(() => {
         //   sendMessage("649214af6b1d361ba85359f1", "Hello world!")
         // }, 5000)
-        
       } catch (error) {
         console.log('Sandbox error: ' + error);
       }
@@ -165,9 +163,14 @@ function App(): JSX.Element {
   const dispatch = useDispatch();
 
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
+  const color = getThemeColor(theme);
 
   return (
     <PaperProvider theme={theme == 'light' ? theme_light : theme_dark}>
+      <StatusBar
+        backgroundColor={color.background}
+        barStyle={theme == 'light' ? 'dark-content' : 'light-content'}
+      />
       <AppNavContainer />
     </PaperProvider>
   );

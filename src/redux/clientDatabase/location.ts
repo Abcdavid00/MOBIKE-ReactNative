@@ -17,20 +17,22 @@ type wardType = {
   Name: string;
 };
 
+export type addressTree = Array<{
+  ID: number;
+  Name: string;
+  Districts: Array<{
+    ID: number;
+    ID_City: number;
+    name: string;
+    Wards: Array<wardType>;
+  }>;
+}>;
+
 export type locationState = {
   Cities: Array<cityType>;
   Districts: Array<districtType>;
   Wards: Array<wardType>;
-  Tree: Array<{
-    ID: number;
-    Name: string;
-    Districts: Array<{
-      ID: number;
-      ID_City: number;
-      name: string;
-      Wards: Array<wardType>;
-    }>;
-  }>;
+  Tree: addressTree;
   CityNameFromID?: (ID: number) => string;
   DistrictNameFromID?: (ID: number) => string;
   WardNameFromID?: (ID: number) => string;

@@ -19,31 +19,6 @@ type ProductListProps = {
 };
 
 const ProductListScreen: React.FC<ProductListProps> = ({navigation}) => {
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
-  const navigationState = useNavigationState(state => state);
-
-  const previousScreen =
-    navigationState.routes[navigationState.index - 1]?.name;
-  useEffect(() => {
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {
-        display: 'none',
-      },
-    });
-    if (previousScreen == MARKETPLACE) {
-      return () =>
-        navigation.getParent()?.setOptions({
-          tabBarStyle: {
-            backgroundColor: color.background_bottomNav,
-            minHeight: 56,
-            maxHeight: 80,
-          },
-        });
-    }
-  }, [navigation]);
-
   return <ProductListComponent navigation={navigation} />;
 };
 

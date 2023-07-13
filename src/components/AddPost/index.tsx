@@ -1,4 +1,4 @@
-import {Text, View} from 'react-native';
+import {Pressable, Text, View} from 'react-native';
 import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
 import TextInputOutline from '../common/textInputOutline-Kohana';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -13,7 +13,13 @@ import {StyleSheet} from 'react-native';
 import {Image} from 'react-native';
 import colors, {ColorThemeProps} from '../../assets/theme/colors';
 import {Dimensions} from 'react-native';
-import Animated, {Layout} from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  Layout,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import BrandBottomSheetContent from './BrandBottomSheetContent';
 import {Button, FAB, RadioButton} from 'react-native-paper';
 import {TouchableWithoutFeedback} from 'react-native';
@@ -21,9 +27,8 @@ import Store, {RootState} from '../../redux/store';
 import TypeBottomSheetContent from './TypeBottomSheetContent';
 import ColorBottomSheetContent from './ColorBottomSheetContent';
 import {ScrollView} from 'react-native-gesture-handler';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useTheme} from '@react-navigation/native';
 import {UploadPost} from '../../backendAPI';
-import {Root, Popup} from 'popup-ui';
 import {POST_PREVIEW, YOUR_POSTS} from '../../constants/routeNames';
 import PostPreviewComponent from '../PostPreviewComponent/index';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -32,8 +37,19 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import TextField from '../common/textField';
 import {useSelector} from 'react-redux';
 import {getThemeColor} from '../../utils/getThemeColor';
-import {POPPINS_MEDIUM, POPPINS_SEMI_BOLD} from '../../assets/fonts';
+import {
+  POPPINS_BOLD,
+  POPPINS_MEDIUM,
+  POPPINS_REGULAR,
+  POPPINS_SEMI_BOLD,
+} from '../../assets/fonts';
 import {getFontSize} from '../../utils/fontSizeResponsive';
+import {addressesType} from '../../redux/clientDatabase/personalInfo';
+import store from '../../redux/store';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import CustomButton from '../common/customButton';
+import PopUpLoading from '../common/popupLoading';
+import PopUpMessage from '../common/popupMessage';
 
 const heightScreen = Dimensions.get('window').height;
 const widthScreen = Dimensions.get('window').width;
@@ -43,28 +59,61 @@ type AddPostComponentProps = {
   navigation: StackNavigationProp<YourPostsStackParamList, 'AddPost'>;
 };
 
-const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
-  const {navigate} = useNavigation();
+export type formAddPostState = {
+  title: string;
+  content: string;
+  price: number;
+  name: string;
+  brand: number;
+  lineup: number;
+  type: number;
+  color: number;
+  condition: number;
+  odometer?: number;
+  licensePlate?: string;
+  manufacturerYear?: number;
+  cubicPower?: number;
+  address: addressesType;
+  images: ImagePicker.Asset[];
+};
 
-  const [form, setForm] = useState({
+type errorState = {
+  title?: string;
+  price?: string;
+  name?: string;
+  brand?: string;
+  type?: string;
+  condition?: string;
+  images?: string;
+  address?: string;
+};
+
+const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
+  const [form, setForm] = useState<formAddPostState>({
     title: '',
     content: '',
-    price: undefined,
+    price: -1,
     name: '',
-    brand: '',
-    lineup: '',
-    type: '',
-    color: '',
-    condition: '',
+    brand: -1,
+    lineup: -1,
+    type: -1,
+    color: -1,
+    condition: -1,
     odometer: undefined,
     licensePlate: '',
-    manufacturerYear: '',
+    manufacturerYear: -1,
     cubicPower: undefined,
-    address: undefined,
+    address: {
+      ID: -1,
+      ID_City: -1,
+      ID_District: -1,
+      ID_Ward: -1,
+      Detail_address: '',
+    },
     images: [],
   });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<errorState>({
     title: undefined,
     price: undefined,
     name: undefined,
@@ -75,7 +124,7 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     address: undefined,
   });
 
-  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [isEdited, setIsEdited] = useState<boolean>(false);
 
   const checkTitle = () => {
     if (!form.title) {
@@ -258,24 +307,11 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
   const Post = async () => {
     if (!checkAll()) {
       console.log('Errors: ', JSON.stringify(errors));
-      Popup.show({
-        type: 'Warning',
-        title: 'Incomplete post',
-        button: true,
-        textBody: 'Please fill in all required fields',
-        buttonText: 'OK',
-        callback: () => Popup.hide(),
-      });
+      setTextError('Please fill in all required fields');
+      setIsError(true);
     } else {
       console.log('Posting...');
-      Popup.show({
-        title: 'Posting...',
-        button: false,
-        callback: () => {},
-        icon: (
-          <Image source={require('../../assets/images/loading-wheel.gif')} />
-        ),
-      });
+      setIsLoading(true);
       const postres = await UploadPost(
         form.images,
         form.title,
@@ -283,78 +319,50 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
         form.price,
         form.address.ID,
         form.name,
-        form.odometer || '-1',
+        form.odometer || -1,
         form.licensePlate || '',
-        form.manufacturerYear || '-1',
-        form.cubicPower || '-1',
+        form.manufacturerYear || -1,
+        form.cubicPower || -1,
         form.brand,
         form.lineup,
         form.type,
         form.condition,
         form.color,
       );
+      setIsLoading(false);
       if (postres) {
-        Popup.show({
-          type: 'Success',
-          title: 'Post successful',
-          button: true,
-          textBody: 'Your post has been successfully posted',
-          buttonText: 'OK',
-          callback: () => {
-            Popup.hide();
-            navigate(YOUR_POSTS);
-          },
-        });
+        setTextSuccess('Your post has been successfully posted.');
+        setIsSuccess(true);
       } else {
-        Popup.show({
-          type: 'Danger',
-          title: 'Post failed',
-          button: true,
-          textBody: 'Your post has failed to be posted',
-          buttonText: 'OK',
-          callback: () => Popup.hide(),
-        });
+        setTextError(
+          'Your post has failed to be posted. Please try again later.',
+        );
+        setIsError(true);
       }
     }
   };
 
   const onPost = () => {
-    setIsPreviewing(false);
+    // setIsPreviewing(false);
     Post();
   };
 
-  const Addresses = Object.values(Store.getState().personalInfo.Addresses);
-  const cityNameFromID = Store.getState().locations.CityNameFromID;
-  const districtNameFromID = Store.getState().locations.DistrictNameFromID;
-  const wardNameFromID = Store.getState().locations.WardNameFromID;
+  const Addresses: addressesType[] | undefined = useSelector<
+    RootState,
+    addressesType[] | undefined
+  >(state => state.personalInfo.Addresses);
 
-  const onChange = ({name, value}) => {
-    console.log('Change ' + name + ' to ' + value);
+  const onChange = ({name, value}: {name: string; value: any}) => {
     setForm({...form, [name]: value});
+    if (!isEdited) setIsEdited(true);
   };
-
-  //   const closeAllBottomSheet = () => {
-  //     changeBottomSheetVisibility(false);
-  //     changeTypeBottomSheetVisibility(false);
-  //     changeColorBottomSheetVisibility(false);
-  //     changeManufacturerYearBottomSheetVisibility(false);
-  //     changeImageBottomSheetVisibility(false);
-  //     changeAddressBottomSheetVisibility(false);
-  //   };
-
-  // //Price
-  // const formatPrice = (price) => {
-  //     if (price == undefined) return '';
-  //     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  // }
 
   //Brand - Lineup
   //   const brandBottomSheet = useRef(null);
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
-  //   const changeBottomSheetVisibility = visibility => {
-  //     brandBottomSheet.current.snapTo(visibility ? 0 : 1);
-  //     setBottomSheetVisible(visibility);
-  //   };
+  const changeBottomSheetVisibility = (visibility: boolean) => {
+    setBottomSheetVisible(visibility);
+  };
 
   const bottomSheetBrandRef = useRef<BottomSheet>(null);
   const snapPointsBrand = useMemo(() => ['80%'], []);
@@ -366,10 +374,16 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
   const handleBrandSnapPress = useCallback((index: number) => {
     bottomSheetBrandRef.current?.snapToIndex(index);
     setBottomSheetVisible(true);
+    if (index == 0) {
+      opacity.value = 0.3;
+      opacityBlack.value = 0.3;
+    }
   }, []);
   const handleCloseBrandPress = useCallback(() => {
     bottomSheetBrandRef.current?.close();
-    setBottomSheetVisible(false);
+    changeBottomSheetVisibility(false);
+    opacity.value = 1;
+    opacityBlack.value = 0;
   }, []);
 
   const _renderHeader = () => (
@@ -384,7 +398,6 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     <BrandBottomSheetContent
       onSetBrand_Lineup={onSetBrand_Lineup}
       onCloseBottomSheet={() => {
-        // changeBottomSheetVisibility(false);
         handleCloseBrandPress();
         checkBrand();
       }}
@@ -395,7 +408,7 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     />
   );
 
-  const brandNameFromID = ID => {
+  const brandNameFromID = (ID: number) => {
     const brand = Store.getState().vehicleModels.VehicleBrands.find(
       item => item.ID == ID,
     );
@@ -403,7 +416,7 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     else return '';
   };
 
-  const lineupNameFromID = ID => {
+  const lineupNameFromID = (ID: number) => {
     const lineup = Store.getState().vehicleModels.VehicleLineUps.find(
       item => item.ID == ID,
     );
@@ -411,31 +424,30 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     else return '';
   };
 
-  const onSetBrand_Lineup = (brandID, lineupID) => {
+  const onSetBrand_Lineup = (brandID: number, lineupID: number) => {
     setForm({...form, brand: brandID, lineup: lineupID});
   };
 
   //Type
-  //   const typeBottomSheet = useRef(null);
-  //   const changeTypeBottomSheetVisibility = visibility => {
-  //     typeBottomSheet.current.snapTo(visibility ? 0 : 1);
-  //     setBottomSheetVisible(visibility);
-  //   };
-
   const bottomSheetTypeRef = useRef<BottomSheet>(null);
   const snapPointsType = useMemo(() => ['40%'], []);
 
-  // callbacks
   const handleTypeSheetChange = useCallback((index: number) => {
     console.log('handleTypeSheetChange', index);
   }, []);
   const handleTypeSnapPress = useCallback((index: number) => {
     bottomSheetTypeRef.current?.snapToIndex(index);
     setBottomSheetVisible(true);
+    if (index == 0) {
+      opacity.value = 0.3;
+      opacityBlack.value = 0.3;
+    }
   }, []);
   const handleCloseTypePress = useCallback(() => {
     bottomSheetTypeRef.current?.close();
     setBottomSheetVisible(false);
+    opacity.value = 1;
+    opacityBlack.value = 0;
   }, []);
 
   const _renderTypeContent = () => (
@@ -451,37 +463,36 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     />
   );
 
-  const onSetType = typeID => {
+  const onSetType = (typeID: number) => {
     setForm({...form, type: typeID});
   };
 
-  const typeNameFromID = ID => {
+  const typeNameFromID = (ID: number) => {
     const type = Store.getState().vehicleTypes.find(item => item.ID == ID);
     if (type) return type.Type;
     else return '';
   };
 
   //Color
-  //   const colorBottomSheet = useRef(null);
-  //   const changeColorBottomSheetVisibility = visibility => {
-  //     colorBottomSheet.current.snapTo(visibility ? 0 : 1);
-  //     setBottomSheetVisible(visibility);
-  //   };
-
   const bottomSheetColorRef = useRef<BottomSheet>(null);
-  const snapPointsColor = useMemo(() => ['40%'], []);
+  const snapPointsColor = useMemo(() => ['30%'], []);
 
-  // callbacks
   const handleColorSheetChange = useCallback((index: number) => {
     console.log('handleColorSheetChange', index);
   }, []);
   const handleColorSnapPress = useCallback((index: number) => {
     bottomSheetColorRef.current?.snapToIndex(index);
     setBottomSheetVisible(true);
+    if (index == 0) {
+      opacity.value = 0.3;
+      opacityBlack.value = 0.3;
+    }
   }, []);
   const handleCloseColorPress = useCallback(() => {
     bottomSheetColorRef.current?.close();
     setBottomSheetVisible(false);
+    opacity.value = 1;
+    opacityBlack.value = 0;
   }, []);
 
   const _renderColorContent = () => (
@@ -497,23 +508,23 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     />
   );
 
-  const onSetColor = colorID => {
+  const onSetColor = (colorID: number) => {
     setForm({...form, color: colorID});
   };
 
-  const colorNameFromID = ID => {
+  const colorNameFromID = (ID: number) => {
     const color = Store.getState().colors.find(item => item.ID == ID);
     if (color) return convertFirstCharacterToUppercase(color.Name);
     else return '';
   };
 
-  const colorHexFromID = ID => {
+  const colorHexFromID = (ID: number) => {
     const color = Store.getState().colors.find(item => item.ID == ID);
     if (color) return '#' + color.Color_hex;
     else return '#000';
   };
 
-  const convertFirstCharacterToUppercase = stringToConvert => {
+  const convertFirstCharacterToUppercase = (stringToConvert: string) => {
     var firstCharacter = stringToConvert.substring(0, 1);
     var restString = stringToConvert.substring(1);
     return firstCharacter.toUpperCase() + restString;
@@ -522,48 +533,49 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
   //Condition
   const dataConditon = Store.getState().vehicleConditions;
 
-  const onSetCondition = conditionID => {
+  const onSetCondition = (conditionID: number) => {
     setForm({...form, condition: conditionID});
   };
 
   //Manufacturer Year
-  //   const manufacturerYearBottomSheet = useRef(null);
-  //   const changeManufacturerYearBottomSheetVisibility = visibility => {
-  //     manufacturerYearBottomSheet.current.snapTo(visibility ? 0 : 1);
-  //     setBottomSheetVisible(visibility);
-  //   };
 
   const bottomSheetManufacturerYearRef = useRef<BottomSheet>(null);
-  const snapPointsManufacturerYear = useMemo(() => ['40%'], []);
+  const snapPointsManufacturerYear = useMemo(() => ['50%'], []);
 
-  // callbacks
   const handleManufacturerYearSheetChange = useCallback((index: number) => {
     console.log('handleManufacturerYearSheetChange', index);
   }, []);
   const handleManufacturerYearSnapPress = useCallback((index: number) => {
     bottomSheetManufacturerYearRef.current?.snapToIndex(index);
     setBottomSheetVisible(true);
+    if (index == 0) {
+      opacity.value = 0.3;
+      opacityBlack.value = 0.3;
+    }
   }, []);
   const handleCloseManufacturerYearPress = useCallback(() => {
     bottomSheetManufacturerYearRef.current?.close();
     setBottomSheetVisible(false);
+    opacity.value = 1;
+    opacityBlack.value = 0;
   }, []);
 
-  const dataYear = [];
+  const dataYear: number[] = [];
   for (let i = 2023; i >= 1900; i--) {
     dataYear.push(i);
   }
 
   const _renderManufacturerYearContent = () => {
     return (
-      <View style={{backgroundColor: '#fff', height: '100%'}}>
+      <View style={{backgroundColor: color.surface, height: '100%'}}>
         <Text
           style={{
             marginStart: 15,
             marginTop: 10,
             marginBottom: 10,
             color: colors.black,
-            fontWeight: 'bold',
+            fontFamily: POPPINS_SEMI_BOLD,
+            fontSize: getFontSize(16),
             alignSelf: 'flex-start',
           }}>
           Choose Manufacturer Year
@@ -575,7 +587,7 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
               flag = true;
             }
             return (
-              <TouchableWithoutFeedback
+              <Pressable
                 key={index}
                 onPress={() => {
                   onSetManufacturerYear(item);
@@ -600,8 +612,9 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                       }}>
                       <Text
                         style={{
-                          color: flag ? colors.primary : 'black',
+                          color: flag ? color.primary : color.onBackground,
                           textAlignVertical: 'center',
+                          fontFamily: POPPINS_REGULAR,
                         }}>
                         {item}
                       </Text>
@@ -610,7 +623,7 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                         <MaterialIcons
                           name="check"
                           size={16}
-                          color={colors.primary}
+                          color={color.primary}
                           style={{paddingTop: 3}}
                         />
                       )}
@@ -620,12 +633,12 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                     style={{
                       height: 1,
                       borderBottomWidth: 1,
-                      borderBottomColor: '#e9e9e9',
+                      borderBottomColor: color.divider,
                       marginStart: 10,
                     }}
                   />
                 </View>
-              </TouchableWithoutFeedback>
+              </Pressable>
             );
           })}
         </ScrollView>
@@ -633,55 +646,53 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
     );
   };
 
-  const onSetManufacturerYear = year => {
+  const onSetManufacturerYear = (year: number) => {
     setForm({...form, manufacturerYear: year});
   };
 
   //Image
   const [flag, setFlag] = useState(false);
 
-  const onSetImages = images => {
+  const onSetImages = (images: ImagePicker.Asset[]) => {
     setForm({...form, images: images});
   };
 
   const launchCamera = () => {
-    let options = {
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
+    let options: ImagePicker.CameraOptions = {
+      mediaType: 'photo',
     };
     ImagePicker.launchCamera(options, response => {
       console.log('Response = ', response);
 
       if (response.didCancel) {
         console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
-      } else {
-        const source = {uri: response.uri};
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      }
+      // else if (response) {
+      //   console.log('User tapped custom button: ', response.customButton);
+      //   alert(response.customButton);
+      // }
+      else {
+        const source = {uri: response.assets};
         console.log('response', JSON.stringify(response));
 
-        let tmp = form.images;
-        for (let i = 0; i < response.assets.length; i++) {
-          tmp.push(response.assets[i]);
+        if (response.assets) {
+          let tmp = form.images;
+          for (let i = 0; i < response.assets.length; i++) {
+            tmp.push(response.assets[i]);
+          }
+          onSetImages(tmp);
         }
-        onSetImages(tmp);
         //setFlag(!flag);
       }
     });
   };
 
   const launchImageLibrary = () => {
-    let options = {
+    let options: ImagePicker.ImageLibraryOptions = {
       selectionLimit: MAX_IMAGE - form.images.length,
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
+      mediaType: 'photo',
     };
 
     ImagePicker.launchImageLibrary(options, response => {
@@ -689,33 +700,37 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
 
       if (response.didCancel) {
         console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
-      } else {
-        const source = {uri: response.uri};
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      }
+      // else if (response.customButton) {
+      //   console.log('User tapped custom button: ', response.customButton);
+      //   alert(response.customButton);
+      // }
+      else {
+        const source = {uri: response.assets};
         console.log('response', JSON.stringify(response));
 
-        var tmp = form.images;
-        for (let i = 0; i < response.assets.length; i++) {
-          tmp.push(response.assets[i]);
+        if (response.assets) {
+          var tmp = form.images;
+          for (let i = 0; i < response.assets.length; i++) {
+            tmp.push(response.assets[i]);
+          }
+          onSetImages(tmp);
+          //setFlag(!flag);
         }
-        onSetImages(tmp);
-        //setFlag(!flag);
       }
     });
   };
 
-  const deleteImage = index => {
+  const deleteImage = (index: number) => {
     let tmp = form.images;
     tmp.splice(index, 1);
     onSetImages(tmp);
     setFlag(!flag);
   };
 
-  const RenderFileUri = images =>
+  const RenderFileUri = () =>
     form.images.map((item, index) => {
       if (item) {
         return (
@@ -752,30 +767,35 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
         );
     });
 
-  //   const imageBottomSheet = useRef(null);
-  //   const changeImageBottomSheetVisibility = visibility => {
-  //     imageBottomSheet.current.snapTo(visibility ? 0 : 1);
-  //     setBottomSheetVisible(visibility);
-  //   };
   const bottomSheetImageRef = useRef<BottomSheet>(null);
-  const snapPointsImage = useMemo(() => ['40%'], []);
+  const snapPointsImage = useMemo(() => ['30%'], []);
 
-  // callbacks
   const handleImageSheetChange = useCallback((index: number) => {
     console.log('handleImageSheetChange', index);
   }, []);
   const handleImageSnapPress = useCallback((index: number) => {
     bottomSheetImageRef.current?.snapToIndex(index);
     setBottomSheetVisible(true);
+    if (index == 0) {
+      opacity.value = 0.3;
+      opacityBlack.value = 0.3;
+    }
   }, []);
   const handleCloseImagePress = useCallback(() => {
     bottomSheetImageRef.current?.close();
     setBottomSheetVisible(false);
+    opacity.value = 1;
+    opacityBlack.value = 0;
   }, []);
   const _renderContentImage = () => {
     return (
       <View
-        style={{backgroundColor: '#fff', height: '100%', alignItems: 'center'}}>
+        style={{
+          backgroundColor: color.surface,
+          height: '100%',
+          alignItems: 'center',
+          paddingTop: 12,
+        }}>
         <Button
           mode="contained"
           onPress={() => {
@@ -783,7 +803,12 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
             // changeImageBottomSheetVisibility(false);
             handleCloseImagePress();
           }}
-          style={{width: '80%', marginVertical: 10}}>
+          textColor={color.onSecondary}
+          style={{
+            width: '80%',
+            marginVertical: 10,
+            backgroundColor: color.secondary,
+          }}>
           Take photo
         </Button>
         <Button
@@ -793,16 +818,26 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
             // changeImageBottomSheetVisibility(false);
             handleCloseImagePress();
           }}
-          style={{width: '80%', marginVertical: 10}}>
+          textColor={color.onSecondary}
+          style={{
+            width: '80%',
+            marginVertical: 10,
+            backgroundColor: color.secondary,
+          }}>
           Choose from library
         </Button>
         <Button
           mode="contained"
-          onPress={() =>
-            // changeImageBottomSheetVisibility(false)
-            handleCloseImagePress()
-          }
-          style={{width: '80%', marginVertical: 10, backgroundColor: '#BBB'}}>
+          onPress={() => {
+            // changeImageBottomSheetVisibility(false);
+            handleCloseImagePress();
+          }}
+          textColor={color.onBackground_light}
+          style={{
+            width: '80%',
+            marginVertical: 10,
+            backgroundColor: color.divider,
+          }}>
           Cancel
         </Button>
       </View>
@@ -810,315 +845,319 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
   };
 
   //Address
-  //   const addressBottomSheet = useRef(null);
-  //   const changeAddressBottomSheetVisibility = visibility => {
-  //     addressBottomSheet.current.snapTo(visibility ? 0 : 1);
-  //     setBottomSheetVisible(visibility);
-  //   };
-
   const bottomSheetAddressRef = useRef<BottomSheet>(null);
   const snapPointsAddress = useMemo(() => ['80%'], []);
 
-  // callbacks
   const handleAddressSheetChange = useCallback((index: number) => {
     console.log('handleAddressSheetChange', index);
   }, []);
   const handleAddressSnapPress = useCallback((index: number) => {
     bottomSheetAddressRef.current?.snapToIndex(index);
     setBottomSheetVisible(true);
+    if (index == 0) {
+      opacity.value = 0.3;
+      opacityBlack.value = 0.3;
+    }
   }, []);
   const handleCloseAddressPress = useCallback(() => {
     bottomSheetAddressRef.current?.close();
     setBottomSheetVisible(false);
+    opacity.value = 1;
+    opacityBlack.value = 0;
   }, []);
 
+  const cityNameFromID = (ID: number) => {
+    const city = Store.getState().locations.Cities.find(item => item.ID == ID);
+    if (city) return city.Name;
+    else return '';
+  };
+
+  const districtNameFromID = (ID: number) => {
+    const district = Store.getState().locations.Districts.find(
+      item => item.ID == ID,
+    );
+    if (district) return district.Name;
+    else return '';
+  };
+
+  const wardNameFromID = (ID: number) => {
+    const ward = Store.getState().locations.Wards.find(item => item.ID == ID);
+    if (ward) return ward.Name;
+    else return '';
+  };
+
   const _renderAddressContent = () => (
-    <View style={{backgroundColor: '#fff', height: '100%'}}>
+    <View style={{backgroundColor: color.surface, height: '100%'}}>
       <Text
         style={{
           marginStart: 15,
           color: colors.black,
-          fontWeight: 'bold',
+          fontFamily: POPPINS_SEMI_BOLD,
+          fontSize: getFontSize(16),
           alignSelf: 'flex-start',
+          marginTop: 8,
         }}>
         Choose address
       </Text>
       <ScrollView>
-        {Addresses.map((item, index) => {
-          let flag = false;
-          if (form.address) {
-            if (item.ID == form.address.ID) flag = true;
-          }
-          return (
-            <TouchableWithoutFeedback
-              key={index}
-              onPress={() => {
-                onSetAddress(item);
-                // changeAddressBottomSheetVisibility(false);
-                handleCloseAddressPress();
-              }}>
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    padding: 12,
-                  }}>
-                  <View style={{width: 25, justifyContent: 'center'}}>
-                    <Text style={{color: flag ? colors.primary : colors.grey}}>
-                      {index + 1}
-                    </Text>
+        {Addresses &&
+          Object.values(Addresses).map((item, index) => {
+            let flag = false;
+            if (form.address) {
+              if (item.ID == form.address.ID) flag = true;
+            }
+            return (
+              <Pressable
+                key={index}
+                onPress={() => {
+                  onSetAddress(item);
+                  // changeAddressBottomSheetVisibility(false);
+                  handleCloseAddressPress();
+                }}>
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      padding: 12,
+                    }}>
+                    <View style={{width: 25, justifyContent: 'center'}}>
+                      <Text
+                        style={{
+                          color: flag
+                            ? color.primary
+                            : color.onBackground_light,
+                        }}>
+                        {index + 1}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        flex: 1,
+                      }}>
+                      {item.Detail_address != '' && (
+                        <Text
+                          style={{
+                            color: flag ? color.primary : color.onBackground,
+                          }}>
+                          {item.Detail_address}
+                        </Text>
+                      )}
+                      <Text
+                        style={{
+                          color: flag ? color.primary : color.onBackground,
+                        }}>
+                        {wardNameFromID(item.ID_Ward)},{' '}
+                        {districtNameFromID(item.ID_District)},{' '}
+                        {cityNameFromID(item.ID_City)}
+                      </Text>
+                    </View>
                   </View>
                   <View
                     style={{
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      flex: 1,
-                    }}>
-                    <Text style={{color: flag ? colors.primary : 'black'}}>
-                      {item.Detail_address}
-                    </Text>
-                    <Text style={{color: flag ? colors.primary : 'black'}}>
-                      {wardNameFromID(item.ID_Ward)},{' '}
-                      {districtNameFromID(item.ID_District)},{' '}
-                      {cityNameFromID(item.ID_City)}
-                    </Text>
-                  </View>
+                      height: 1,
+                      borderBottomWidth: 1,
+                      borderBottomColor: '#e9e9e9',
+                      marginStart: 35,
+                      marginEnd: 20,
+                    }}
+                  />
                 </View>
-                <View
-                  style={{
-                    height: 1,
-                    borderBottomWidth: 1,
-                    borderBottomColor: '#e9e9e9',
-                    marginStart: 35,
-                    marginEnd: 20,
-                  }}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          );
-        })}
+              </Pressable>
+            );
+          })}
       </ScrollView>
     </View>
   );
 
-  const onSetAddress = a => {
+  const onSetAddress = (a: addressesType) => {
     setForm({
       ...form,
       address: a,
     });
   };
 
-  // const cityNameFromID = (ID) => {
-  //     const city = Store.getState().locations.Cities.find((item) => item.ID == ID);
-  //     if (city)
-  //         return city.Name;
-  //     else return '';
-  // };
-
-  // const districtNameFromID = (ID) => {
-  //     const district = Store.getState().locations.Districts.find((item) => item.ID == ID);
-  //     if (district)
-  //         return district.Name;
-  //     else return '';
-  // };
-
-  // const wardNameFromID = (ID) => {
-  //     const ward = Store.getState().locations.Wards.find((item) => item.ID == ID);
-  //     if (ward)
-  //         return ward.Name;
-  //     else return '';
-  // };
-
-  const onNavigate = () => {
-    navigate(POST_PREVIEW, {form: form, onPost: Post});
-    setIsPreviewing(true);
-  };
-
   const onPreview = async () => {
-    // console.log("Preview: " + JSON.stringify(form));
-    // console.log("Address: " + JSON.stringify(Addresses));
-    // if (form.address && form.brand && form.lineup && form.type && form.condition && form.color && form.price && form.images.length > 0) {
-    //     if (!isNaN(form.address.ID) && !isNaN(form.price) && !isNaN(form.brand) && !isNaN(form.lineup) && !isNaN(form.type) && !isNaN(form.condition) && !isNaN(form.color)) {
-    //         console.log("Posting")
-    //         const postres = await UploadPost(
-    //             form.images,
-    //             form.title || 'No title',
-    //             form.content || 'No content',
-    //             form.price || '-1',
-    //             form.address.ID,
-    //             form.name || 'No name',
-    //             form.odometer || '-1',
-    //             form.licensePlate || 'No license plate',
-    //             form.manufacturerYear || '-1',
-    //             form.cubicPower || '-1',
-    //             form.brand,
-    //             form.lineup,
-    //             form.type,
-    //             form.condition,
-    //             form.color,
-    //         )
-    //         console.log("Post res: " + JSON.stringify(postres));
-    //     } else {
-    //         console.log("ID is not a number")
-    //     }
-    // } else {
-    //     console.log("Missing data")
-    // }
-
-    onNavigate();
+    if (!checkAll()) {
+      console.log('Errors: ', JSON.stringify(errors));
+      setTextError('Please fill in all required fields');
+      setIsError(true);
+    } else {
+      navigation.navigate(POST_PREVIEW, {form: form});
+    }
   };
 
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
+  const onGoBack = () => {
+    if (isEdited) {
+      setIsWarning(true);
+      setTextWarning('Do you want to discard the post?');
+    } else navigation.goBack();
+  };
+
+  const color = useTheme().colors.customColors;
+
+  const opacity = useSharedValue(1);
+  const opacityAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(opacity.value, {
+        duration: 50,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      }),
+    };
+  });
+
+  const opacityBlack = useSharedValue(0);
+  const opacityBlackAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(opacityBlack.value, {
+        duration: 50,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      }),
+    };
+  });
+
+  //Popup message
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const onChangeLoadingState = (x: boolean) => {
+    setIsLoading(x);
+  };
+
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [textSuccess, setTextSuccess] = useState<string>('');
+  const onChangeSuccessState = (x: boolean) => {
+    setIsSuccess(x);
+  };
+  const [isError, setIsError] = useState<boolean>(false);
+  const [textError, setTextError] = useState<string>('');
+  const onChangeErrorState = (x: boolean) => {
+    setIsError(x);
+  };
+
+  const [isWarning, setIsWarning] = useState<boolean>(false);
+  const [textWarning, setTextWarning] = useState<string>('');
+  const onChangeWarningState = (x: boolean) => {
+    setIsWarning(x);
+  };
 
   return (
-    <Root>
-      {isPreviewing ? (
-        <PostPreviewComponent form={form} onPost={onPost} />
-      ) : (
-        <View style={{height: '100%', position: 'relative'}}>
-          <Container
-            keyboardShouldPersistTaps={'never'}
-            styleScrollView={{
-              backgroundColor: color.background,
-              height: heightScreen,
-            }}>
-            {/* <TouchableWithoutFeedback onPress={closeAllBottomSheet}> */}
-            <Animated.View
+    <View style={{height: '100%'}}>
+      <Animated.View
+        style={[
+          styles.wrapperHeader,
+          //  opacityAnimatedStyle
+        ]}>
+        <Pressable
+          onPress={onGoBack}
+          style={{
+            height: 70,
+            width: 50,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <SimpleLineIcons
+            name="arrow-left"
+            color={color.onBackground_light}
+            size={20}
+          />
+        </Pressable>
+        <View
+          style={{
+            height: 70,
+            width: 120,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={[styles.textHeader, {color: color.onBackground}]}>
+            Add Post
+          </Text>
+        </View>
+
+        <View
+          style={{
+            height: 70,
+            width: 50,
+          }}
+        />
+      </Animated.View>
+
+      <Container
+        keyboardShouldPersistTaps={'never'}
+        styleScrollView={{
+          backgroundColor: color.background,
+          height: heightScreen,
+        }}>
+        <Animated.View
+          style={[
+            {
+              flex: 1,
+              height: '100%',
+            },
+            // opacityAnimatedStyle,
+          ]}>
+          {/*Title & Description */}
+          <View style={styles.wrapperTitle_Description}>
+            <View
               style={{
-                paddingHorizontal: 20,
-                marginTop: 15,
-                flex: 1,
-                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: color.divider + '88',
+                width: '100%',
+                height: 40,
+                marginBottom: 20,
               }}>
-              <View style={{alignSelf: 'center'}}>
-                <Text
-                  style={{
-                    color: colors.primary,
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                    marginBottom: 10,
-                  }}>
-                  Title & Description
-                </Text>
-              </View>
+              <Text
+                style={{
+                  color: color.primary,
+                  fontFamily: POPPINS_SEMI_BOLD,
+                  fontSize: getFontSize(16),
+                }}>
+                Title & Description
+              </Text>
+            </View>
 
-              <TextInputOutline
+            <View style={{paddingHorizontal: 20}}>
+              <TextField
                 label={'Title'}
-                inputPadding={6}
-                borderWidthtoTop={0}
-                containerStyle={{
-                  height: 56,
-                  borderColor: '#555',
+                style={{
+                  width: '100%',
+                  alignSelf: 'center',
+                  marginBottom: 16,
                 }}
-                labelStyle={{fontSize: 12}}
+                maxLength={60}
+                value={form.title}
+                editable={!isBottomSheetVisible}
+                onChangeText={value => {
+                  onChange({name: 'title', value});
+                }}
+                onEndEditing={checkTitle}
+                error={errors.title}
+                multiline={true}
                 numberOfLines={2}
-                multiline={true}
-                inputStyle={{
-                  textAlignVertical: 'top',
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  fontSize: 14,
-                }}
-                maxLength={128}
-                labelContainerStyle={{padding: 13}}
-                value={form.title}
-                editable={!isBottomSheetVisible}
-                onChangeText={value => {
-                  onChange({name: 'title', value});
-                }}
-                onEndEditing={checkTitle}
-                error={errors.title}
+                large={true}
               />
-              {/* <TextField
-                label={'Title'}
-                iconClass={MaterialIcons}
-                iconName={'drive-file-rename-outline'}
-                iconColor={color.primary}
+
+              <TextField
+                label={'Description'}
                 style={{
                   width: '100%',
                   alignSelf: 'center',
                   marginBottom: 8,
+                  height: 184,
                 }}
-                maxLength={128}
-                value={form.title}
-                // editable={!isBottomSheetVisible}
+                maxLength={1500}
+                value={form.content}
+                editable={!isBottomSheetVisible}
                 onChangeText={value => {
-                  onChange({name: 'title', value});
+                  onChange({name: 'content', value});
                 }}
                 onEndEditing={checkTitle}
-                error={errors.title}
-              /> */}
-
-              <TextInputOutline
-                label={'Description'}
-                inputPadding={6}
-                borderWidthtoTop={0}
-                containerStyle={{
-                  height: 145,
-                  borderColor: '#555',
-                }}
-                labelStyle={{fontSize: 12}}
-                labelContainerStyle={{padding: 13}}
-                value={form.content}
+                multiline={true}
                 numberOfLines={8}
-                multiline={true}
-                inputStyle={{
-                  textAlignVertical: 'top',
-                  paddingHorizontal: 16,
-                  paddingVertical: 10,
-                  fontSize: 14,
-                }}
-                editable={!isBottomSheetVisible}
-                onChangeText={value => {
-                  onChange({name: 'content', value});
-                }}
+                largest={true}
               />
 
-              {/* <TextField
-                label={'Description'}
-                iconClass={MaterialIcons}
-                iconName={'drive-file-rename-outline'}
-                iconColor={color.primary}
-                style={{
-                  width: '100%',
-                  alignSelf: 'center',
-                  marginBottom: 8,
-                }}
-                value={form.content}
-                // editable={!isBottomSheetVisible}
-                onChangeText={value => {
-                  onChange({name: 'content', value});
-                }}
-              /> */}
-
-              <TextInputOutline
-                label={'Price'}
-                iconClass={MaterialIcons}
-                iconName={'attach-money'}
-                iconColor={'#90B4D3'}
-                inputPadding={6}
-                borderWidthtoTop={0}
-                containerStyle={{
-                  height: 44,
-                  borderColor: '#555',
-                }}
-                labelStyle={{fontSize: 12}}
-                inputStyle={{fontSize: 14}}
-                labelContainerStyle={{padding: 13}}
-                iconSize={20}
-                value={form.price}
-                keyboardType={'numeric'}
-                editable={!isBottomSheetVisible}
-                onChangeText={value => {
-                  onChange({name: 'price', value});
-                }}
-                onEndEditing={checkPrice}
-                error={errors.price}
-              />
-
-              {/* <TextField
+              <TextField
                 label={'Price'}
                 iconClass={MaterialIcons}
                 iconName={'attach-money'}
@@ -1128,49 +1167,51 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                   alignSelf: 'center',
                   marginBottom: 8,
                 }}
-                value={form.price}
+                value={form.price == -1 ? '' : form.price.toString()}
                 keyboardType={'numeric'}
-                // editable={!isBottomSheetVisible}
+                editable={!isBottomSheetVisible}
                 onChangeText={value => {
                   onChange({name: 'price', value});
                 }}
                 onEndEditing={checkPrice}
                 error={errors.price}
-              /> */}
+              />
+            </View>
+          </View>
 
-              <View style={{alignSelf: 'center'}}>
-                <Text
-                  style={{
-                    color: color.primary,
-                    fontFamily: POPPINS_SEMI_BOLD,
-                    fontSize: getFontSize(16),
-                    marginTop: 10,
-                    marginBottom: 5,
-                  }}>
-                  Detail Information
-                </Text>
-              </View>
+          {/*Detail Information */}
+          <View style={styles.wrapperDetailInformation}>
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: color.divider + '88',
+                width: '100%',
+                height: 40,
+                marginBottom: 10,
+              }}>
+              <Text
+                style={{
+                  color: color.primary,
+                  fontFamily: POPPINS_SEMI_BOLD,
+                  fontSize: getFontSize(16),
+                }}>
+                Detail Information
+              </Text>
+            </View>
 
+            <View style={{paddingHorizontal: 20}}>
               {/* Name */}
               <View>
                 <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Name
                 </Text>
-                <TextInputOutline
+                <TextField
                   label={'Name'}
                   iconClass={MaterialIcons}
                   iconName={'drive-file-rename-outline'}
-                  iconColor={'#90B4D3'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
+                  iconColor={color.primary}
+                  style={{fontSize: 14}}
                   value={form.name}
                   editable={!isBottomSheetVisible}
                   onChangeText={value => {
@@ -1186,104 +1227,78 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                 <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Brand - Lineup
                 </Text>
-                <TextInputOutline
-                  label={'Brand - Lineup'}
-                  iconClass={MaterialIcons}
-                  iconName={'motorcycle'}
-                  iconColor={'#90B4D3'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
-                  value={
-                    form.brand !== '' && form.lineup !== ''
-                      ? brandNameFromID(form.brand) +
-                        ' - ' +
-                        lineupNameFromID(form.lineup)
-                      : ''
-                  }
-                  editable={!isBottomSheetVisible}
-                  onTouchEnd={() => {
-                    // changeBottomSheetVisibility(true);
+                <Pressable
+                  onPress={() => {
                     handleBrandSnapPress(0);
                     checkBrand();
-                  }}
-                  error={errors.brand}
-                />
+                  }}>
+                  <TextField
+                    label={'Brand - Lineup'}
+                    iconClass={MaterialIcons}
+                    iconName={'motorcycle'}
+                    iconColor={color.primary}
+                    style={{fontSize: 14}}
+                    value={
+                      form.brand != -1 && form.lineup != -1
+                        ? brandNameFromID(form.brand) +
+                          ' - ' +
+                          lineupNameFromID(form.lineup)
+                        : ''
+                    }
+                    editable={false}
+                    error={errors.brand}
+                  />
+                </Pressable>
               </View>
 
               {/* Type */}
               <View>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Type
                 </Text>
-                <TextInputOutline
-                  label={'Type'}
-                  iconClass={MaterialIcons}
-                  iconName={'category'}
-                  iconColor={'#90B4D3'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
-                  value={typeNameFromID(form.type)}
-                  editable={!isBottomSheetVisible}
-                  onTouchEnd={() => {
-                    // changeTypeBottomSheetVisibility(true);
+                <Pressable
+                  onPress={() => {
+                    //   changeBottomSheetVisibility(true);
                     handleTypeSnapPress(0);
                     checkType();
-                  }}
-                  error={errors.type}
-                />
+                  }}>
+                  <TextField
+                    label={'Type'}
+                    iconClass={MaterialIcons}
+                    iconName={'category'}
+                    iconColor={color.primary}
+                    style={{fontSize: 14}}
+                    value={form.type != -1 ? typeNameFromID(form.type) : ''}
+                    editable={false}
+                    error={errors.type}
+                  />
+                </Pressable>
               </View>
 
               {/* Color */}
               <View>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Color
                 </Text>
-                <TextInputOutline
-                  label={'Color'}
-                  iconClass={FontAwesome}
-                  iconName={'circle'}
-                  iconColor={colorHexFromID(form.color)}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
-                  value={colorNameFromID(form.color)}
-                  editable={!isBottomSheetVisible}
-                  onTouchEnd={() =>
-                    // changeColorBottomSheetVisibility(true)
-                    handleColorSnapPress(0)
-                  }
-                />
+                <Pressable
+                  onPress={() => {
+                    handleColorSnapPress(0);
+                  }}>
+                  <TextField
+                    label={'Color'}
+                    iconClass={FontAwesome}
+                    iconName={'circle'}
+                    iconColor={colorHexFromID(form.color)}
+                    style={{fontSize: 14}}
+                    value={form.color != -1 ? colorNameFromID(form.color) : ''}
+                    editable={false}
+                  />
+                </Pressable>
               </View>
 
               {/*Condition*/}
               <View>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Condition
                 </Text>
                 <View
@@ -1291,20 +1306,21 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
+                    marginTop: 8,
                   }}>
                   {dataConditon.map((item, index) => {
                     return (
                       <View
-                        key={index}
+                        key={item.ID}
                         style={{
                           flexDirection: 'row',
                           alignItems: 'center',
                           width: '48%',
                           borderWidth: 1,
-                          borderColor: '#555',
+                          borderColor: color.divider,
                           borderRadius: 7,
                           height: 44,
-                          backgroundColor: '#F5F5F5',
+                          backgroundColor: color.background,
                           paddingStart: 10,
                         }}>
                         <RadioButton
@@ -1313,15 +1329,19 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                             form.condition == item.ID ? 'checked' : 'unchecked'
                           }
                           onPress={() => onSetCondition(item.ID)}
-                          //   disabled={isBottomSheetVisible}
                         />
                         <Text
                           style={{
                             color:
                               form.condition == item.ID
                                 ? colors.primary
-                                : '#555',
-                            fontSize: 14,
+                                : color.onBackground_light,
+                            fontSize: getFontSize(14),
+                            top: 2,
+                            fontFamily:
+                              form.condition == item.ID
+                                ? POPPINS_MEDIUM
+                                : POPPINS_REGULAR,
                             marginStart: 5,
                           }}>
                           {item.Condition}
@@ -1335,11 +1355,12 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                   <Text
                     style={{
                       alignSelf: 'flex-end',
-                      color: '#F50057',
+                      color: color.error,
                       paddingEnd: 5,
                       fontSize: 12,
                       paddingTop: 1,
                       textAlign: 'right',
+                      fontFamily: POPPINS_REGULAR,
                     }}>
                     {errors.condition}
                   </Text>
@@ -1348,26 +1369,17 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
 
               {/* Odometer */}
               <View style={{marginTop: 10}}>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Odometer
                 </Text>
-                <TextInputOutline
+
+                <TextField
                   label={'Odometer'}
                   iconClass={Ionicons}
                   iconName={'speedometer'}
-                  iconColor={'#90B4D3'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
-                  value={form.odometer}
+                  iconColor={color.primary}
+                  style={{fontSize: 14}}
+                  value={form.odometer != -1 ? form.odometer?.toString() : ''}
                   editable={!isBottomSheetVisible}
                   keyboardType={'numeric'}
                   onChangeText={value => {
@@ -1378,25 +1390,16 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
 
               {/* License plate */}
               <View>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   License Plate
                 </Text>
-                <TextInputOutline
+
+                <TextField
                   label={'License Plate'}
                   iconClass={Octicons}
                   iconName={'number'}
-                  iconColor={'#90B4D3'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
+                  iconColor={color.primary}
+                  style={{fontSize: 14}}
                   value={form.licensePlate}
                   editable={!isBottomSheetVisible}
                   onChangeText={value => {
@@ -1407,56 +1410,43 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
 
               {/* Manufacturer Year */}
               <View>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Manufacturer Year
                 </Text>
-                <TextInputOutline
-                  label={'Manufacturer Year'}
-                  iconClass={Fontisto}
-                  iconName={'date'}
-                  iconColor={'#90B4D3'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
-                  value={form.manufacturerYear.toString()}
-                  editable={!isBottomSheetVisible}
-                  onTouchEnd={() =>
-                    // changeManufacturerYearBottomSheetVisibility(true)
-                    handleManufacturerYearSnapPress(0)
-                  }
-                />
+                <Pressable
+                  onPress={() => {
+                    handleManufacturerYearSnapPress(0);
+                  }}>
+                  <TextField
+                    label={'Manufacturer Year'}
+                    iconClass={Fontisto}
+                    iconName={'date'}
+                    iconColor={color.primary}
+                    style={{fontSize: 14}}
+                    value={
+                      form.manufacturerYear != -1
+                        ? form.manufacturerYear?.toString()
+                        : ''
+                    }
+                    editable={false}
+                  />
+                </Pressable>
               </View>
 
               {/* Cubic Power */}
               <View>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                <Text style={[styles.styleTitle, {color: color.onBackground}]}>
                   Cubic Power
                 </Text>
-                <TextInputOutline
-                  label={'Cubic Power'}
+                <TextField
+                  label={'Odometer'}
                   iconClass={MaterialIcons}
                   iconName={'speed'}
-                  iconColor={'#90B4D3'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 44,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12}}
-                  inputStyle={{fontSize: 14}}
-                  labelContainerStyle={{padding: 13}}
-                  iconSize={20}
-                  value={form.cubicPower}
+                  iconColor={color.primary}
+                  style={{fontSize: 14}}
+                  value={
+                    form.cubicPower != -1 ? form.cubicPower?.toString() : ''
+                  }
                   editable={!isBottomSheetVisible}
                   keyboardType={'numeric'}
                   onChangeText={value => {
@@ -1468,16 +1458,19 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
               {/* Image */}
               <View>
                 <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
+                  style={[
+                    styles.styleTitle,
+                    {color: color.onBackground, marginBottom: 4},
+                  ]}>
                   Image
                 </Text>
                 {form.images.length > 0 ? (
                   <Animated.View
                     layout={Layout.stiffness(100).damping(10).duration(300)}
                     style={{flexDirection: 'row', flexWrap: 'wrap'}}>
-                    {RenderFileUri(form.images)}
+                    {RenderFileUri()}
                     {form.images.length < 8 && form.images.length > 0 && (
-                      <TouchableWithoutFeedback
+                      <Pressable
                         onPress={() => {
                           //   changeImageBottomSheetVisibility(true);
                           handleImageSnapPress(0);
@@ -1489,28 +1482,31 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                           style={{
                             width: (widthScreen - 40) / 4 - 10,
                             height: (widthScreen - 40) / 4 - 10,
-                            backgroundColor: '#f5f5f5',
+                            // backgroundColor: color.surface,
                             justifyContent: 'center',
                             alignItems: 'center',
                             borderRadius: 5,
                             margin: 5,
+                            borderColor: color.divider,
+                            borderWidth: 1,
                           }}>
                           <MaterialCommunityIcons
                             name="camera-plus"
                             size={24}
-                            color={colors.primary}
+                            color={color.primary}
                           />
                           <Text
                             style={{
                               fontSize: 10,
-                              color: '#555',
+                              color: color.onBackground_light,
                               textAlign: 'center',
                               marginTop: 5,
+                              fontFamily: POPPINS_REGULAR,
                             }}>
                             Add more
                           </Text>
                         </Animated.View>
-                      </TouchableWithoutFeedback>
+                      </Pressable>
                     )}
                   </Animated.View>
                 ) : (
@@ -1523,7 +1519,9 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                     <View
                       style={{
                         height: ((widthScreen - 40) / 4 - 10) * 2,
-                        backgroundColor: '#f5f5f5',
+                        // backgroundColor: color.surface + '44',
+                        borderColor: color.divider,
+                        borderWidth: 1,
                         justifyContent: 'center',
                         alignItems: 'center',
                         borderRadius: 10,
@@ -1531,14 +1529,15 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                       <MaterialCommunityIcons
                         name="camera-plus"
                         size={48}
-                        color={colors.primary}
+                        color={color.primary}
                       />
                       <Text
                         style={{
                           fontSize: 14,
-                          color: '#555',
+                          color: color.onBackground_light,
                           textAlign: 'center',
                           marginTop: 5,
+                          fontFamily: POPPINS_REGULAR,
                         }}>
                         Upload 1 to 8 images for your vehicle
                       </Text>
@@ -1550,7 +1549,8 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                   <Text
                     style={{
                       alignSelf: 'flex-end',
-                      color: '#F50057',
+                      color: color.error,
+                      fontFamily: POPPINS_REGULAR,
                       paddingEnd: 5,
                       fontSize: 12,
                       paddingTop: 1,
@@ -1560,303 +1560,280 @@ const AddPostComponent: React.FC<AddPostComponentProps> = ({navigation}) => {
                   </Text>
                 )}
               </View>
+            </View>
+          </View>
 
-              <View style={{alignSelf: 'center', marginTop: 20}}>
-                <Text
-                  style={{
-                    color: colors.primary,
-                    fontWeight: 'bold',
-                    fontSize: 16,
-                    marginBottom: 5,
-                  }}>
-                  Seller Information
-                </Text>
-              </View>
-              {/* Address */}
-              <View>
-                <Text
-                  style={{marginBottom: 5, fontWeight: '500', color: '#555'}}>
-                  Address
-                </Text>
-                <TextInputOutline
-                  label={'Address'}
-                  inputPadding={6}
-                  borderWidthtoTop={0}
-                  containerStyle={{
-                    height: 70,
-                    borderColor: '#555',
-                  }}
-                  labelStyle={{fontSize: 12, marginTop: 12}}
-                  numberOfLines={2}
-                  multiline={true}
-                  inputStyle={{
-                    textAlignVertical: 'center',
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
-                    fontSize: 14,
-                  }}
-                  maxLength={128}
-                  labelContainerStyle={{padding: 13}}
-                  value={
-                    form.address
-                      ? form.address.Detail_address +
-                        '\n' +
-                        wardNameFromID(form.address.ID_Ward) +
-                        ', ' +
-                        districtNameFromID(form.address.ID_District) +
-                        ', ' +
-                        cityNameFromID(form.address.ID_City)
-                      : ''
-                  }
-                  editable={!isBottomSheetVisible}
-                  onTouchEnd={() => {
-                    // changeAddressBottomSheetVisibility(true);
-                    handleAddressSnapPress(0);
-                    checkAddress();
-                  }}
-                />
-
-                {errors.address && (
-                  <Text
-                    style={{
-                      alignSelf: 'flex-end',
-                      color: '#F50057',
-                      paddingEnd: 5,
-                      fontSize: 12,
-                      paddingTop: 1,
-                      textAlign: 'right',
-                    }}>
-                    {errors.address}
-                  </Text>
-                )}
-              </View>
-
-              <View style={{height: 100}} />
-
-              <FAB
-                onPress={() => {
-                  onPreview();
-                }}
-                label="Preview"
-                size="small"
+          <View style={{marginTop: 20}}>
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: color.divider + '88',
+                width: '100%',
+                height: 40,
+                marginBottom: 10,
+              }}>
+              <Text
                 style={{
-                  margin: 16,
-                  marginBottom: 30,
-                  marginHorizontal: 16,
-                  backgroundColor: color.secondary,
-                }}
+                  color: color.primary,
+                  fontFamily: POPPINS_SEMI_BOLD,
+                  fontSize: getFontSize(16),
+                }}>
+                Seller Information
+              </Text>
+            </View>
+          </View>
+          {/* Address */}
+          <View style={{paddingHorizontal: 20}}>
+            <Text
+              style={[
+                styles.styleTitle,
+                {color: color.onBackground, marginBottom: 8},
+              ]}>
+              Address
+            </Text>
+
+            <Pressable
+              onPress={() => {
+                handleAddressSnapPress(0);
+                checkAddress();
+              }}>
+              <TextField
+                label={'Address'}
+                large={true}
+                style={{fontSize: 14}}
+                value={
+                  form.address.ID != -1
+                    ? (form.address.Detail_address != ''
+                        ? form.address.Detail_address + ', '
+                        : '') +
+                      wardNameFromID(form.address.ID_Ward) +
+                      ', ' +
+                      districtNameFromID(form.address.ID_District) +
+                      ', ' +
+                      cityNameFromID(form.address.ID_City)
+                    : ''
+                }
+                editable={false}
+                multiline={true}
+                numberOfLines={2}
               />
-            </Animated.View>
-            {/* </TouchableWithoutFeedback> */}
-          </Container>
+            </Pressable>
 
-          {/*Brand Bottom Sheet*/}
-          {/* <BottomSheet
-            ref={brandBottomSheet}
-            snapPoints={[heightScreen - 150, 0]}
-            initialSnap={1}
-            callbackNode={fall}
-            onCloseEnd={() => {
-              changeBottomSheetVisibility(false);
-            }}
-            enabledGestureInteraction={true}
-            renderHeader={_renderHeader}
-            renderContent={_renderContent}
-          /> */}
-          <BottomSheet
-            ref={bottomSheetBrandRef}
-            index={-1}
-            snapPoints={snapPointsBrand}
-            enablePanDownToClose={true}
-            handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
-            handleStyle={{
-              backgroundColor: color.background_bottomNav,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}
+            {errors.address && (
+              <Text
+                style={{
+                  alignSelf: 'flex-end',
+                  color: color.error,
+                  fontFamily: POPPINS_REGULAR,
+                  paddingEnd: 5,
+                  fontSize: 12,
+                  paddingTop: 1,
+                  textAlign: 'right',
+                }}>
+                {errors.address}
+              </Text>
+            )}
+          </View>
+
+          <View style={{height: 50}} />
+          <View
             style={{
-              backgroundColor: color.background,
-              borderColor: color.divider,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
+              flexDirection: 'row',
+              marginBottom: 40,
+              justifyContent: 'space-around',
             }}>
-            {_renderContent()}
-          </BottomSheet>
+            <CustomButton onPress={onPreview} title="Preview" />
+            <CustomButton onPress={onPost} title="Post" />
+          </View>
+        </Animated.View>
+      </Container>
 
-          {/*Type Bottom Sheet*/}
-          {/* <BottomSheet
-            ref={typeBottomSheet}
-            snapPoints={[300, 0]}
-            initialSnap={1}
-            callbackNode={fall}
-            onCloseEnd={() => {
-              changeTypeBottomSheetVisibility(false);
-            }}
-            enabledGestureInteraction={true}
-            renderHeader={_renderHeader}
-            renderContent={_renderTypeContent}
-          /> */}
-          <BottomSheet
-            ref={bottomSheetTypeRef}
-            index={-1}
-            snapPoints={snapPointsType}
-            enablePanDownToClose={true}
-            handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
-            handleStyle={{
-              backgroundColor: color.background_bottomNav,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}
-            style={{
-              backgroundColor: color.background,
-              borderColor: color.divider,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}>
-            {_renderTypeContent()}
-          </BottomSheet>
+      {/*Brand Bottom Sheet*/}
+      <BottomSheet
+        ref={bottomSheetBrandRef}
+        index={-1}
+        snapPoints={snapPointsBrand}
+        onClose={() => changeBottomSheetVisibility(false)}
+        enablePanDownToClose={true}
+        handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
+        handleStyle={{
+          backgroundColor: color.background_bottomNav,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}
+        style={{
+          backgroundColor: color.background,
+          borderColor: color.divider,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}>
+        {_renderContent()}
+      </BottomSheet>
 
-          {/*Color Bottom Sheet*/}
-          {/* <BottomSheet
-            ref={colorBottomSheet}
-            snapPoints={[200, 0]}
-            initialSnap={1}
-            callbackNode={fall}
-            onCloseEnd={() => {
-              changeColorBottomSheetVisibility(false);
-            }}
-            enabledGestureInteraction={true}
-            renderHeader={_renderHeader}
-            renderContent={_renderColorContent}
-          /> */}
+      {/*Type Bottom Sheet*/}
+      <BottomSheet
+        ref={bottomSheetTypeRef}
+        index={-1}
+        onClose={() => {
+          opacity.value = 1;
+          opacityBlack.value = 0;
+        }}
+        snapPoints={snapPointsType}
+        enablePanDownToClose={true}
+        handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
+        handleStyle={{
+          backgroundColor: color.background_bottomNav,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}
+        style={{
+          backgroundColor: color.background,
+          borderColor: color.divider,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}>
+        {_renderTypeContent()}
+      </BottomSheet>
 
-          <BottomSheet
-            ref={bottomSheetColorRef}
-            index={-1}
-            snapPoints={snapPointsColor}
-            enablePanDownToClose={true}
-            handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
-            handleStyle={{
-              backgroundColor: color.background_bottomNav,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}
-            style={{
-              backgroundColor: color.background,
-              borderColor: color.divider,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}>
-            {_renderColorContent()}
-          </BottomSheet>
+      {/*Color Bottom Sheet*/}
+      <BottomSheet
+        ref={bottomSheetColorRef}
+        index={-1}
+        snapPoints={snapPointsColor}
+        enablePanDownToClose={true}
+        handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
+        handleStyle={{
+          backgroundColor: color.background_bottomNav,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}
+        style={{
+          backgroundColor: color.background,
+          borderColor: color.divider,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}>
+        {_renderColorContent()}
+      </BottomSheet>
 
-          {/*Manufacturer Year Bottom Sheet*/}
-          {/* <BottomSheet
-            ref={manufacturerYearBottomSheet}
-            snapPoints={[500, 0]}
-            initialSnap={1}
-            callbackNode={fall}
-            onCloseEnd={() => {
-              changeManufacturerYearBottomSheetVisibility(false);
-            }}
-            enabledGestureInteraction={true}
-            renderHeader={_renderHeader}
-            renderContent={_renderManufacturerYearContent}
-          /> */}
-          <BottomSheet
-            ref={bottomSheetManufacturerYearRef}
-            index={-1}
-            snapPoints={snapPointsManufacturerYear}
-            enablePanDownToClose={true}
-            handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
-            handleStyle={{
-              backgroundColor: color.background_bottomNav,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}
-            style={{
-              backgroundColor: color.background,
-              borderColor: color.divider,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}>
-            {_renderManufacturerYearContent()}
-          </BottomSheet>
+      {/*Manufacturer Year Bottom Sheet*/}
+      <BottomSheet
+        ref={bottomSheetManufacturerYearRef}
+        index={-1}
+        snapPoints={snapPointsManufacturerYear}
+        enablePanDownToClose={true}
+        handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
+        handleStyle={{
+          backgroundColor: color.background_bottomNav,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}
+        style={{
+          backgroundColor: color.background,
+          borderColor: color.divider,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}>
+        {_renderManufacturerYearContent()}
+      </BottomSheet>
 
-          {/*Images Bottom Sheet*/}
-          {/* <BottomSheet
-            ref={imageBottomSheet}
-            snapPoints={[230, 0]}
-            initialSnap={1}
-            callbackNode={fall}
-            onCloseEnd={() => {
-              changeImageBottomSheetVisibility(false);
-            }}
-            enabledGestureInteraction={true}
-            renderHeader={_renderHeader}
-            renderContent={_renderContentImage}
-          /> */}
-          <BottomSheet
-            ref={bottomSheetImageRef}
-            index={-1}
-            snapPoints={snapPointsImage}
-            enablePanDownToClose={true}
-            handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
-            handleStyle={{
-              backgroundColor: color.background_bottomNav,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}
-            style={{
-              backgroundColor: color.background,
-              borderColor: color.divider,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}>
-            {_renderContentImage()}
-          </BottomSheet>
+      {/*Images Bottom Sheet*/}
+      <BottomSheet
+        ref={bottomSheetImageRef}
+        index={-1}
+        snapPoints={snapPointsImage}
+        enablePanDownToClose={true}
+        handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
+        handleStyle={{
+          backgroundColor: color.background_bottomNav,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}
+        style={{
+          backgroundColor: color.background,
+          borderColor: color.divider,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}>
+        {_renderContentImage()}
+      </BottomSheet>
 
-          {/*Address Bottom Sheet*/}
-          {/* <BottomSheet
-            ref={addressBottomSheet}
-            snapPoints={[500, 0]}
-            initialSnap={1}
-            callbackNode={fall}
-            onCloseEnd={() => {
-              changeAddressBottomSheetVisibility(false);
-            }}
-            enabledGestureInteraction={true}
-            renderHeader={_renderHeader}
-            renderContent={_renderAddressContent}
-          /> */}
-          <BottomSheet
-            ref={bottomSheetAddressRef}
-            index={-1}
-            snapPoints={snapPointsAddress}
-            enablePanDownToClose={true}
-            handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
-            handleStyle={{
-              backgroundColor: color.background_bottomNav,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}
-            style={{
-              backgroundColor: color.background,
-              borderColor: color.divider,
-              borderTopRightRadius: 16,
-              borderTopLeftRadius: 16,
-            }}>
-            {_renderAddressContent()}
-          </BottomSheet>
-        </View>
-      )}
-    </Root>
+      {/*Address Bottom Sheet*/}
+      <BottomSheet
+        ref={bottomSheetAddressRef}
+        index={-1}
+        snapPoints={snapPointsAddress}
+        enablePanDownToClose={true}
+        handleIndicatorStyle={{backgroundColor: color.onBackground_light}}
+        handleStyle={{
+          backgroundColor: color.background_bottomNav,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}
+        style={{
+          backgroundColor: color.background,
+          borderColor: color.divider,
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}>
+        {_renderAddressContent()}
+      </BottomSheet>
+
+      <PopUpLoading
+        text="Uploading post..."
+        visibility={isLoading}
+        onChangePopupVisibility={onChangeLoadingState}
+      />
+      <PopUpMessage
+        message={textSuccess}
+        type={'success'}
+        visibility={isSuccess}
+        onChangePopupVisibility={onChangeSuccessState}
+        havingTwoButton={true}
+        labelCTA="Go to your posts"
+        onPress={() => {
+          navigation.navigate(YOUR_POSTS);
+        }}
+      />
+      <PopUpMessage
+        message={textError}
+        type={'error'}
+        visibility={isError}
+        onChangePopupVisibility={onChangeErrorState}
+        labelCancel="Cancel"
+      />
+      <PopUpMessage
+        message={textWarning}
+        type={'warning'}
+        visibility={isWarning}
+        onChangePopupVisibility={onChangeWarningState}
+        havingTwoButton={true}
+        labelCTA="Go Back"
+        labelCancel="Discard"
+        onPressCancel={() => {
+          navigation.navigate(YOUR_POSTS);
+        }}
+      />
+    </View>
   );
 };
 
 export default AddPostComponent;
 
 const styles = StyleSheet.create({
+  wrapperHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: '2%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 70,
+  },
+  textHeader: {
+    fontSize: getFontSize(18),
+    fontFamily: POPPINS_BOLD,
+    height: 24,
+  },
   btnParentSection: {
     alignItems: 'center',
     marginTop: 10,
@@ -1915,5 +1892,14 @@ const styles = StyleSheet.create({
   styleTitle: {
     fontSize: getFontSize(14),
     fontFamily: POPPINS_MEDIUM,
+    marginBottom: -4,
+    marginTop: 8,
+  },
+  wrapperTitle_Description: {
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  wrapperDetailInformation: {
+    marginBottom: 16,
   },
 });

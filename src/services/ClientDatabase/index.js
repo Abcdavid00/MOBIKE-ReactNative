@@ -18,7 +18,7 @@ const VEHICLETYPES = 'VehicleTypes';
 const VEHICLECONDITIONS = 'VehicleConditions';
 const COLORS = 'Colors';
 
-const doLog = false;
+const doLog = true;
 
 const log = (message) => {
     if (doLog) {

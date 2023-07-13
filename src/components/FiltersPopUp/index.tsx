@@ -10,9 +10,11 @@ import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   FilterState,
+  initialState,
   setBrand,
   setColor,
   setInitial,
+  setIsFiltered,
   setLineup,
   setMinMaxText,
   setPriceRange,
@@ -43,6 +45,7 @@ import {setInitialSort} from '../../redux/slice/sortSlice';
 import FilterPropManufacturerYearComponent from './FilterPropManufacturerYear';
 import ColorBottomSheetContent from '../AddPost/ColorBottomSheetContent';
 import FilterPropColorComponent from './FilterPropColor';
+import {useTheme} from '@react-navigation/native';
 const heightScreen = Dimensions.get('window').height;
 const widthScreen = Dimensions.get('window').width;
 
@@ -68,12 +71,21 @@ const FiltersPopUpComponent: React.FC<FiltersPopUpComponentProps> = ({
 
   const onNavigationProductList = () => {
     navigation.goBack();
+    if (
+      filter.vehicleType == undefined &&
+      JSON.stringify(filter.priceRange).toString() ==
+        JSON.stringify(initialState.priceRange).toString() &&
+      filter.brand == undefined &&
+      filter.lineup == undefined &&
+      filter.manufacturerYear == undefined &&
+      filter.color == undefined
+    ) {
+      dispatch(setIsFiltered(false));
+    } else dispatch(setIsFiltered(true));
     dispatch(setInitialSort());
   };
 
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
+  const color = useTheme().colors.customColors;
 
   const onGoBack = () => {
     // dispatch(setInitial());

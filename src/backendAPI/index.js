@@ -118,7 +118,7 @@ export const SetProfileImage = async (image: Object) => {
     return await ProtectedUploadImage("personal/avatar/set", image, token);
 }
 
-export const SetPersonalInfo = async (name: String, birthday: String, gender: Number, phoneNumber: String, identificationNumber: String) => {
+export const SetPersonalInfo = async (name?: string, birthday?: string, gender?: number, phoneNumber?: number, identificationNumber?: number) => {
     const body = {
         Name: name || "",
         Birthday: birthday || "",
@@ -170,20 +170,20 @@ export const SetPersonalAddress = async (addresses: Array) => {
 
 export const UploadPost = async (
     images: Array<Object>,
-    title: String,
-    content: String,
-    price: Number,
-    addressID: Number,
-    vehicleName: String,
-    vehicleOdometer: Number,
-    vehicleLicensePlate: String,
-    vehicleManufactureYear: Number,
-    vehicleCubicPower: Number,
-    vehicleBrandID: Number,
-    vehicleLineupID: Number,
-    vehicleTypeID: Number,
-    vehicleConditionID: Number,
-    vehicleColorID: Number,
+    title: string,
+    content: string,
+    price: number,
+    addressID: number,
+    vehicleName: string,
+    vehicleOdometer: number,
+    vehicleLicensePlate: string,
+    vehicleManufactureYear: number,
+    vehicleCubicPower: number,
+    vehicleBrandID: number,
+    vehicleLineupID: number,
+    vehicleTypeID: number,
+    vehicleConditionID: number,
+    vehicleColorID: number,
 ) => {
     const token = getToken();
     const pros = [];

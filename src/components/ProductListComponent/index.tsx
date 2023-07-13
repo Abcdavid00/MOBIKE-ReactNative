@@ -19,6 +19,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {FilterState} from '../../redux/slice/filterSlice';
 import {
   FILTERS_POP_UP,
+  POST_DETAIL,
   POST_DETAIL_NAVIGATOR,
   SEARCH,
 } from '../../constants/routeNames';
@@ -36,6 +37,7 @@ import {SortState, setInitialSort, setSort} from '../../redux/slice/sortSlice';
 import {useIsFocused} from '@react-navigation/native';
 import PostPreviewList from '../PostPreviewList';
 import {selectPost} from '../../redux/slice/selectedPostSlice';
+import {personalInfoState} from '../../redux/clientDatabase/personalInfo';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -125,7 +127,6 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
     // console.log('postListLoaded: ' + JSON.stringify(postListTmp));
     // console.log('postListCurrent: ' + JSON.stringify(tmp.length));
     setIsLoading(false);
-    setIsReady(true);
     //trick
     if (tmp.length % 2 != 0) {
       setIsEnd(true);
@@ -201,11 +202,14 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
     // console.log('Clear');
   };
 
-  const [isReady, setIsReady] = useState(false);
-
-  const isFiltered = useSelector<RootState, Boolean>(
+  const isFilteredState = useSelector<RootState, Boolean>(
     state => state.filter.isFiltered,
   );
+
+  const [isFiltered, setIsFiltered] = useState(isFilteredState);
+  useEffect(() => {
+    setIsFiltered(isFilteredState);
+  }, [isFocused]);
 
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
   const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
@@ -225,6 +229,10 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
     }
   }, [page]);
 
+  const userPersonalInfo = useSelector<RootState, personalInfoState>(
+    state => state.personalInfo,
+  );
+
   const renderItemPostPreview: ListRenderItem<PostPreviewType> = ({
     item,
     index,
@@ -232,19 +240,19 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
     <PostPreview
       postID={item.post.ID}
       post={item}
-      key={index}
+      key={item.post.ID}
       styleWrapper={{marginTop: 13}}
       isActivePost={true}
       pressable={true}
       onPress={() => {
-        dispatch(
-          selectPost({
-            ID: item.post.ID,
-            isActivePost: true,
+        navigation.navigate(POST_DETAIL_NAVIGATOR, {
+          screen: POST_DETAIL,
+          params: {
+            postID: item.post.ID,
+            isActivePost: item.user.ID == userPersonalInfo.ID ? false : true,
             isAdmin: false,
-          }),
-        );
-        navigation.navigate(POST_DETAIL_NAVIGATOR);
+          },
+        });
       }}
       index={index}
       color={color}
@@ -278,26 +286,7 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
   const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
   const renderHeader = () => (
-    <View style={{marginBottom: '3%'}}>
-      <View style={styles.wrapperHeader}>
-        <Pressable onPress={onGoBack}>
-          <SimpleLineIcons
-            name="arrow-left"
-            color={color.onBackground_light}
-            size={20}
-          />
-        </Pressable>
-        <TextField
-          label={!filter.title ? 'What are you looking for ?' : ''}
-          iconClass={Ionicons}
-          iconName={'search-outline'}
-          iconColor={color.primary}
-          style={{width: '90%'}}
-          onTouchEndCapture={onNavigateSearch}
-          value={filter.title}
-        />
-      </View>
-
+    <View style={{marginBottom: '6%'}}>
       {/*Sort Option
        */}
       <View
@@ -435,7 +424,25 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
         </View>
       </Container> */}
 
-      {renderHeader()}
+      {/* {renderHeader()} */}
+      <View style={styles.wrapperHeader}>
+        <Pressable onPress={onGoBack}>
+          <SimpleLineIcons
+            name="arrow-left"
+            color={color.onBackground_light}
+            size={20}
+          />
+        </Pressable>
+        <TextField
+          label={!filter.title ? 'What are you looking for ?' : ''}
+          iconClass={Ionicons}
+          iconName={'search-outline'}
+          iconColor={color.primary}
+          style={{width: '90%'}}
+          onTouchEndCapture={onNavigateSearch}
+          value={filter.title}
+        />
+      </View>
 
       <PostPreviewList
         data={postList}
@@ -446,6 +453,7 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
         onMomentumScrollBegin={onMomentumScrollBegin}
         isEnd={isEnd}
         isEmpty={isEmpty}
+        ListHeaderComponent={renderHeader()}
       />
     </View>
   );
@@ -454,15 +462,6 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
 export default ProductListComponent;
 
 const styles = StyleSheet.create({
-  styleWrapper: {
-    backgroundColor: '#EDEDED',
-    padding: 12,
-    borderRadius: 5,
-    marginEnd: 13,
-    marginVertical: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   wrapperHeader: {
     flexDirection: 'row',
     paddingLeft: '6%',

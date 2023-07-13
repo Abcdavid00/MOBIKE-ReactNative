@@ -6,6 +6,7 @@ import {
 } from '../../utils/Validator';
 
 export type personalInfoState = {
+  ID?: number;
   Birthdate?: string;
   Gender?: number;
   Identification_number?: number;
@@ -26,6 +27,7 @@ export type addressesType = {
 };
 
 const initialState: personalInfoState = {
+  ID: undefined,
   Birthdate: undefined,
   Gender: undefined,
   Identification_number: undefined,
@@ -68,6 +70,7 @@ export const personalInfoSlice = createSlice({
     setAll: (state, action) => {
       try {
         if (action.payload) {
+          state.ID = action.payload.ID || undefined;
           state.Birthdate = action.payload.Birthdate || undefined;
           state.Gender = action.payload.Gender || undefined;
           state.Identification_number =

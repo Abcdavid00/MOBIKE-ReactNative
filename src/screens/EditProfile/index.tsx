@@ -12,24 +12,6 @@ type EditProfileScreenProps = {
 };
 
 const EditProfileScreen: React.FC<EditProfileScreenProps> = ({navigation}) => {
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
-  useEffect(() => {
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {
-        display: 'none',
-      },
-    });
-    return () =>
-      navigation.getParent()?.setOptions({
-        tabBarStyle: {
-          backgroundColor: color.background_bottomNav,
-          minHeight: 56,
-          maxHeight: 80,
-        },
-      });
-  }, [navigation]);
   return <EditProfileComponent navigation={navigation} />;
 };
 

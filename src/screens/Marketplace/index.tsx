@@ -2,7 +2,11 @@ import React, {useEffect} from 'react';
 import MarketplaceComponent from '../../components/Marketplace';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {MarketplaceStackParamList} from '../../navigations/MarketplaceNavigator';
-import {useIsFocused, useNavigationState} from '@react-navigation/native';
+import {
+  useIsFocused,
+  useNavigationState,
+  useTheme,
+} from '@react-navigation/native';
 import {PRODUCT_LIST, SEARCH} from '../../constants/routeNames';
 import {useDispatch} from 'react-redux';
 import {setInitial, setTitle} from '../../redux/slice/filterSlice';
@@ -16,13 +20,27 @@ const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({navigation}) => {
   const previousScreen =
     navigationState.routes[navigationState.index - 1]?.name;
   const dispatch = useDispatch();
-  const isFocus = useIsFocused();
+  const isFocused = useIsFocused();
+  const color = useTheme().colors.customColors;
   useEffect(() => {
-    if (isFocus) {
+    if (isFocused) {
       dispatch(setInitial());
-      console.log('Clear');
+      // console.log('Clear');
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {
+          backgroundColor: color.background_bottomNav,
+          minHeight: 56,
+          maxHeight: 80,
+        },
+      });
+    } else {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {
+          display: 'none',
+        },
+      });
     }
-  }, [isFocus]);
+  }, [isFocused]);
   return <MarketplaceComponent navigation={navigation} />;
 };
 

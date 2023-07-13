@@ -13,11 +13,14 @@ import ProfileScreen from '../screens/Profile';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import SavedPostScreen from '../screens/SavedPost';
-import PostDetailNavigator from './PostDetailNavigator';
+import PostDetailNavigator, {
+  PostDetailStackParamList,
+} from './PostDetailNavigator';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type SavedPostStackParamList = {
   [SAVED_POST]: undefined;
-  [POST_DETAIL_NAVIGATOR]: undefined;
+  [POST_DETAIL_NAVIGATOR]: NavigatorScreenParams<PostDetailStackParamList>;
 };
 
 const Stack = createStackNavigator<SavedPostStackParamList>();

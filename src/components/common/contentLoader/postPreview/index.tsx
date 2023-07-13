@@ -6,15 +6,16 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../../redux/store';
 import {ThemeState} from '../../../../redux/slice/themeSlice';
 import colors from '../../../../assets/theme/colors';
+import {useTheme} from '@react-navigation/native';
 
 const widthScreen = Dimensions.get('window').width;
 
 const PostPreviewLoader = () => {
-  const theme = useSelector<RootState, ThemeState>(state => state.theme);
-  const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
+  const color = useTheme().colors.customColors;
+  const theme = useTheme().dark;
 
   return (
-    <View style={{marginVertical: 12}}>
+    <View style={{marginBottom: 24}}>
       <ShadowWrapper
         style={{
           width: widthScreen * 0.42,
@@ -26,7 +27,7 @@ const PostPreviewLoader = () => {
           height={widthScreen * 0.42 * 1.45}
           speed={1}
           backgroundColor={color.divider}
-          foregroundColor={theme == 'light' ? '#ecebeb' : '#686868'}>
+          foregroundColor={theme ? '#686868' : '#ecebeb'}>
           {/* Only SVG shapes */}
           <Rect
             x={widthScreen * 0.035}

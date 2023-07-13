@@ -89,7 +89,7 @@ const ColorBottomSheetContent: React.FC<ColorBottomSheetContentProps> = ({
   );
 
   return (
-    <View style={{backgroundColor: color.background, height: '100%'}}>
+    <View style={{backgroundColor: color.surface, height: '100%'}}>
       <Text style={[styles.selectedLabel, {color: color.onBackground}]}>
         Choose color
       </Text>
@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
     fontSize: getFontSize(16),
     fontFamily: POPPINS_SEMI_BOLD,
     alignSelf: 'flex-start',
+    marginTop: 8,
   },
   resetLabel: {
     marginEnd: 15,

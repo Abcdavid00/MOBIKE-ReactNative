@@ -12,11 +12,12 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/store';
 import {ThemeState} from '../../../redux/slice/themeSlice';
 import colors from '../../../assets/theme/colors';
+import * as ImagePicker from 'react-native-image-picker';
 
 const {width, height} = Dimensions.get('window');
 
 type CarouselProps = {
-  data: Array<string> | Array<number>;
+  data: Array<string> | Array<number> | Array<ImagePicker.Asset>;
   isUri?: boolean;
   isImageID?: boolean;
   havingBackground?: boolean;
@@ -36,70 +37,70 @@ const Carousel: React.FC<CarouselProps> = ({
   const scrollX = new Animated.Value(0);
   let position = Animated.divide(scrollX, width);
   // if (data && data.length) {
-    return (
-      <View style={style}>
-        <FlatList
-          data={data}
-          keyExtractor={(item, index) => 'key' + index}
-          horizontal
-          pagingEnabled
-          scrollEnabled
-          snapToAlignment="center"
-          scrollEventThrottle={16}
-          decelerationRate={'normal'}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({item, index}) => {
+  return (
+    <View style={style}>
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => 'key' + index}
+        horizontal
+        pagingEnabled
+        scrollEnabled
+        snapToAlignment="center"
+        scrollEventThrottle={16}
+        decelerationRate={'normal'}
+        showsHorizontalScrollIndicator={false}
+        renderItem={({item, index}) => {
+          return (
+            <CarouselItem
+              item={item}
+              isUri={isUri}
+              isImageID={isImageID}
+              index={index}
+            />
+          );
+        }}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {useNativeDriver: false},
+        )}
+      />
+      {data.length > 1 && (
+        <View
+          style={[
+            styles.dotView,
+            havingBackground && {
+              backgroundColor: theme == 'light' ? '#ffffff55' : '#00000055',
+              borderRadius: 10,
+              bottom: 28,
+            },
+          ]}>
+          {data.map((_, i) => {
+            let opacity = position.interpolate({
+              inputRange: [i - 1, i, i + 1],
+              outputRange: [0.3, 1, 0.3],
+              extrapolate: 'clamp',
+            });
             return (
-              <CarouselItem
-                item={item}
-                isUri={isUri}
-                isImageID={isImageID}
-                index={index}
+              <Animated.View
+                key={i}
+                style={{
+                  opacity,
+                  height: 5,
+                  width: 5,
+                  backgroundColor: color.onBackground,
+                  margin: 2,
+                  borderRadius: 5,
+                }}
               />
             );
-          }}
-          onScroll={Animated.event(
-            [{nativeEvent: {contentOffset: {x: scrollX}}}],
-            {useNativeDriver: false},
-          )}
-        />
-        {data.length > 1 && (
-          <View
-            style={[
-              styles.dotView,
-              havingBackground && {
-                backgroundColor: theme == 'light' ? '#ffffff55' : '#00000055',
-                borderRadius: 10,
-                bottom: 28,
-              },
-            ]}>
-            {data.map((_, i) => {
-              let opacity = position.interpolate({
-                inputRange: [i - 1, i, i + 1],
-                outputRange: [0.3, 1, 0.3],
-                extrapolate: 'clamp',
-              });
-              return (
-                <Animated.View
-                  key={i}
-                  style={{
-                    opacity,
-                    height: 5,
-                    width: 5,
-                    backgroundColor: color.onBackground,
-                    margin: 2,
-                    borderRadius: 5,
-                  }}
-                />
-              );
-            })}
-          </View>
-        )}
-      </View>
-    );
-  }
-  // console.log('Please provide Images');
-  // return null;
+          })}
+        </View>
+      )}
+    </View>
+  );
+};
+// console.log('Please provide Images');
+// return null;
 // };
 
 const styles = StyleSheet.create({

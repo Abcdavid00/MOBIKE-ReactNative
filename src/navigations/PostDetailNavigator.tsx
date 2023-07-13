@@ -6,13 +6,17 @@ import SeeAllReviews from '../screens/SeeAllReviews';
 import React from 'react';
 
 export type PostDetailStackParamList = {
-  [POST_DETAIL]: undefined;
+  [POST_DETAIL]: {
+    postID: number;
+    isActivePost: boolean;
+    isAdmin: boolean;
+  };
   [SEE_ALL_REVIEWS]: undefined;
 };
 
 const PostDetailStack = createStackNavigator<PostDetailStackParamList>();
 
-const PostDetailNavigator = () => {
+const PostDetailNavigator: React.FC = () => {
   return (
     <PostDetailStack.Navigator
       initialRouteName={POST_DETAIL}

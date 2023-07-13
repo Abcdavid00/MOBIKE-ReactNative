@@ -16,21 +16,6 @@ const AddPostScreen: React.FC<AddPostScreenProps> = ({navigation}) => {
   const color = useSelector<RootState, ColorThemeProps>(state =>
     getThemeColor(state.theme),
   );
-  useEffect(() => {
-    navigation.getParent().setOptions({
-      tabBarStyle: {
-        display: 'none',
-      },
-    });
-    return () =>
-      navigation.getParent().setOptions({
-        tabBarStyle: {
-          backgroundColor: color.background_bottomNav,
-          minHeight: 56,
-          maxHeight: 80,
-        },
-      });
-  }, [navigation]);
 
   return <AddPostComponent navigation={navigation} />;
 };

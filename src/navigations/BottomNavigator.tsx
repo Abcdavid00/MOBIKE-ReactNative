@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {
   CHAT_NAVIGATOR,
@@ -19,12 +19,23 @@ import {POPPINS_REGULAR} from '../assets/fonts';
 import {getFontSize} from '../utils/fontSizeResponsive';
 import {StyleSheet} from 'react-native';
 import ChatNavigator from './ChatNavigator';
+import {useTheme} from '@react-navigation/native';
 
-const Tab = createBottomTabNavigator();
+export type BottomTabParamsList = {
+  [MARKETPLACE_NAVIGATOR]: undefined;
+  [YOUR_POSTS_NAVIGATOR]: undefined;
+  [CHAT_NAVIGATOR]: undefined;
+  [PROFILE_NAVIGATOR]: undefined;
+};
+
+const Tab = createBottomTabNavigator<BottomTabParamsList>();
 
 const BottomNavigator = () => {
   const theme = useSelector<RootState, ThemeState>(state => state.theme);
-  const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
+  const color = useTheme().colors.customColors;
+  useEffect(() => {
+    console.log('Render Bottom Tab');
+  }, [theme]);
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({

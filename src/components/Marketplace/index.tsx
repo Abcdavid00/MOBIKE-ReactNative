@@ -10,12 +10,13 @@ import {
 } from 'react-native';
 import React, {useRef, useState} from 'react';
 import Container from '../common/container';
-import colors from '../../assets/theme/colors';
+import colors, {ColorThemeProps} from '../../assets/theme/colors';
 import Carousel from '../Banner/carousel';
 import imageBanner from '../../data/imageBanner';
 import CategoryList from '../CategoryList/flatList';
 import {RootState} from '../../redux/store';
 import {
+  POST_DETAIL,
   POST_DETAIL_NAVIGATOR,
   PRODUCT_LIST,
   SEARCH,
@@ -45,6 +46,9 @@ import {setSort} from '../../redux/slice/sortSlice';
 import {PostPreviewType} from '../PostPreview';
 import {selectPost} from '../../redux/slice/selectedPostSlice';
 import PostPreviewList from '../PostPreviewList';
+import {useTheme} from '@react-navigation/native';
+import {getThemeColor} from '../../utils/getThemeColor';
+import {personalInfoState} from '../../redux/clientDatabase/personalInfo';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -67,9 +71,9 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
 
   const getFilterPostList = async (page?: number) => {
     const postListTmp = await GetAllPosts(
-      page ? 'page=' + page.toString() : '',
+      'order=desc&' + (page ? 'page=' + page.toString() : ''),
     );
-    // console.log('Page: ' + page);
+    console.log('Page: ' + page);
     // console.log('postList: ' + JSON.stringify(postListTmp));
     let tmp: Array<PostPreviewType> = [...postList];
     for (let i = 0; i < postListTmp.length; i++) {
@@ -95,8 +99,8 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   // const [isLoading, setIsLoading] = React.useState(true);
   const loadingArray = [1, 2, 3, 4, 5, 6];
 
-  const theme = useSelector<RootState, ThemeState>(state => state.theme);
-  const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
+  // const color = useTheme().colors.customColors;
+  const color = useTheme().colors.customColors;
 
   //Infinite Scroll
   const [page, setPage] = useState(1);
@@ -111,6 +115,10 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
     }
   }, [page]);
 
+  const userPersonalInfo = useSelector<RootState, personalInfoState>(
+    state => state.personalInfo,
+  );
+
   const renderItemPostPreview: ListRenderItem<PostPreviewType> = ({
     item,
     index,
@@ -118,19 +126,19 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
     <PostPreview
       postID={item.post.ID}
       post={item}
-      key={index}
+      key={item.post.ID}
       styleWrapper={{marginTop: 13}}
       isActivePost={true}
       pressable={true}
       onPress={() => {
-        dispatch(
-          selectPost({
-            ID: item.post.ID,
-            isActivePost: true,
+        navigation.navigate(POST_DETAIL_NAVIGATOR, {
+          screen: POST_DETAIL,
+          params: {
+            postID: item.post.ID,
+            isActivePost: item.user.ID == userPersonalInfo.ID ? false : true,
             isAdmin: false,
-          }),
-        );
-        navigation.navigate(POST_DETAIL_NAVIGATOR);
+          },
+        });
       }}
       index={index}
       color={color}
@@ -168,7 +176,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   // render header
   const renderHeader = () => {
     return (
-      <View>
+      <View style={{marginBottom: 10}}>
         {/* Header */}
         <View style={styles.wrapperHeader}>
           <TextField
@@ -235,81 +243,6 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
         flex: 1,
       }}>
       {/*Preview Post List */}
-
-      {/* <View style={{marginLeft: widthScreen * 0.01}}>
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-          }}>
-          {postList.map((item, index) => {
-            return (
-              <PostPreview
-                postID={item.post.ID}
-                post={item}
-                key={index}
-                styleWrapper={{marginTop: 13}}
-                isActivePost={true}
-                pressable={true}
-                onPress={() => {
-                  dispatch(
-                    selectPost({
-                      ID: item.post.ID,
-                      isActivePost: true,
-                      isAdmin: false,
-                    }),
-                  );
-                  navigation.navigate(POST_DETAIL_NAVIGATOR);
-                }}
-                index={index}
-                color={color}
-              />
-            );
-          })}
-          {isLoading &&
-            loadingArray.map((item, index) => (
-              <PostPreviewLoader key={index} />
-            ))}
-        </View>
-      </View> */}
-
-      {/* <FlatList
-        columnWrapperStyle={{
-          justifyContent: 'space-around',
-          marginHorizontal: widthScreen * 0.01,
-        }}
-        showsVerticalScrollIndicator={false}
-        nestedScrollEnabled
-        data={postList}
-        ListHeaderComponent={renderHeader}
-        numColumns={2}
-        keyExtractor={keyExtractorPostPreview}
-        renderItem={renderItemPostPreview}
-        ListFooterComponent={() => {
-          if (isLoading) {
-            return (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  justifyContent: 'space-around',
-                  marginHorizontal: widthScreen * 0.01,
-                }}>
-                {loadingArray.map((item, index) => (
-                  <PostPreviewLoader key={item} />
-                ))}
-              </View>
-            );
-          } else return null;
-        }}
-        onEndReached={onEndReached}
-        onEndReachedThreshold={0.3}
-        onMomentumScrollBegin={() => {
-          setOnEndReachedCalledDuringMomentum(false);
-        }}
-      /> */}
-
       <PostPreviewList
         data={postList}
         onEndReached={onEndReached}

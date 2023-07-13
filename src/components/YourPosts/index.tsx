@@ -1,7 +1,7 @@
 import {View, Dimensions} from 'react-native';
 import React from 'react';
 import colors, {ColorThemeProps} from '../../assets/theme/colors';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useTheme} from '@react-navigation/native';
 import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
 import ActiveRoute from './ActiveRoute';
 import InactiveRoute from './InactiveRoute';
@@ -27,28 +27,39 @@ type YourPostsComponentProps = {
 const YourPostsComponent: React.FC<YourPostsComponentProps> = ({
   navigation,
 }) => {
-  const {navigate} = useNavigation();
-
   const layout = useWindowDimensions();
 
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
+  const color = useTheme().colors.customColors;
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     {key: 'Active', title: 'Active'},
     {key: 'Inactive', title: 'Inactive'},
     {key: 'Sold', title: 'Sold'},
-    {key: 'Deactivated', title: 'Deactivated'},
+    {key: 'Deactivated', title: 'Deleted'},
   ]);
 
-  const renderScene = SceneMap({
-    Active: ActiveRoute,
-    Inactive: InactiveRoute,
-    Sold: SoldRoute,
-    Deactivated: DeactivatedRoute,
-  });
+  // const renderScene = SceneMap({
+  //   Active: ActiveRoute,
+  //   Inactive: InactiveRoute,
+  //   Sold: SoldRoute,
+  //   Deactivated: DeactivatedRoute,
+  // });
+
+  const renderScene = ({route}: any) => {
+    switch (route.key) {
+      case 'Active':
+        return <ActiveRoute navigation={navigation} />;
+      case 'Inactive':
+        return <InactiveRoute navigation={navigation} />;
+      case 'Sold':
+        return <SoldRoute navigation={navigation} />;
+      case 'Deactivated':
+        return <DeactivatedRoute navigation={navigation} />;
+      default:
+        return null;
+    }
+  };
 
   const renderTabBar = (props: any) => (
     <TabBar
@@ -68,28 +79,13 @@ const YourPostsComponent: React.FC<YourPostsComponentProps> = ({
         elevation: 0,
         borderBottomWidth: 1,
         borderBottomColor: color.divider,
+        paddingVertical: 4,
       }}
     />
   );
 
   return (
-    <View style={{height: '100%'}}>
-      {/* <TouchableWithoutFeedback
-        onPress={() => {
-          navigate(ADD_POST);
-        }}>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: colors.primary,
-            padding: 10,
-            borderRadius: 5,
-            backgroundColor: colors.primary,
-          }}>
-          <Text style={{ color: colors.white }}>Add post</Text>
-        </View>
-      </TouchableWithoutFeedback> */}
-
+    <View style={{height: '100%', backgroundColor: color.background}}>
       <TabView
         navigationState={{index, routes}}
         renderScene={renderScene}
@@ -105,7 +101,7 @@ const YourPostsComponent: React.FC<YourPostsComponentProps> = ({
           margin: 16,
           right: 0,
           bottom: 0,
-          backgroundColor: colors.secondary,
+          backgroundColor: color.secondary,
         }}
         onPress={() => navigation.navigate(ADD_POST)}
       />

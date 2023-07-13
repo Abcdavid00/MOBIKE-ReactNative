@@ -120,10 +120,11 @@ const BrandBottomSheetContent: React.FC<BrandBottomSheetContentProps> = ({
                   style={[
                     {
                       flexDirection: 'row',
-                      // }, isManufacturerSelected && {
-                      //     paddingStart: 10,
-                      //     paddingVertical: 5,
-                      //     paddingEnd: 12,
+                    },
+                    isManufacturerSelected && {
+                      paddingStart: 10,
+                      paddingVertical: 5,
+                      paddingEnd: 12,
                     },
                     !isManufacturerSelected && {padding: 12},
                   ]}>
@@ -149,10 +150,9 @@ const BrandBottomSheetContent: React.FC<BrandBottomSheetContentProps> = ({
                     }}>
                     <Text
                       style={{
-                        // color: flag ? colors.primary : 'black',
                         fontSize: getFontSize(12),
                         fontFamily: POPPINS_REGULAR,
-                        color: color.onBackground,
+                        color: flag ? color.primary : color.onBackground,
                         textAlignVertical: 'center',
                       }}>
                       {isManufacturerSelected
@@ -160,14 +160,14 @@ const BrandBottomSheetContent: React.FC<BrandBottomSheetContentProps> = ({
                         : (item as vehicleLineUpsItemType).Lineup}
                     </Text>
 
-                    {/* {flag && (
+                    {flag && (
                       <MaterialIcons
                         name="check"
                         size={16}
                         color={colors.primary}
                         style={{paddingTop: isManufacturerSelected ? 8 : 3}}
                       />
-                    )} */}
+                    )}
                   </View>
                 </View>
 
@@ -196,7 +196,7 @@ const BrandBottomSheetContent: React.FC<BrandBottomSheetContentProps> = ({
                   <View
                     style={{
                       borderWidth: 1,
-                      borderColor: color.divider,
+                      borderColor: flag ? color.primary : color.divider,
                       borderRadius: 10,
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -213,7 +213,7 @@ const BrandBottomSheetContent: React.FC<BrandBottomSheetContentProps> = ({
                       <Text
                         style={{
                           //   color: flag ? colors.primary : 'black',
-                          color: color.onBackground,
+                          color: flag ? color.primary : color.onBackground,
                           textAlignVertical: 'center',
                           fontSize: getFontSize(12),
                           fontFamily: POPPINS_REGULAR,
@@ -221,14 +221,14 @@ const BrandBottomSheetContent: React.FC<BrandBottomSheetContentProps> = ({
                         }}>
                         {(item as vehicleBrandsItemType).Name}
                       </Text>
-                      {/* {flag && (
+                      {flag && (
                         <MaterialIcons
                           name="check"
                           size={16}
                           color={colors.primary}
                           style={{marginLeft: 2}}
                         />
-                      )} */}
+                      )}
                     </View>
                   </View>
                 </View>
@@ -276,7 +276,7 @@ const BrandBottomSheetContent: React.FC<BrandBottomSheetContentProps> = ({
     getThemeColor(state.theme),
   );
   return (
-    <View style={{backgroundColor: color.background, height: '100%'}}>
+    <View style={{backgroundColor: color.surface, height: '100%'}}>
       <Text style={[styles.selectedLabel, {color: color.onBackground}]}>
         {isManufacturerSelected ? 'Choose brand' : 'Choose lineup'}
       </Text>
@@ -324,6 +324,7 @@ const styles = StyleSheet.create({
     marginStart: 15,
     fontSize: getFontSize(16),
     fontFamily: POPPINS_SEMI_BOLD,
+    marginTop: 8,
     alignSelf: 'flex-start',
   },
   resetLabel: {

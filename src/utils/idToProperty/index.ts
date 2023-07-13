@@ -36,7 +36,7 @@ export const colorNameFromID = (ID: number) => {
 export const colorHexFromID = (ID: number) => {
   const color = Store.getState().colors.find(item => item.ID == ID);
   if (color) return '#' + color.Color_hex;
-  else return '--';
+  else return '#000';
 };
 
 export const convertFirstCharacterToUppercase = (stringToConvert: String) => {

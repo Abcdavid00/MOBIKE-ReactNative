@@ -35,21 +35,21 @@ export type FilterState = {
   isFiltered: Boolean;
 };
 
-const checkIsNoFilter = (state: FilterState) => {
-  if (
-    state.vehicleType == undefined &&
-    JSON.stringify(state.priceRange).toString() ==
-      JSON.stringify(initialState.priceRange).toString() &&
-    state.brand == undefined &&
-    state.lineup == undefined &&
-    state.manufacturerYear == undefined &&
-    state.color == undefined
-  )
-    return true;
-  else return false;
-};
+// const checkIsNoFilter = (state: FilterState) => {
+//   if (
+//     state.vehicleType == undefined &&
+//     JSON.stringify(state.priceRange).toString() ==
+//       JSON.stringify(initialState.priceRange).toString() &&
+//     state.brand == undefined &&
+//     state.lineup == undefined &&
+//     state.manufacturerYear == undefined &&
+//     state.color == undefined
+//   )
+//     return true;
+//   else return false;
+// };
 
-const initialState: FilterState = {
+export const initialState: FilterState = {
   name: '',
   vehicleType: undefined,
   priceRange: {
@@ -102,8 +102,8 @@ const filterSlice = createSlice({
       state.priceRange.max = action.payload.max;
       state.priceRange.minPosition = action.payload.minPosition;
       state.priceRange.maxPosition = action.payload.maxPosition;
-      if (checkIsNoFilter(state)) state.isFiltered = false;
-      else state.isFiltered = true;
+      // if (checkIsNoFilter(state)) state.isFiltered = false;
+      // else state.isFiltered = true;
     },
     setMinMaxText: (state, action) => {
       state.minMaxText.min = action.payload.min;
@@ -136,22 +136,25 @@ const filterSlice = createSlice({
     removeBrand_Lineup: state => {
       state.brand = undefined;
       state.lineup = undefined;
-      if (checkIsNoFilter(state)) state.isFiltered = false;
+      // if (checkIsNoFilter(state)) state.isFiltered = false;
     },
     setType: (state, action) => {
       state.vehicleType = action.payload;
-      if (checkIsNoFilter(state)) state.isFiltered = false;
-      else state.isFiltered = true;
+      // if (checkIsNoFilter(state)) state.isFiltered = false;
+      // else state.isFiltered = true;
     },
     setColor: (state, action) => {
       state.color = action.payload;
-      if (checkIsNoFilter(state)) state.isFiltered = false;
-      else state.isFiltered = true;
+      // if (checkIsNoFilter(state)) state.isFiltered = false;
+      // else state.isFiltered = true;
     },
     setManufacturerYear: (state, action) => {
       state.manufacturerYear = action.payload;
-      if (checkIsNoFilter(state)) state.isFiltered = false;
-      else state.isFiltered = true;
+      // if (checkIsNoFilter(state)) state.isFiltered = false;
+      // else state.isFiltered = true;
+    },
+    setIsFiltered: (state, action) => {
+      state.isFiltered = action.payload;
     },
 
     setInitial: state => {
@@ -171,7 +174,8 @@ const filterSlice = createSlice({
         manufacturer: [],
 
         asc: state.asc,
-        title: state.title,
+        // title: state.title,
+        title: undefined,
         brand: undefined,
         lineup: undefined,
         // type: undefined,
@@ -199,5 +203,6 @@ export const {
   setType,
   setColor,
   setManufacturerYear,
+  setIsFiltered,
 } = filterSlice.actions;
 export default filterSlice.reducer;

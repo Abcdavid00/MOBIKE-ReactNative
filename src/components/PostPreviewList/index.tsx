@@ -45,6 +45,7 @@ const PostPreviewList: React.FC<PostPreviewListProps> = ({
   isEnd = false,
   isEmpty = false,
   color,
+  
 }) => {
   const loadingArray = [1, 2, 3, 4, 5, 6];
   const getItemLayout = (
@@ -62,6 +63,9 @@ const PostPreviewList: React.FC<PostPreviewListProps> = ({
         justifyContent: 'space-around',
         marginHorizontal: widthScreen * 0.01,
       }}
+      contentContainerStyle={{
+        backgroundColor: color.background,
+      }}
       showsVerticalScrollIndicator={false}
       nestedScrollEnabled
       data={data}
@@ -77,6 +81,7 @@ const PostPreviewList: React.FC<PostPreviewListProps> = ({
                 alignItems: 'center',
                 height: widthScreen,
                 marginLeft: widthScreen * -0.01,
+                backgroundColor: color.background,
               }}>
               <Image
                 source={require('../../assets/images/not-found.png')}
@@ -150,7 +155,7 @@ const PostPreviewList: React.FC<PostPreviewListProps> = ({
         // } else return null;
       }}
       onEndReached={onEndReached}
-      onEndReachedThreshold={0.3}
+      onEndReachedThreshold={1.4}
       onMomentumScrollBegin={onMomentumScrollBegin}
       renderItem={renderItem}
       keyExtractor={keyExtractor}

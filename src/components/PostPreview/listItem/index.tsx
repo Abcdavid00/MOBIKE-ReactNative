@@ -32,6 +32,7 @@ import {ThemeState} from '../../../redux/slice/themeSlice';
 import colors from '../../../assets/theme/colors';
 import {getFontSize} from '../../../utils/fontSizeResponsive';
 import {POPPINS_BOLD, POPPINS_ITALIC} from '../../../assets/fonts';
+import {personalPostInfoType} from '../../PostDetail';
 // import SkeletonContent from 'react-native-skeleton-content-nonexpo';
 
 const widthScreen = Dimensions.get('window').width;
@@ -85,7 +86,7 @@ interface PostPreviewProps extends PressableProps {
   pressable?: boolean;
   styleWrapper?: ViewStyle;
   isActivePost?: boolean;
-  post?: PostPreviewType;
+  post?: PostPreviewType | personalPostInfoType;
   isAdmin?: boolean;
   onPress: () => void;
 }
@@ -116,83 +117,72 @@ const PostPreview: React.FC<PostPreviewProps> = ({
   const getPost = async () => {
     const post = await GetPost(postID);
     setPostInfo(post);
-    setIsLoading(false);
   };
 
   //Get inactive post
   const getInactivePost = async () => {
     setPostInfo(await GetPersonalPostDetail(postID));
-    setIsLoading(false);
   };
 
   // Get inactive post by admin
   const getInactivePostByAdmin = async () => {
     const post = await AppAdminGetPost(postID);
     setPostInfo(post);
-    setIsLoading(false);
   };
 
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  const dispatch = useDispatch();
   const onPressItem = () => {
-    dispatch(
-      selectPost({ID: postID, isActivePost: isActivePost, isAdmin: isAdmin}),
-    );
     onPress();
   };
 
   const _renderContent = () => {
     if (!postInfo) return null;
-    if (isActivePost) {
-      return (
-        <View style={{marginVertical: 12}}>
-          <ShadowWrapper
-            style={{
-              width: widthScreen * 0.42,
-              height: widthScreen * 0.42 * 1.45,
-              borderRadius: 11.75,
-            }}>
-            <Pressable
-              style={[styles.styleWrapper, styleWrapper]}
-              onPress={onPressItem}>
-              <MobikeImage
-                imageID={postInfo.post.rel_Image[0]}
-                style={styles.styleImage}
-              />
+    return (
+      <View style={{marginVertical: 12}}>
+        <ShadowWrapper
+          style={{
+            width: widthScreen * 0.42,
+            height: widthScreen * 0.42 * 1.45,
+            borderRadius: 11.75,
+          }}>
+          <Pressable
+            style={[styles.styleWrapper, styleWrapper]}
+            onPress={onPressItem}>
+            <MobikeImage
+              imageID={postInfo.post.rel_Image[0]}
+              style={styles.styleImage}
+            />
 
-              <View style={styles.textWrapper}>
-                <Text
-                  style={[styles.styleTitle, {color: color.onBackground}]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  {postInfo.post.Title}
+            <View style={styles.textWrapper}>
+              <Text
+                style={[styles.styleTitle, {color: color.onBackground}]}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {postInfo.post.Title}
+              </Text>
+              <Text
+                style={[styles.styleInfo, {color: color.onBackground_light}]}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                <Text>
+                  {typeNameFromID(postInfo.vehicleinfo.ID_VehicleType)}
                 </Text>
-                <Text
-                  style={[styles.styleInfo, {color: color.onBackground_light}]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  <Text>
-                    {typeNameFromID(postInfo.vehicleinfo.ID_VehicleType)}
-                  </Text>
-                  <Text> - </Text>
-                  <Text>
-                    {brandNameFromID(postInfo.vehicleinfo.ID_VehicleBrand)}
-                  </Text>
+                <Text> - </Text>
+                <Text>
+                  {brandNameFromID(postInfo.vehicleinfo.ID_VehicleBrand)}
                 </Text>
+              </Text>
 
-                <Text
-                  style={[styles.stylePrice, {color: color.error}]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  {formatPrice(postInfo.post.Pricetag) + ' VND'}
-                </Text>
-              </View>
-            </Pressable>
-          </ShadowWrapper>
-        </View>
-      );
-    }
+              <Text
+                style={[styles.stylePrice, {color: color.error}]}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {formatPrice(postInfo.post.Pricetag) + ' VND'}
+              </Text>
+            </View>
+          </Pressable>
+        </ShadowWrapper>
+      </View>
+    );
 
     // } else {
     //   return (
@@ -242,7 +232,7 @@ const PostPreview: React.FC<PostPreviewProps> = ({
 
   return (
     <Pressable onPress={pressable ? onPressItem : null} key={postID} {...props}>
-        {_renderContent()}
+      {_renderContent()}
     </Pressable>
   );
 };

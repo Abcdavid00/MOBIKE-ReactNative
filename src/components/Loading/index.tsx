@@ -22,7 +22,7 @@ const LoadingComponent = () => {
           top: 70,
           alignItems: 'center',
         }}>
-        <LoadingText />
+        <LoadingText text={'On the way'} />
         <Image
           source={require('../../assets/images/loading-wheel.gif')}
           style={{width: 80, height: 80}}

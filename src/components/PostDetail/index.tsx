@@ -1,6 +1,8 @@
 import React, {useEffect} from 'react';
 import {
+  FlatList,
   Linking,
+  ListRenderItem,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -21,7 +23,7 @@ import {RootState} from '../../redux/store';
 import ReadMore from '@fawazahmed/react-native-read-more';
 import {Dimensions} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useTheme} from '@react-navigation/native';
 import {SceneMap} from 'react-native-tab-view';
 import MobikeImage from '../common/image';
 import {useState} from 'react';
@@ -57,14 +59,20 @@ import {
   POPPINS_REGULAR,
   POPPINS_SEMI_BOLD,
 } from '../../assets/fonts';
-import {StackNavigationProp} from '@react-navigation/stack';
+import {StackNavigationProp, StackScreenProps} from '@react-navigation/stack';
 import {PostDetailStackParamList} from '../../navigations/PostDetailNavigator';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
-import PostPreview from '../PostPreview/listItem';
-import {APPLICATION_ADMIN, POST_DETAIL_NAVIGATOR} from '../../constants/routeNames';
+import {
+  APPLICATION_ADMIN,
+  POST_DETAIL,
+  POST_DETAIL_NAVIGATOR,
+} from '../../constants/routeNames';
 import {FAB} from 'react-native-paper';
 import Feather from 'react-native-vector-icons/Feather';
 import {getSavedPostList, savePost} from '../../services/SavedPost';
+import PostPreviewList from '../PostPreviewList';
+import PostPreview, {PostPreviewType} from '../PostPreview';
+import {personalInfoState} from '../../redux/clientDatabase/personalInfo';
 
 const widthScreen = Dimensions.get('window').width;
 const heightScreen = Dimensions.get('window').height;
@@ -74,10 +82,12 @@ type PostDetailComponentProps = {
   isActivePost?: boolean;
   isAdmin?: boolean;
   navigation: StackNavigationProp<PostDetailStackParamList, 'PostDetail'>;
+  // route : RouteProp
 };
 
 type postInfoType = {
   address: {
+    Detail_address: string;
     ID: number;
     ID_City: number;
     ID_District: number;
@@ -142,18 +152,83 @@ type userInfoType = {
   }>;
 };
 
+export type rating = {
+  account: number;
+  accountinfo: {
+    Gender: number;
+    ID: number;
+    ID_Image_Profile: number;
+    Name: string;
+    Phone_number: string;
+    Time_created: Date;
+  };
+  rating: {
+    Content: string;
+    ID: number;
+    ID_Account: number;
+    Rating_point: number;
+    Time_created: Date;
+  };
+};
+
+export type status = {
+  ID: number;
+  ID_Post: number;
+  Information: string;
+  Status: number;
+  Time_created: Date;
+};
+
+export type personalPostInfoType = {
+  address: {
+    Detail_address: string;
+    ID: number;
+    ID_City: number;
+    ID_District: number;
+    ID_Ward: number;
+  };
+  post: {
+    Content: string;
+    ID: number;
+    ID_Account: number;
+    ID_Address: number;
+    ID_VehicleInfo: number;
+    Pricetag: number;
+    Time_created: Date;
+    Title: string;
+    rel_Image: Array<number>;
+    rel_Like: Array<number>;
+    rel_Rating: Array<number>;
+  };
+  ratings: Array<rating>;
+  stat: {
+    Contact_amount: number;
+    Like_amount: number;
+    Rating_amount: number;
+    View_amount: number;
+  };
+  statuses: Array<status>;
+  vehicleinfo: {
+    Cubic_power: number;
+    ID: number;
+    ID_Color: number;
+    ID_Condition: number;
+    ID_VehicleBrand: number;
+    ID_VehicleLineup: number;
+    ID_VehicleType: number;
+    License_plate: string;
+    Manufacture_year: number;
+    Odometer: number;
+    Vehicle_name: string;
+  };
+};
+
 const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   postID,
   isActivePost,
   isAdmin,
   navigation,
 }) => {
-  const {navigate} = useNavigation();
-
-  const selectedPost = useSelector<RootState, number | null>(
-    state => state.selectedPost.ID,
-  );
-
   const post = {
     images: [
       {
@@ -317,19 +392,20 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     } else {
       getInactivePost();
     }
-  }, [selectedPost]);
+  }, []);
 
   const getData = async () => {
     const post: postInfoType = await GetPost(postID);
-    console.log('Post Detail: ' + JSON.stringify(post));
+    // console.log('Post Detail: ' + JSON.stringify(post));
     setPostInfo(prevPost => post);
     const user: userInfoType = await GetUserInfo(post.user.ID);
-    console.log('User Info: ' + JSON.stringify(user));
+    // console.log('User Info: ' + JSON.stringify(user));
     let tmp = Array.from(user.posts.filter(item => item.ID != postID));
-    let tmp2 = tmp.map(item => {
-      return item.ID;
-    });
-    if (tmp2.length > 30) tmp2 = tmp2.slice(0, 30);
+    let tmp2: PostPreviewType[] = [];
+    for (let i = 0; i < tmp.length; i++) {
+      let post = await GetPost(tmp[i].ID);
+      tmp2.push(post);
+    }
     setPostList(tmp2);
     setUserInfo(user);
     setIsLoading(false);
@@ -337,7 +413,11 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
 
   const [postInfo, setPostInfo] = React.useState<postInfoType>();
   const [userInfo, setUserInfo] = React.useState<userInfoType>();
-  const [postList, setPostList] = React.useState<Array<number>>([]);
+  const [postList, setPostList] = React.useState<Array<PostPreviewType>>([]);
+
+  const userPersonalInfo = useSelector<RootState, personalInfoState>(
+    state => state.personalInfo,
+  );
 
   //Get inactive post data
   const getInactivePost = async () => {
@@ -361,7 +441,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   const ApprovePost = async () => {
     const approveRes = await AppAdminSetStatus(postID, 1, message);
     console.log('Approve post: ' + JSON.stringify(approveRes));
-    navigate(APPLICATION_ADMIN);
+    // navigate(APPLICATION_ADMIN);
   };
 
   const renderStarRating = (rating: number) => {
@@ -404,6 +484,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
           fontSize: getFontSize(14),
           fontFamily: POPPINS_REGULAR,
         }}
+        seeMoreContainerStyleSecondary={{position: 'relative'}}
         numberOfLines={10}>
         {postInfo?.post.Content}
       </ReadMore>
@@ -488,7 +569,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
               <MaterialIcons name="speed" size={18} color={colors.primary} />
               <Text
                 style={{
-                  marginLeft: 8,
+                  marginLeft: 5,
                   fontSize: getFontSize(14),
                   color: color.onBackground_light,
                   fontFamily: POPPINS_REGULAR,
@@ -508,17 +589,18 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
               </Text>
             </View>
 
-            {/* Name */}
-            <View style={{flexDirection: 'row', marginBottom: 15}}>
-              <AntDesign name="edit" size={18} color={colors.primary} />
+            {/* License Plate */}
+            <View
+              style={{flexDirection: 'row', marginBottom: 15, paddingLeft: 5}}>
+              <Octicons name="number" size={18} color={colors.primary} />
               <Text
                 style={{
-                  marginLeft: 5,
+                  marginLeft: 7,
                   fontSize: getFontSize(14),
                   color: color.onBackground_light,
                   fontFamily: POPPINS_REGULAR,
                 }}>
-                Name :{' '}
+                Plate :{' '}
               </Text>
               <Text
                 style={{
@@ -527,7 +609,9 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
                   fontFamily: POPPINS_REGULAR,
                   flex: 1,
                 }}>
-                {postInfo ? postInfo.vehicleinfo.Vehicle_name : '--'}
+                {postInfo && postInfo.vehicleinfo.License_plate
+                  ? postInfo.vehicleinfo.License_plate
+                  : '---'}
               </Text>
             </View>
           </View>
@@ -542,7 +626,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
                 />
                 <Text
                   style={{
-                    marginLeft: 5,
+                    marginLeft: 8,
                     fontSize: getFontSize(14),
                     color: color.onBackground_light,
                     fontFamily: POPPINS_REGULAR,
@@ -655,17 +739,17 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
             </View>
           </View>
         </View>
-        {/* License Plate */}
-        <View style={{flexDirection: 'row', marginBottom: 15, paddingLeft: 7}}>
-          <Octicons name="number" size={18} color={colors.primary} />
+        {/* Name */}
+        <View style={{flexDirection: 'row', marginBottom: 8, paddingLeft: 5}}>
+          <AntDesign name="edit" size={18} color={colors.primary} />
           <Text
             style={{
-              marginLeft: 8,
+              marginLeft: 7,
               fontSize: getFontSize(14),
               color: color.onBackground_light,
               fontFamily: POPPINS_REGULAR,
             }}>
-            License Plate :{' '}
+            Name :{' '}
           </Text>
           <Text
             style={{
@@ -674,9 +758,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
               fontFamily: POPPINS_REGULAR,
               flex: 1,
             }}>
-            {postInfo && postInfo.vehicleinfo.License_plate
-              ? postInfo.vehicleinfo.License_plate
-              : '---'}
+            {postInfo ? postInfo.vehicleinfo.Vehicle_name : '--'}
           </Text>
         </View>
       </View>
@@ -805,20 +887,17 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     setMessage(content);
   };
 
-  const color = useSelector<RootState, ColorThemeProps>(state =>
-    getThemeColor(state.theme),
-  );
+  const color = useTheme().colors.customColors;
 
   // const {navigate} = useNavigation();
 
   //Header
   const onGoBack = () => {
     navigation.goBack();
-    // navigate.g
   };
 
   const onLikePost = () => {
-    onSavePost(selectedPost);
+    onSavePost(postID);
     setIsLiked(!isLiked);
   };
   const [isLiked, setIsLiked] = useState<boolean>(false);
@@ -828,7 +907,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     const getDataSavedPostList = async () => {
       let arr: number[] | null = await getSavedPostList();
       setSavedPostList(arr);
-      if (selectedPost != null && arr?.includes(selectedPost)) setIsLiked(true);
+      if (postID != null && arr?.includes(postID)) setIsLiked(true);
     };
     getDataSavedPostList();
   }, []);
@@ -839,8 +918,9 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
       let arr = [...savedPostList];
       if (arr.includes(id)) {
         arr.splice(arr.indexOf(id), 1);
+      } else {
+        arr.unshift(id);
       }
-      arr.unshift(id);
       setSavedPostList(arr);
       await savePost(arr);
     } else {
@@ -849,420 +929,473 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     }
   };
 
-  return (
-    <View style={{height: '100%', position: 'relative'}}>
-      <View
-        style={{
-          flex: 1,
-          height: '100%',
-        }}>
-        {isLoading ? (
-          <View />
-        ) : (
-          <Container
-            keyboardShouldPersistTaps="always"
-            styleScrollView={{
-              backgroundColor: color.background,
+  const renderHeader = () => {
+    return (
+      <View>
+        <View style={styles.wrapperHeader}>
+          <Pressable
+            onPress={onGoBack}
+            style={{
+              height: 70,
+              width: 50,
+              justifyContent: 'center',
+              alignItems: 'center',
             }}>
-            <View style={styles.wrapperHeader}>
-              <Pressable
-                onPress={onGoBack}
-                style={{
-                  height: 70,
-                  width: 50,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <SimpleLineIcons
-                  name="arrow-left"
-                  color={color.onBackground_light}
-                  size={20}
-                />
-              </Pressable>
-              <View
-                style={{
-                  height: 70,
-                  width: 120,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text style={[styles.textHeader, {color: color.onBackground}]}>
-                  Post Detail
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  height: 70,
-                  width: 50,
-                }}
-              />
-            </View>
-            {/* Image */}
-            <Carousel
-              data={
-                postInfo && postInfo.post.rel_Image.length != 0
-                  ? postInfo.post.rel_Image
-                  : [-1]
-              }
-              isImageID={true}
-              havingBackground={true}
+            <SimpleLineIcons
+              name="arrow-left"
+              color={color.onBackground_light}
+              size={20}
             />
+          </Pressable>
+          <View
+            style={{
+              height: 70,
+              width: 120,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={[styles.textHeader, {color: color.onBackground}]}>
+              Post Detail
+            </Text>
+          </View>
 
-            <View style={{paddingHorizontal: 20, marginTop: 5}}>
-              {/* Type */}
-              <View
+          <View
+            style={{
+              height: 70,
+              width: 50,
+            }}
+          />
+        </View>
+        {/* Image */}
+        <Carousel
+          data={
+            postInfo && postInfo.post.rel_Image.length != 0
+              ? postInfo.post.rel_Image
+              : [-1]
+          }
+          isImageID={true}
+          havingBackground={true}
+        />
+
+        <View style={{paddingHorizontal: 20, marginTop: 5}}>
+          {/* Type */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              alignSelf: 'flex-start',
+            }}>
+            <FontAwesome name="circle" size={8} color={color.secondary} />
+            <Text
+              style={{
+                color: color.text,
+                fontSize: 12,
+                marginLeft: 8,
+                fontFamily: POPPINS_MEDIUM,
+              }}>
+              {typeNameFromID(
+                postInfo ? postInfo.vehicleinfo.ID_VehicleType : -1,
+              )}
+            </Text>
+          </View>
+
+          {/* Title */}
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: 5,
+              paddingHorizontal: 5,
+            }}>
+            <Text
+              style={{
+                fontFamily: POPPINS_SEMI_BOLD,
+                color: color.onBackground,
+                fontSize: getFontSize(16),
+              }}>
+              {postInfo ? postInfo.post.Title : ''}
+            </Text>
+          </View>
+
+          {/* Price */}
+          <View
+            style={{
+              alignSelf: 'flex-end',
+              marginTop: 5,
+              paddingHorizontal: 5,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              width: '100%',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                fontFamily: POPPINS_BOLD,
+                color: color.error,
+                fontSize: getFontSize(18),
+                alignSelf: 'flex-end',
+                top: 4,
+              }}>
+              {formatPrice(postInfo?.post.Pricetag) + ' VND'}
+            </Text>
+
+            {/* Save button, only when viewed by other user */}
+            {isActivePost && (
+              <Pressable
+                onPress={onLikePost}
                 style={{
-                  flexDirection: 'row',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  alignSelf: 'flex-start',
                 }}>
-                <FontAwesome name="circle" size={8} color={color.secondary} />
-                <Text
+                <View
                   style={{
-                    color: color.text,
-                    fontSize: 12,
-                    marginLeft: 8,
-                    fontFamily: POPPINS_MEDIUM,
-                  }}>
-                  {typeNameFromID(
-                    postInfo ? postInfo.vehicleinfo.ID_VehicleType : -1,
-                  )}
-                </Text>
-              </View>
-
-              {/* Title */}
-              <View
-                style={{
-                  alignSelf: 'flex-start',
-                  marginTop: 5,
-                  paddingHorizontal: 5,
-                }}>
-                <Text
-                  style={{
-                    fontFamily: POPPINS_SEMI_BOLD,
-                    color: color.onBackground,
-                    fontSize: getFontSize(16),
-                  }}>
-                  {postInfo ? postInfo.post.Title : ''}
-                </Text>
-              </View>
-
-              {/* Price */}
-              <View
-                style={{
-                  alignSelf: 'flex-end',
-                  marginTop: 5,
-                  paddingHorizontal: 5,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  alignItems: 'center',
-                }}>
-                <Text
-                  style={{
-                    fontFamily: POPPINS_BOLD,
-                    color: color.error,
-                    fontSize: getFontSize(18),
-                    alignSelf: 'flex-end',
-                    top: 4,
-                  }}>
-                  {formatPrice(postInfo?.post.Pricetag) + ' VND'}
-                </Text>
-
-                {/* Save button */}
-                <Pressable
-                  onPress={onLikePost}
-                  style={{
+                    flexDirection: 'row',
                     justifyContent: 'center',
                     alignItems: 'center',
+                    paddingHorizontal: 10,
+                    paddingVertical: 2,
+                    borderRadius: 16,
+                    borderWidth: 1,
+                    borderColor: isLiked ? color.error + '4D' : color.divider,
                   }}>
-                  <View
+                  {isLiked ? (
+                    <Ionicons name={'heart'} size={20} color={color.error} />
+                  ) : (
+                    <Ionicons
+                      name={'heart-outline'}
+                      size={20}
+                      color={color.onBackground_light}
+                    />
+                  )}
+
+                  <Text
                     style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      paddingHorizontal: 10,
-                      paddingVertical: 2,
-                      borderRadius: 16,
-                      borderWidth: 1,
-                      borderColor: isLiked ? color.error + '4D' : color.divider,
+                      fontFamily: POPPINS_REGULAR,
+                      fontSize: getFontSize(14),
+                      color: isLiked ? color.error : color.onBackground_light,
+                      marginStart: 4,
+                      marginTop: 2,
                     }}>
-                    {isLiked ? (
-                      <Ionicons name={'heart'} size={20} color={color.error} />
-                    ) : (
-                      <Ionicons
-                        name={'heart-outline'}
-                        size={20}
-                        color={color.onBackground_light}
-                      />
-                    )}
+                    Save Post
+                  </Text>
+                </View>
+              </Pressable>
+            )}
+          </View>
+        </View>
 
-                    <Text
-                      style={{
-                        fontFamily: POPPINS_REGULAR,
-                        fontSize: getFontSize(14),
-                        color: isLiked ? color.error : color.onBackground_light,
-                        marginStart: 4,
-                        marginTop: 2,
-                      }}>
-                      Save Post
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
-            </View>
+        <View
+          style={{
+            backgroundColor: color.divider,
+            height: 1,
+            marginTop: 20,
+            marginHorizontal: 20,
+          }}
+        />
 
-            <View
-              style={{
-                backgroundColor: color.divider,
-                height: 1,
-                marginTop: 20,
-                marginHorizontal: 20,
-              }}
+        {DetailRoute()}
+
+        {/* Seperate */}
+        <View
+          style={{
+            backgroundColor: color.divider,
+            height: 1,
+            marginTop: 20,
+            marginHorizontal: 20,
+          }}
+        />
+
+        {/*Seller Info */}
+        {isActivePost ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingTop: 10,
+              paddingBottom: 12,
+              marginLeft: 20,
+            }}>
+            <MobikeImage
+              imageID={postInfo && postInfo.user.ID_Image_Profile}
+              avatar={true}
             />
 
-            {DetailRoute()}
-
-            {/* Seperate */}
-            <View
-              style={{
-                backgroundColor: color.divider,
-                height: 1,
-                marginTop: 20,
-                marginHorizontal: 20,
-              }}
-            />
-
-      
-
-            {/*Seller Info */}
-            {!isAdmin && (
+            <View style={{marginHorizontal: 15, flex: 1}}>
+              {/* Name & View Page */}
               <View
                 style={{
                   flexDirection: 'row',
-                  paddingTop: 10,
-                  paddingBottom: 12,
-                  marginLeft: 20,
+                  justifyContent: 'space-between',
                 }}>
-                <MobikeImage
-                  imageID={postInfo && postInfo.user.ID_Image_Profile}
-                  avatar={true}
-                />
-
-                <View style={{marginHorizontal: 15, flex: 1}}>
-                  {/* Name & View Page */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                    }}>
-                    <Text
-                      style={{
-                        color: color.onBackground,
-                        fontFamily: POPPINS_MEDIUM,
-                        fontSize: 14,
-                        flex: 1,
-                        marginStart: 16,
-                      }}>
-                      {postInfo ? postInfo.user.Name : '--'}
-                    </Text>
-                  </View>
-
-                  {/* Address */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      marginEnd: 15,
-                      alignItems: 'flex-start',
-                      flex: 1,
-                    }}>
-                    <SimpleLineIcons
-                      name="location-pin"
-                      size={12}
-                      color={color.onBackground}
-                      style={{marginTop: 2}}
-                    />
-                    <Text
-                      style={{
-                        color: color.onBackground_light,
-                        fontFamily: POPPINS_ITALIC,
-                        fontSize: getFontSize(12),
-                        marginLeft: 5,
-                      }}>
-                      {wardNameFromID(postInfo && postInfo.address.ID_Ward) +
-                        ', ' +
-                        districtNameFromID(
-                          postInfo && postInfo.address.ID_District,
-                        ) +
-                        ', ' +
-                        cityNameFromID(postInfo && postInfo.address.ID_City)}
-                    </Text>
-                  </View>
-
-                  {/* Feature */}
-                  {/* <View style={{flexDirection: 'row', marginTop: 5}}>
-                  <View style={{flexDirection: 'row', alignItems: 'flex-end'}}>
-                    <Text style={{fontSize: 12, color: colors.text}}>50</Text>
-                    <Text
-                      style={{
-                        fontSize: 10,
-                        color: '#000',
-                        fontWeight: '300',
-                        marginStart: 5,
-                        marginRight: 15,
-                      }}>
-                      Posts
-                    </Text>
-                    <View
-                      style={{
-                        height: '90%',
-                        width: 1,
-                        backgroundColor: '#e8e8e8',
-                      }}
-                    />
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'flex-end',
-                      marginStart: 12,
-                    }}>
-                    <Text style={{fontSize: 12, color: colors.text}}>5.0</Text>
-                    <Text
-                      style={{
-                        fontSize: 10,
-                        color: '#000',
-                        fontWeight: '300',
-                        marginStart: 5,
-                        marginRight: 15,
-                      }}>
-                      Rate
-                    </Text>
-                  </View>
-                </View> */}
-                </View>
-              </View>
-            )}
-
-            {/*Other post from user */}
-            {postList.length > 0 && !isAdmin && (
-              <View>
                 <Text
                   style={{
-                    fontSize: getFontSize(14),
-                    fontFamily: POPPINS_SEMI_BOLD,
                     color: color.onBackground,
-                    marginStart: 20,
+                    fontFamily: POPPINS_MEDIUM,
+                    fontSize: 14,
+                    flex: 1,
+                    marginStart: 16,
                   }}>
-                  Other post of {userInfo?.accountinfo.Name}
+                  {postInfo ? postInfo.user.Name : '--'}
                 </Text>
-                <View style={{marginLeft: widthScreen * 0.01}}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      flexWrap: 'wrap',
-                      justifyContent: 'space-around',
-                    }}>
-                    {postList.map((item, index) => {
-                      return (
-                        <PostPreview
-                          postID={item}
-                          key={index}
-                          styleWrapper={{marginTop: 13}}
-                          isActivePost={true}
-                          pressable={true}
-                          onPress={() => {
-                            // navigation.navigate(POST_DETAIL_NAVIGATOR);
-                          }}
-                          index={index}
-                        />
-                      );
-                    })}
-                  </View>
-                </View>
               </View>
-            )}
 
-            <View style={{height: 90}} />
-          </Container>
+              {/* Address */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  marginEnd: 15,
+                  alignItems: 'flex-start',
+                  flex: 1,
+                }}>
+                <SimpleLineIcons
+                  name="location-pin"
+                  size={12}
+                  color={color.onBackground}
+                  style={{marginTop: 2}}
+                />
+                <Text
+                  style={{
+                    color: color.onBackground_light,
+                    fontFamily: POPPINS_ITALIC,
+                    fontSize: getFontSize(12),
+                    marginLeft: 5,
+                  }}>
+                  {wardNameFromID(postInfo && postInfo.address.ID_Ward) +
+                    ', ' +
+                    districtNameFromID(
+                      postInfo && postInfo.address.ID_District,
+                    ) +
+                    ', ' +
+                    cityNameFromID(postInfo && postInfo.address.ID_City)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingTop: 10,
+              paddingBottom: 12,
+              marginLeft: 20,
+            }}>
+            <MobikeImage
+              imageID={userPersonalInfo && userPersonalInfo.ID_Image_Profile}
+              avatar={true}
+            />
+
+            <View style={{marginHorizontal: 15, flex: 1}}>
+              {/* Name & View Page */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                <Text
+                  style={{
+                    color: color.onBackground,
+                    fontFamily: POPPINS_MEDIUM,
+                    fontSize: 14,
+                    flex: 1,
+                    marginStart: 16,
+                  }}>
+                  {userPersonalInfo ? userPersonalInfo.Name : '--'}
+                </Text>
+              </View>
+
+              {/* Address */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  marginEnd: 15,
+                  alignItems: 'flex-start',
+                  flex: 1,
+                }}>
+                <SimpleLineIcons
+                  name="location-pin"
+                  size={12}
+                  color={color.onBackground}
+                  style={{marginTop: 2}}
+                />
+                <Text
+                  style={{
+                    color: color.onBackground_light,
+                    fontFamily: POPPINS_ITALIC,
+                    fontSize: getFontSize(12),
+                    marginLeft: 5,
+                  }}>
+                  {wardNameFromID(postInfo && postInfo.address.ID_Ward) +
+                    ', ' +
+                    districtNameFromID(
+                      postInfo && postInfo.address.ID_District,
+                    ) +
+                    ', ' +
+                    cityNameFromID(postInfo && postInfo.address.ID_City)}
+                </Text>
+              </View>
+            </View>
+          </View>
         )}
       </View>
+    );
+  };
 
-      <View
-        style={{
-          flexDirection: 'row',
+  const renderItem: ListRenderItem<PostPreviewType> = ({item, index}) => {
+    return (
+      <PostPreview
+        postID={item.post.ID}
+        post={item}
+        key={index}
+        styleWrapper={{marginTop: 13}}
+        isActivePost={true}
+        pressable={true}
+        onPress={() => {
+          // dispatch(
+          //   selectPost({
+          //     ID: item.post.ID,
+          //     isActivePost: true,
+          //     isAdmin: false,
+          //   }),
+          // );
+          navigation.push(POST_DETAIL, {
+            postID: item.post.ID,
+            isActivePost: true,
+            isAdmin: false,
+          });
+        }}
+        index={index}
+        color={color}
+      />
+    );
+  };
+
+  const keyExtractor = (item: PostPreviewType) => {
+    return item.post.ID.toString();
+  };
+
+  const loadingArray = [1, 2, 3, 4, 5, 6];
+
+  return (
+    <View
+      style={{
+        height: '100%',
+        position: 'relative',
+        flex: 1,
+        backgroundColor: color.background,
+      }}>
+      <FlatList
+        columnWrapperStyle={{
           justifyContent: 'space-around',
-          width: '100%',
-          marginTop: 10,
-          position: 'absolute',
-          bottom: 0,
-          backgroundColor: color.background_bottomNav,
-          height: 70,
-          alignItems: 'center',
-        }}>
-        <Pressable
-          style={{
-            flexDirection: 'row',
-            width: '50%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexGrow: 1,
-          }}
-          onPress={() => {
-            // TODO: Navigate to chat screen
-            if(isAdmin){
-              
-            }
-          }}>
-           {!isAdmin && <Ionicons name="chatbubbles-outline" size={24} color={'#8DEE8B'} />}
-          <Text
-            style={{
-              marginStart: 12,
-              fontSize: getFontSize(20),
-              fontFamily: POPPINS_REGULAR,
-              color: color.onBackground_light,
-            }}>
-            {isAdmin? 'Approve': 'Chat'}
-          </Text>
-        </Pressable>
-        <View
-          style={{width: 1, height: '50%', backgroundColor: color.divider}}
-        />
-        <Pressable
-          style={{
-            flexDirection: 'row',
-            width: '50%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexGrow: 1,
-          }}
-          onPress={() => {
-            if(isAdmin){
-              OnApprovePost();
-              return;
-            }
-            Linking.openURL(
-              `tel:${userInfo && userInfo.accountinfo.Phone_number}`,
+          marginHorizontal: widthScreen * 0.01,
+        }}
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
+        data={postList}
+        ListHeaderComponent={renderHeader()}
+        numColumns={2}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ListFooterComponent={() => {
+          if (isLoading) {
+            const loadingArray = [1, 2];
+            return (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-around',
+                  marginHorizontal: widthScreen * 0.01,
+                  marginBottom: 80,
+                }}>
+                {loadingArray.map((item, index) => (
+                  <PostPreviewLoader key={item} />
+                ))}
+              </View>
             );
+          }
+          return <View style={{height: 100}} />;
+        }}
+      />
+      {/*if post view by admin and other user then show these buttons */}
+      {isActivePost && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            width: '100%',
+            position: 'absolute',
+            bottom: 0,
+            backgroundColor: color.background_bottomNav,
+            height: 70,
+            alignItems: 'center',
           }}>
-
-          {!isAdmin && <Feather name="phone-call" size={24} color={'#8DEE8B'} />}
-          <Text
+          <Pressable
             style={{
-              marginStart: 12,
-              fontSize: getFontSize(20),
-              fontFamily: POPPINS_REGULAR,
-              color: color.onBackground_light,
+              flexDirection: 'row',
+              width: '50%',
+              height: '100%',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexGrow: 1,
+            }}
+            onPress={() => {
+              // TODO: Navigate to chat screen
+              if (isAdmin) {
+              } else {
+              }
             }}>
-            {isAdmin? 'Decline': 'Call'}
-          </Text>
-        </Pressable>
-      </View>
+            {!isAdmin && (
+              <Ionicons
+                name="chatbubbles-outline"
+                size={24}
+                color={'#8DEE8B'}
+              />
+            )}
+            <Text
+              style={{
+                marginStart: 12,
+                fontSize: getFontSize(20),
+                fontFamily: POPPINS_REGULAR,
+                color: color.onBackground_light,
+              }}>
+              {isAdmin ? 'Approve' : 'Chat'}
+            </Text>
+          </Pressable>
+          <View
+            style={{width: 1, height: '50%', backgroundColor: color.divider}}
+          />
+          <Pressable
+            style={{
+              flexDirection: 'row',
+              width: '50%',
+              height: '100%',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexGrow: 1,
+            }}
+            onPress={() => {
+              if (isAdmin) {
+                OnApprovePost();
+                return;
+              }
+              Linking.openURL(
+                `tel:${userInfo && userInfo.accountinfo.Phone_number}`,
+              );
+            }}>
+            {!isAdmin && (
+              <Feather name="phone-call" size={24} color={'#8DEE8B'} />
+            )}
+            <Text
+              style={{
+                marginStart: 12,
+                fontSize: getFontSize(20),
+                fontFamily: POPPINS_REGULAR,
+                color: color.onBackground_light,
+              }}>
+              {isAdmin ? 'Decline' : 'Call'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 };
