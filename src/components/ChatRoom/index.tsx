@@ -1,5 +1,14 @@
-import {View, Text, StyleSheet, Animated, TouchableOpacity, Pressable, KeyboardAvoidingView} from 'react-native';
-import React, {useRef, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  TouchableOpacity,
+  Pressable,
+  KeyboardAvoidingView,
+  ListRenderItem,
+} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {ChatStackParamList} from '../../navigations/ChatNavigator';
 import {Room} from '../../redux/slice/roomSlice';
@@ -10,30 +19,45 @@ import {getThemeColor} from '../../utils/getThemeColor';
 import Container from '../common/container';
 import {getFontSize} from '../../utils/fontSizeResponsive';
 import {POPPINS_BOLD} from '../../assets/fonts';
-import {RouteProp} from '@react-navigation/native';
+import {RouteProp, useTheme} from '@react-navigation/native';
 import {FlatList} from 'react-native-gesture-handler';
 import TextField from '../common/textField';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import colors from '../../assets/theme/colors';
 import {ThemeState} from '../../redux/slice/themeSlice';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { sendMessage } from '../../services/ChatDrawer';
+import {sendMessage} from '../../services/ChatDrawer';
+import {Message} from '../../redux/slice/messageSlice';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import {GetUserInfo} from '../../backendAPI';
+import {userInfoType} from '../ChatList';
 
 type ChatRoomComponentProps = {
   navigation: StackNavigationProp<ChatStackParamList, 'ChatRoom'>;
   roomID: string;
+  sellerID: number;
 };
 
 const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
   navigation,
   roomID,
+  sellerID,
 }) => {
   const uid = store.getState().auth.ID;
+  const [sellerInfo, setSellerInfo] = useState<userInfoType>();
+  const getUserInfo = async (userID: number) => {
+    let result = await GetUserInfo(userID);
+    setSellerInfo(result);
+  };
+  useEffect(() => {
+    getUserInfo(sellerID);
+  }, []);
 
-  const messages = useSelector((state: RootState) => state.message[roomID]);
+  const messages = useSelector<RootState, Message[]>(
+    state => state.message[roomID],
+  );
 
-  const theme = useSelector<RootState, ThemeState>(state => state.theme);
-  const color = theme == 'light' ? colors.lightTheme : colors.darkTheme;
+  const color = useTheme().colors.customColors;
 
   const [currentMessage, setCurrentMessage] = useState('');
 
@@ -41,11 +65,56 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
     console.log('Send Message: ' + currentMessage);
     sendMessage(roomID, currentMessage);
     setCurrentMessage('');
-  }
+  };
+
+  const renderItem: ListRenderItem<Message> = ({item}) => {
+    const isOwnMessage = item.senderId == uid;
+    return (
+      <View>
+        {/* <Text
+          style={{
+            textAlign: 'center',
+            // height: 0,
+          }}>
+          {item.timestamp?.toLocaleString()}
+        </Text> */}
+        <View
+          style={{
+            flexDirection: 'row',
+            width: '100%',
+            marginVertical: 5,
+            justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
+          }}>
+          <TouchableOpacity
+            // onPress={() => {
+            //   handleShowTime(item);
+            // }}
+            style={{
+              maxWidth: '70%',
+              backgroundColor: isOwnMessage ? color.secondary : color.divider,
+              padding: 10,
+              borderRadius: 10,
+              marginBottom: 10,
+            }}>
+            <Text
+              style={{
+                color: isOwnMessage ? color.onSecondary : color.onBackground,
+              }}>
+              {item.content}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  const onBack = () => {
+    navigation.goBack();
+  };
 
   return (
     <View>
-      <View
+      {/* <View
         style={{
           // Header
           height: '10%',
@@ -54,7 +123,43 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
         <Text>Chat Room</Text>
         <Text>RoomID: {roomID}</Text>
         <Text>UID: {uid}</Text>
+      </View> */}
+      <View style={styles.wrapperHeader}>
+        <Pressable
+          onPress={onBack}
+          style={{
+            height: 70,
+            width: 50,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <SimpleLineIcons
+            name="arrow-left"
+            color={color.onBackground_light}
+            size={20}
+          />
+        </Pressable>
+        <View
+          style={{
+            height: 70,
+            width: 120,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={[styles.textHeader, {color: color.onBackground}]}>
+            {sellerInfo?.accountinfo.Name}
+          </Text>
+        </View>
+
+        <View
+          style={{
+            height: 70,
+            width: 50,
+          }}
+        />
       </View>
+
+      <View></View>
 
       <View
         style={{
@@ -63,42 +168,7 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
         }}>
         <FlatList
           data={messages}
-          renderItem={({item}) => {
-            const isOwnMessage = item.senderId == uid;
-            return (
-              <View key="abc">
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    height: 0,
-                  }}>
-                  {item.timestamp?.toLocaleString()}
-                </Text>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    width: '100%',
-                    marginVertical: 5,
-                    justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
-                    // backgroundColor: "black"
-                  }}>
-                  <TouchableOpacity
-                    // onPress={() => {
-                    //   handleShowTime(item);
-                    // }}
-                    style={{
-                      maxWidth: '70%',
-                      backgroundColor: 'pink',
-                      padding: 10,
-                      borderRadius: 10,
-                      marginBottom: 10,
-                    }}>
-                    <Text>{item.content}</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            );
-          }}
+          renderItem={renderItem}
           keyExtractor={item => item.id}
           style={{
             height: 500,
@@ -112,7 +182,7 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
         style={{
           // Input
           height: '10%',
-          backgroundColor: 'pink',
+          backgroundColor: color.background,
           paddingHorizontal: '2%',
           flexDirection: 'row',
         }}>
@@ -133,22 +203,16 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
           }}
         />
 
-        <Pressable style={{
-          width:'15%' ,
-          height: '100%',
-          backgroundColor: 'yellow',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        onPress={handleSendMessage}
-        >
-          <Ionicons
-            name="notifications-outline"
-            color={color.onBackground_light}
-
-            size={28}
-          />
-          <Text>Hello</Text>
+        <Pressable
+          style={{
+            width: '15%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingBottom: 8,
+          }}
+          onPress={handleSendMessage}>
+          <Ionicons name="send" color={color.primary} size={28} />
         </Pressable>
       </KeyboardAvoidingView>
     </View>

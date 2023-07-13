@@ -9,11 +9,21 @@ import {ChatStackParamList} from '../../navigations/ChatNavigator';
 //   navigation: StackNavigationProp<ChatStackParamList, 'ChatRoom'>;
 // };
 
-import { RoomStackScreenProps } from '../../navigations/ChatNavigator';
+import {RoomStackScreenProps} from '../../navigations/ChatNavigator';
 
-const ChatRoomScreen: React.FC<RoomStackScreenProps> = ({navigation, route}) => {
-  const roomID = route.params.roomID;
-  return <ChatRoomComponent navigation={navigation} roomID={roomID} />;
+const ChatRoomScreen: React.FC<RoomStackScreenProps> = ({
+  navigation,
+  route,
+}) => {
+  const {roomID, sellerID} = route.params;
+
+  return (
+    <ChatRoomComponent
+      navigation={navigation}
+      roomID={roomID}
+      sellerID={sellerID}
+    />
+  );
 };
 
 export default ChatRoomScreen;

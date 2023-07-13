@@ -16,7 +16,7 @@ import PostPreview from '../../PostPreview';
 import PostPreviewLoader from '../../common/contentLoader/postPreview';
 import {Text} from 'react-native';
 import {getFontSize} from '../../../utils/fontSizeResponsive';
-import {POPPINS_SEMI_BOLD} from '../../../assets/fonts';
+import {POPPINS_MEDIUM, POPPINS_SEMI_BOLD} from '../../../assets/fonts';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -161,13 +161,13 @@ const SoldRoute: React.FC<SoldRouteProps> = ({navigation}) => {
                   backgroundColor: color.background,
                 }}>
                 <Image
-                  source={require('../../../assets/images/not-found.png')}
+                  source={require('../../../assets/images/out-of-stock.png')}
                   style={{width: '30%', height: '30%'}}
                 />
                 <Text
                   style={{
                     fontSize: getFontSize(16),
-                    fontFamily: POPPINS_SEMI_BOLD,
+                    fontFamily: POPPINS_MEDIUM,
                     textAlign: 'center',
                     marginTop: '5%',
                     color: color.onBackground,
