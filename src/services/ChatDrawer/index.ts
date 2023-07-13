@@ -40,16 +40,20 @@ export async function init() {
     OnMessageReceive(msg);
   });
 
+  socket.on('room created', room => {
+    OnRoomCreated(room);
+  });
+
   await fetchRoom(uid);
 
-  console.log('Latest room set to store');
-  console.log(Store.getState().room);
+  // console.log('Latest room set to store');
+  // console.log(Store.getState().room);
 
   console.log('Chat drawer init done');
 }
 
 async function fetchRoom(uid: string) {
-  console.log('Fetching latest room');
+  // console.log('Fetching latest room');
   const latestRoom = await GetRoomByUser(uid);
   for (const room of latestRoom) {
     await addRoom(room);
@@ -57,6 +61,11 @@ async function fetchRoom(uid: string) {
 }
 
 async function addRoom(room: any) {
+  const currentRooms = Store.getState().room;
+  if (currentRooms[room._id]) {
+    console.log('Room already exist, skipping');
+    return;
+  }
   const post = (await GetPost(room.postId)).post;
   let imageId = undefined;
   if (post.rel_Image.length > 0) {
@@ -128,6 +137,12 @@ async function OnMessageReceive(message: any) {
     };
     Store.dispatch(setMessage(messageObj));
   }
+}
+
+async function OnRoomCreated(room: any) {
+  console.log('Room created: ' + JSON.stringify(room));
+  await addRoom(room);
+  console.log(`Room ${room._id} added to store`);
 }
 
 export function getSocket(): Socket | undefined {

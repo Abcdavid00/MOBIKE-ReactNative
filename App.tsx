@@ -26,6 +26,7 @@ import {setLoading} from './src/redux/slice/loadingSlice';
 import HttpRequest from './src/backendAPI/HttpRequest';
 import {sendMessage} from './src/services/ChatDrawer';
 import { getThemeColor } from './src/utils/getThemeColor';
+import { CreateRoom } from './src/backendAPI';
 
 LogBox.ignoreAllLogs();
 
@@ -138,8 +139,8 @@ function App(): JSX.Element {
         // Count to 10 every minutes and send message
         // const countOrSend = (current) => {
         //   if (current <= 0) {
-        //     console.log('Sending message');
-        //     sendMessage('649214af6b1d361ba85359f1', 'Hello World');
+        //     console.log('Creating Room');
+        //     CreateRoom(1, [6, 142]);
         //     return;
         //   }
         //   console.log('Waiting before send message: ' + current);
@@ -148,7 +149,6 @@ function App(): JSX.Element {
         //   }, 1000)
         // }
         // countOrSend(10);
-        // await CreateRoom(1, [6, 142]);
         // sendMessage("6495bf4a2f559fe339e2b8b2", "Hi Hi")
         // const messages = store.getState().message;
         // console.log("Messages: " + JSON.stringify(messages));
