@@ -2,7 +2,7 @@ import {View, Text, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {ChatStackParamList} from '../../navigations/ChatNavigator';
 import {StackNavigationProp} from '@react-navigation/stack';
-import { Room, RoomDictionary } from '../../redux/slice/roomSlice';
+import {Room, RoomDictionary} from '../../redux/slice/roomSlice';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/store';
 import {ColorThemeProps} from '../../assets/theme/colors';
@@ -23,24 +23,21 @@ type ChatListComponentProps = {
   navigation: StackNavigationProp<ChatStackParamList, 'ChatList'>;
 };
 const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
-
-  
-
   const [chatRoomList, setChatRoomList] = useState<Room[]>([]);
-  let data = Object.values(useSelector<RootState, Room[]>(state => state.room));
+  let data = Object.values(useSelector<RootState, RoomDictionary>(state => state.room));
 
-useEffect(() => {
-     data = data
-          .sort((a, b) => {
-               if (a.latestTimestamp && b.latestTimestamp) {
-                    return b.latestTimestamp.getTime() - a.latestTimestamp.getTime();
-               }
-               return 0;
-          })
-          .map((item) => item);
-     console.log("ChatList: " + JSON.stringify(data));
-     setChatRoomList(data);
-}, []);
+  useEffect(() => {
+    data = data
+      .sort((a, b) => {
+        if (a.latestTimestamp && b.latestTimestamp) {
+          return b.latestTimestamp.getTime() - a.latestTimestamp.getTime();
+        }
+        return 0;
+      })
+      .map(item => item);
+    console.log('ChatList: ' + JSON.stringify(data));
+    setChatRoomList(data);
+  }, []);
 
   const color = useSelector<RootState, ColorThemeProps>(state =>
     getThemeColor(state.theme),
@@ -65,58 +62,69 @@ useEffect(() => {
     } else {
       return (
         <View>
-          {data.map((item, index) => (
-            <Pressable
-              onPress={()=>onPress(item.id)}
-              key={index}
-              style={{
-                flexDirection: 'row',
-                marginVertical: 8,
-                paddingHorizontal: '4%',
-              }}>
-              <MobikeImage imageID={item.imageId} avatar={true} />
-              <View
-                style={{justifyContent: 'center', flexGrow: 1, marginLeft: 12}}>
-                <Text
-                  style={{
-                    fontSize: getFontSize(16),
-                    fontFamily: POPPINS_MEDIUM,
-                    color: color.onBackground,
-                  }}>
-                  {truncateText(item.id, 26)}
-                </Text>
+          {data
+            .map((item, index) => (
+              <Pressable
+                onPress={() => onPress(item.id)}
+                key={index}
+                style={{
+                  flexDirection: 'row',
+                  marginVertical: 8,
+                  paddingHorizontal: '4%',
+                }}>
+                <MobikeImage imageID={item.imageId} avatar={true} />
                 <View
                   style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
+                    flexGrow: 1,
+                    marginLeft: 12,
                   }}>
                   <Text
                     style={{
-                      fontSize: getFontSize(14),
-                      fontFamily: POPPINS_REGULAR,
-                      color: color.onBackground_light,
+                      fontSize: getFontSize(16),
+                      fontFamily: POPPINS_MEDIUM,
+                      color: color.onBackground,
                     }}>
-                    {truncateText(item.latestMessage, 24)}
+                    {truncateText(item.id, 26)}
                   </Text>
-                  <Text
+                  <View
                     style={{
-                      fontSize: getFontSize(12),
-                      fontFamily: POPPINS_LIGHT_ITALIC,
-                      color: color.onBackground_light,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
                     }}>
+                    <Text
+                      style={{
+                        fontSize: getFontSize(14),
+                        fontFamily: POPPINS_REGULAR,
+                        color: color.onBackground_light,
+                      }}>
+                      {truncateText(item.latestMessage, 24)}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: getFontSize(12),
+                        fontFamily: POPPINS_LIGHT_ITALIC,
+                        color: color.onBackground_light,
+                      }}>
                       {/* date and time*/}
-                      {item.latestTimestamp && item.latestTimestamp.toLocaleDateString() + ' ' + item.latestTimestamp.toLocaleTimeString()}
-                    {/* {(item.latestTimestamp && item.latestTimestamp.toLocaleDateString()) || ''} */}
-                  </Text>
+                      {item.latestTimestamp &&
+                        item.latestTimestamp.toLocaleDateString() +
+                          ' ' +
+                          item.latestTimestamp.toLocaleTimeString()}
+                      {/* {(item.latestTimestamp && item.latestTimestamp.toLocaleDateString()) || ''} */}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </Pressable>
-          )).sort((a, b) => {
-                if (a.latestTimestamp && b.latestTimestamp) {
-                      return b.latestTimestamp.getTime() - a.latestTimestamp.getTime();
-                }
-                return 0;
-          })}
+              </Pressable>
+            ))
+            .sort((a, b) => {
+              if (a.latestTimestamp && b.latestTimestamp) {
+                return (
+                  b.latestTimestamp.getTime() - a.latestTimestamp.getTime()
+                );
+              }
+              return 0;
+            })}
         </View>
       );
     }
