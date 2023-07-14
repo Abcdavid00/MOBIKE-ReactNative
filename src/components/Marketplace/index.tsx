@@ -66,7 +66,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   const dispatch = useDispatch();
 
   useEffect(() => {
-    getFilterPostList(page);
+    // getFilterPostList(page);
   }, []);
 
   const getFilterPostList = async (page?: number) => {
@@ -242,8 +242,8 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
         height: '100%',
         flex: 1,
       }}>
-      {/*Preview Post List */}
-      <PostPreviewList
+      {/* Preview Post List */}
+      {/* <PostPreviewList
         data={postList}
         onEndReached={onEndReached}
         onMomentumScrollBegin={onMomentumScrollBegin}
@@ -252,7 +252,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
         ListHeaderComponent={renderHeader()}
         isEnd={isEnd}
         color={color}
-      />
+      /> */}
     </View>
   );
 };

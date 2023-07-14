@@ -57,11 +57,12 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
   const data = Object.values(
     useSelector<RootState, RoomDictionary>(state => state.room),
   );
+  console.log('ChatRooms: ' + JSON.stringify(store.getState().room));
   const dataState = useSelector<RootState, RoomDictionary>(state => state.room);
 
-  // useEffect(() => {
-  //   getData();
-  // }, []);
+  useEffect(() => {
+    getData();
+  }, [dataState]);
 
   const isFocused = useIsFocused();
   useEffect(() => {
@@ -245,7 +246,7 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
                       fontFamily: POPPINS_REGULAR,
                       color: color.onBackground,
                     }}>
-                    {truncateText(item.latestMessage.content, 20)}
+                    {truncateText(item.latestMessage && item.latestMessage.content, 20)}
                   </Text>
                 </View>
                 <MobikeImage
