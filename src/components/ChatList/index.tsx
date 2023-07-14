@@ -172,6 +172,7 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
         </View>
       );
     } else {
+      console.log('Data: ' + JSON.stringify(data));
       return (
         <View>
           {data.map((item, index) => {
@@ -244,7 +245,7 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
                       fontFamily: POPPINS_REGULAR,
                       color: color.onBackground,
                     }}>
-                    {truncateText(item.latestMessage, 20)}
+                    {truncateText(item.latestMessage.content, 20)}
                   </Text>
                 </View>
                 <MobikeImage
