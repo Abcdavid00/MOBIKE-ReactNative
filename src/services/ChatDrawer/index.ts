@@ -36,14 +36,11 @@ export async function init() {
     socket.emit('set user', uid);
   });
 
-  socket.on('chat message', msg => {
-    OnMessageReceive(msg);
-  });
+  socket.on('chat message', OnMessageReceived);
 
-  socket.on('room created', room => {
-    OnRoomCreated(room);
-  });
+  socket.on('room created', OnRoomCreated);
 
+  socket.on('room updated', OnRoomUpdated);
   await fetchRoom(uid);
 
   // console.log('Latest room set to store');
@@ -118,7 +115,7 @@ export function sendMessage(roomId: string, content: string) {
   socket.emit('chat message', {roomId, content});
 }
 
-async function OnMessageReceive(message: any) {
+async function OnMessageReceived(message: any) {
   console.log('Message received: ' + JSON.stringify(message));
   const roomId = message['roomId'];
   if (!Store.getState().room[roomId]) {
@@ -143,6 +140,12 @@ async function OnRoomCreated(room: any) {
   console.log('Room created: ' + JSON.stringify(room));
   await addRoom(room);
   console.log(`Room ${room._id} added to store`);
+}
+
+async function OnRoomUpdated(room: any) {
+  console.log('Room updated: ' + JSON.stringify(room));
+  Store.dispatch(setRoom([room._id, room]));
+  console.log(`Room ${room._id} updated to store`);
 }
 
 export function getSocket(): Socket | undefined {

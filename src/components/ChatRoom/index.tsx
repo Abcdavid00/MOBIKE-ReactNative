@@ -58,10 +58,6 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
     state => state.message[roomID],
   );
 
-  useEffect(() => {
-    console.log('Redux change');
-  }, messages);
-
   const color = useTheme().colors.customColors;
 
   const [currentMessage, setCurrentMessage] = useState('');
