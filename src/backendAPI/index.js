@@ -230,6 +230,77 @@ export const UploadPost = async (
 
 }
 
+export const EditPost = async (
+    postID: number,
+    images: Array<Object>,
+    title: string,
+    content: string,
+    price: number,
+    addressID: number,
+    vehicleName: string,
+    vehicleOdometer: number,
+    vehicleLicensePlate: string,
+    vehicleManufactureYear: number,
+    vehicleCubicPower: number,
+    vehicleBrandID: number,
+    vehicleLineupID: number,
+    vehicleTypeID: number,
+    vehicleConditionID: number,
+    vehicleColorID: number,
+) => {
+    const token = getToken();
+    const pros = [];
+    images.forEach(image => {
+        pros.push(ProtectedUploadImage("personal/post/new/image", image, token));
+    });
+    console.log("Uploading post images");
+    const imageResponses = await Promise.all(pros);
+    console.log("Image responses: " + JSON.stringify(imageResponses));
+    if (imageResponses.every(imageResponse => imageResponse.msg == "Completed")) {
+        const imageIDs = imageResponses.map(imageResponse => imageResponse.info);
+    
+        const body = {
+            P_title: title,
+            P_content: content,
+            P_price: price,
+            P_address: addressID,
+            P_images: imageIDs,
+            V_name: vehicleName,
+            V_odometer: vehicleOdometer,
+            V_license: vehicleLicensePlate,
+            V_mnf: vehicleManufactureYear,
+            V_cubic: vehicleCubicPower,
+            V_brand: vehicleBrandID,
+            V_lineup: vehicleLineupID,
+            V_type: vehicleTypeID,
+            V_condition: vehicleConditionID,
+            V_color: vehicleColorID,
+            
+        }
+        const postInfoResponse = await HttpRequest.ProtectedPutRequest(`personal/post/${postID}/edit`, body, token);
+        // console.log("Uploading vehicle info");
+        // const vehicleInfoResponse = await HttpRequest.ProtectedPostRequest("personal/post/new/vehicle", body, token);
+        // console.log("Vehicle info response: " + JSON.stringify(vehicleInfoResponse));
+        // if (vehicleInfoResponse.msg == "Completed") {
+        //     const vehicleID = vehicleInfoResponse.info;
+        //     const body = {
+        //         title: title,
+        //         content: content,
+        //         price: price,
+        //         address: addressID,
+        //         vehicleinfo: vehicleID,
+        //         images: imageIDs,
+        //     }
+        //     console.log("Uploading post info");
+        //     const postInfoResponse = await HttpRequest.ProtectedPostRequest("personal/post/new", body, token);
+        //     console.log("Post info response: " + JSON.stringify(postInfoResponse));
+        //     // console.log(postInfoResponse.msg == "Completed")
+        //     return postInfoResponse.msg == "Completed";
+        // }
+
+    }
+
+}
 
 export const GetPersonalPost = async () => {
     const token = getToken();
