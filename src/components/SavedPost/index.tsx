@@ -27,7 +27,7 @@ import {
 } from '../../assets/fonts';
 import Container from '../common/container';
 import {POST_DETAIL, POST_DETAIL_NAVIGATOR} from '../../constants/routeNames';
-import {GetLikedPosts, GetPost} from '../../backendAPI';
+import {GetLikedPosts, GetAllRatings} from '../../backendAPI';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
 import {getSavedPostList} from '../../services/SavedPost';
 import PostPreview, {PostPreviewType} from '../PostPreview';
@@ -58,7 +58,7 @@ const SavedPostComponent: React.FC<SavedPostComponentProps> = ({
     let tmp: PostPreviewType[] = [];
     if (postListTmp) {
       for (let i = 0; i < postListTmp?.length; i++) {
-        const post = await GetPost(postListTmp[i]);
+        const post = await GetAllRatings(postListTmp[i]);
         if (post) {
           tmp.push(post);
         }
