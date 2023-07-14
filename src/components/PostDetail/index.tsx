@@ -42,6 +42,7 @@ import {
 import {
   AppAdminGetPost,
   AppAdminSetStatus,
+  CreateRoom,
   GetPersonalPostDetail,
   GetPost,
   GetUserInfo,
@@ -64,6 +65,8 @@ import {PostDetailStackParamList} from '../../navigations/PostDetailNavigator';
 import PostPreviewLoader from '../common/contentLoader/postPreview';
 import {
   APPLICATION_ADMIN,
+  CHAT_NAVIGATOR,
+  CHAT_ROOM,
   POST_DETAIL,
   POST_DETAIL_NAVIGATOR,
 } from '../../constants/routeNames';
@@ -73,6 +76,7 @@ import {getSavedPostList, savePost} from '../../services/SavedPost';
 import PostPreviewList from '../PostPreviewList';
 import PostPreview, {PostPreviewType} from '../PostPreview';
 import {personalInfoState} from '../../redux/clientDatabase/personalInfo';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 const widthScreen = Dimensions.get('window').width;
 const heightScreen = Dimensions.get('window').height;
@@ -1235,6 +1239,146 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
             </View>
           </View>
         )}
+
+        {/*if view post by personal user then show these statistic part */}
+        {!isActivePost && !isAdmin && (
+          <View>
+            <View
+              style={{
+                backgroundColor: color.divider,
+                height: 1,
+                marginTop: 0,
+                marginHorizontal: 20,
+              }}
+            />
+            <Text
+              style={{
+                fontFamily: POPPINS_SEMI_BOLD,
+                fontSize: getFontSize(16),
+                color: color.onBackground,
+                marginTop: 12,
+                marginLeft: 20,
+                marginBottom: 12,
+              }}>
+              Statistics
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                paddingHorizontal: 20,
+                alignSelf: 'center',
+              }}>
+              <View style={{width: widthScreen / 2 - 30}}>
+                {/* Like */}
+                <View style={{flexDirection: 'row', marginBottom: 15}}>
+                  <AntDesign name="heart" size={18} color={color.error} />
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      fontSize: getFontSize(14),
+                      color: color.onBackground_light,
+                      fontFamily: POPPINS_REGULAR,
+                    }}>
+                    Like :{' '}
+                  </Text>
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      color: color.onBackground,
+                      fontFamily: POPPINS_REGULAR,
+                      flex: 1,
+                    }}>
+                    {postInfo ? postInfo.stat.Like_amount : '--'}
+                  </Text>
+                </View>
+
+                {/* Contact */}
+                <View style={{flexDirection: 'row', marginBottom: 15}}>
+                  <MaterialCommunityIcons
+                    name="contacts"
+                    size={18}
+                    color={color.primary}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      fontSize: getFontSize(14),
+                      color: color.onBackground_light,
+                      fontFamily: POPPINS_REGULAR,
+                    }}>
+                    Contact :{' '}
+                  </Text>
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      color: color.onBackground,
+                      fontFamily: POPPINS_REGULAR,
+                      flex: 1,
+                    }}>
+                    {postInfo ? postInfo.stat.Contact_amount : '--'}
+                  </Text>
+                </View>
+              </View>
+              <View style={{width: widthScreen / 2 - 30}}>
+                {/* View */}
+                <View style={{flexDirection: 'row', marginBottom: 15}}>
+                  <MaterialCommunityIcons
+                    name="account-eye-outline"
+                    size={18}
+                    color={color.onBackground_light}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      fontSize: getFontSize(14),
+                      color: color.onBackground_light,
+                      fontFamily: POPPINS_REGULAR,
+                    }}>
+                    View :{' '}
+                  </Text>
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      color: color.onBackground,
+                      fontFamily: POPPINS_REGULAR,
+                      flex: 1,
+                    }}>
+                    {postInfo ? postInfo.stat.View_amount : '--'}
+                  </Text>
+                </View>
+
+                {/* Rating */}
+                <View style={{flexDirection: 'row', marginBottom: 15}}>
+                  <FontAwesome5
+                    name="comment-dots"
+                    size={18}
+                    color={color.popupWarning}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      fontSize: getFontSize(14),
+                      color: color.onBackground_light,
+                      fontFamily: POPPINS_REGULAR,
+                    }}>
+                    Rating :{' '}
+                  </Text>
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      color: color.onBackground,
+                      fontFamily: POPPINS_REGULAR,
+                      flex: 1,
+                    }}>
+                    {postInfo ? postInfo.stat.Rating_amount : '--'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
     );
   };
@@ -1273,6 +1417,14 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   };
 
   const loadingArray = [1, 2, 3, 4, 5, 6];
+
+  const {navigate} = useNavigation();
+
+  const onApprove = async (status: number) => {
+    let res = await AppAdminSetStatus(postInfo?.post.ID, status, messageAdmin);
+  };
+
+  const [messageAdmin, setMessageAdmin] = useState<string>('');
 
   return (
     <View
@@ -1337,10 +1489,23 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
               alignItems: 'center',
               flexGrow: 1,
             }}
-            onPress={() => {
+            onPress={async () => {
               // TODO: Navigate to chat screen
               if (isAdmin) {
               } else {
+                console.log('Press Chat');
+                let room = await CreateRoom(postID, [
+                  userPersonalInfo.ID,
+                  postInfo?.user.ID,
+                ]);
+                console.log('Room created: ' + JSON.stringify(room));
+                navigate(CHAT_NAVIGATOR, {
+                  screen: CHAT_ROOM,
+                  params: {
+                    roomID: room.room._id,
+                    sellerID: postInfo?.user.ID,
+                  },
+                });
               }
             }}>
             {!isAdmin && (

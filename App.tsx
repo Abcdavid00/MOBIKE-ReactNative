@@ -7,7 +7,7 @@
 
 import React, {useEffect} from 'react';
 import type {PropsWithChildren} from 'react';
-import {StatusBar,LogBox, StyleSheet, useColorScheme} from 'react-native';
+import {StatusBar, LogBox, StyleSheet, useColorScheme} from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import AppNavContainer from './src/navigations';
 import {getThemeState} from './src/services/ThemeStorage';
@@ -25,8 +25,8 @@ import ClientDatabase from './src/services/ClientDatabase';
 import {setLoading} from './src/redux/slice/loadingSlice';
 import HttpRequest from './src/backendAPI/HttpRequest';
 import {sendMessage} from './src/services/ChatDrawer';
-import { getThemeColor } from './src/utils/getThemeColor';
-import { CreateRoom } from './src/backendAPI';
+import {getThemeColor} from './src/utils/getThemeColor';
+import {CreateRoom} from './src/backendAPI';
 
 LogBox.ignoreAllLogs();
 
@@ -140,7 +140,8 @@ function App(): JSX.Element {
         // const countOrSend = (current) => {
         //   if (current <= 0) {
         //     console.log('Creating Room');
-        //     CreateRoom(1, [6, 142]);
+        // const room = await CreateRoom(1, [6, 142]);
+        // console.log('Create room: ' + JSON.stringify(room));
         //     return;
         //   }
         //   console.log('Waiting before send message: ' + current);

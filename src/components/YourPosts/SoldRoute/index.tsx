@@ -1,8 +1,20 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useEffect} from 'react';
-import {Dimensions, FlatList, Image, ListRenderItem, View} from 'react-native';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  ListRenderItem,
+  RefreshControl,
+  View,
+} from 'react-native';
 import ContextMenu from 'react-native-context-menu-view';
-import {GetPersonalPost, GetPersonalPostDetail} from '../../../backendAPI';
+import {
+  DeactivatePost,
+  GetPersonalPost,
+  GetPersonalPostDetail,
+  SoldPost,
+} from '../../../backendAPI';
 import Container from '../../common/container';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {YourPostsStackParamList} from '../../../navigations/YourPostsNavigator';
@@ -17,6 +29,8 @@ import PostPreviewLoader from '../../common/contentLoader/postPreview';
 import {Text} from 'react-native';
 import {getFontSize} from '../../../utils/fontSizeResponsive';
 import {POPPINS_MEDIUM, POPPINS_SEMI_BOLD} from '../../../assets/fonts';
+import PopUpLoading from '../../common/popupLoading';
+import PopUpMessage from '../../common/popupMessage';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -27,7 +41,7 @@ type SoldRouteProps = {
 const SoldRoute: React.FC<SoldRouteProps> = ({navigation}) => {
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = React.useState(true);
-  const [isEmpty, setIsEmpty] = React.useState(false);
+  // const [isEmpty, setIsEmpty] = React.useState(false);
   useEffect(() => {
     if (isFocused) {
       console.log('Sold Tab');
@@ -53,7 +67,8 @@ const SoldRoute: React.FC<SoldRouteProps> = ({navigation}) => {
     }
     setSoldPostList(soldPostListTmp);
     setIsLoading(false);
-    if (soldPostListTmp.length == 0) setIsEmpty(true);
+    setRefreshing(false);
+    // if (soldPostListTmp.length == 0) setIsEmpty(true);
   };
 
   const [soldPostList, setSoldPostList] = React.useState<
@@ -71,21 +86,49 @@ const SoldRoute: React.FC<SoldRouteProps> = ({navigation}) => {
     });
   };
 
+  const onUnsold = async (ID: number) => {
+    setIsLoadingPopup(true);
+    const res = await SoldPost(ID);
+    setIsLoadingPopup(false);
+    if (res) {
+      setIsSuccess(true);
+      setTextSuccess('Change post status successfully');
+      getPersonalPost();
+    } else {
+      setIsError(true);
+      setTextError('Change post status failed');
+    }
+  };
+
+  const onDeactivate = async (ID: number) => {
+    setIsLoadingPopup(true);
+    const res = await DeactivatePost(ID);
+    setIsLoadingPopup(false);
+    if (res) {
+      setIsSuccess(true);
+      setTextSuccess('Change post status successfully');
+      getPersonalPost();
+    } else {
+      setIsError(true);
+      setTextError('Change post status failed');
+    }
+  };
+
   const renderItem: ListRenderItem<personalPostInfoType> = ({item, index}) => {
     return (
       <ContextMenu
         actions={[
           {title: 'View Detail'},
-          {title: 'Sold'},
+          {title: 'Unsold'},
           {title: 'Deactivated'},
         ]}
         onPress={e => {
           if (e.nativeEvent.index == 0) {
             onViewDetail(item.post.ID);
           } else if (e.nativeEvent.index == 1) {
-            console.log('Sold');
+            onUnsold(item.post.ID);
           } else if (e.nativeEvent.index == 2) {
-            console.log('Deactivated');
+            onDeactivate(item.post.ID);
           }
         }}
         dropdownMenuMode={true}
@@ -111,6 +154,30 @@ const SoldRoute: React.FC<SoldRouteProps> = ({navigation}) => {
 
   const color = useTheme().colors.customColors;
 
+  //Popup message
+  const [isLoadingPopup, setIsLoadingPopup] = useState<boolean>(false);
+  const onChangeLoadingState = (x: boolean) => {
+    setIsLoadingPopup(x);
+  };
+
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [textSuccess, setTextSuccess] = useState<string>('');
+  const onChangeSuccessState = (x: boolean) => {
+    setIsSuccess(x);
+  };
+  const [isError, setIsError] = useState<boolean>(false);
+  const [textError, setTextError] = useState<string>('');
+  const onChangeErrorState = (x: boolean) => {
+    setIsError(x);
+  };
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getPersonalPost();
+  }, []);
+
   return (
     <View
       style={{
@@ -120,6 +187,9 @@ const SoldRoute: React.FC<SoldRouteProps> = ({navigation}) => {
       }}>
       {/*Preview Post List */}
       <FlatList
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         columnWrapperStyle={{
           justifyContent: 'space-around',
           marginHorizontal: widthScreen * 0.01,
@@ -149,36 +219,57 @@ const SoldRoute: React.FC<SoldRouteProps> = ({navigation}) => {
               </View>
             );
           }
-          if (isEmpty) {
-            return (
-              <View
-                style={{
-                  width: '100%',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: widthScreen,
-                  marginLeft: widthScreen * -0.01,
-                  backgroundColor: color.background,
-                }}>
-                <Image
-                  source={require('../../../assets/images/out-of-stock.png')}
-                  style={{width: '30%', height: '30%'}}
-                />
-                <Text
-                  style={{
-                    fontSize: getFontSize(16),
-                    fontFamily: POPPINS_MEDIUM,
-                    textAlign: 'center',
-                    marginTop: '5%',
-                    color: color.onBackground,
-                  }}>
-                  No sold posts
-                </Text>
-              </View>
-            );
-          }
+          // if (isEmpty) {
+          //   return (
+          //     <View
+          //       style={{
+          //         width: '100%',
+          //         justifyContent: 'center',
+          //         alignItems: 'center',
+          //         height: widthScreen,
+          //         marginLeft: widthScreen * -0.01,
+          //         backgroundColor: color.background,
+          //       }}>
+          //       <Image
+          //         source={require('../../../assets/images/out-of-stock.png')}
+          //         style={{width: '30%', height: '30%'}}
+          //       />
+          //       <Text
+          //         style={{
+          //           fontSize: getFontSize(16),
+          //           fontFamily: POPPINS_MEDIUM,
+          //           textAlign: 'center',
+          //           marginTop: '5%',
+          //           color: color.onBackground,
+          //         }}>
+          //         No sold posts
+          //       </Text>
+          //     </View>
+          //   );
+          // }
           return <View style={{height: 100}} />;
         }}
+      />
+      <PopUpLoading
+        text={'Changing...'}
+        visibility={isLoadingPopup}
+        onChangePopupVisibility={onChangeLoadingState}
+      />
+      <PopUpMessage
+        message={textSuccess}
+        type={'success'}
+        visibility={isSuccess}
+        onChangePopupVisibility={onChangeSuccessState}
+        havingTwoButton={true}
+        labelCTA="Ok"
+      />
+      <PopUpMessage
+        message={textError}
+        type={'error'}
+        visibility={isError}
+        onChangePopupVisibility={onChangeErrorState}
+        havingTwoButton={true}
+        labelCTA="Ok"
       />
     </View>
   );

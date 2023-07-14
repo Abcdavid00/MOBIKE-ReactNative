@@ -1,11 +1,12 @@
 import {useIsFocused, useNavigation, useTheme} from '@react-navigation/native';
-import React from 'react';
+import React, {useState} from 'react';
 import {useEffect} from 'react';
 import {
   Dimensions,
   FlatList,
   Image,
   ListRenderItem,
+  RefreshControl,
   Text,
   View,
 } from 'react-native';
@@ -13,7 +14,12 @@ import ContextMenu from 'react-native-context-menu-view';
 import {FAB} from 'react-native-paper';
 import {useDispatch} from 'react-redux';
 import colors from '../../../assets/theme/colors';
-import {GetPersonalPost, GetPersonalPostDetail} from '../../../backendAPI';
+import {
+  DeactivatePost,
+  GetPersonalPost,
+  GetPersonalPostDetail,
+  SoldPost,
+} from '../../../backendAPI';
 import {
   ADD_POST,
   POST_DETAIL,
@@ -34,6 +40,8 @@ import {
   POPPINS_REGULAR,
   POPPINS_SEMI_BOLD,
 } from '../../../assets/fonts';
+import PopUpLoading from '../../common/popupLoading';
+import PopUpMessage from '../../common/popupMessage';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -68,6 +76,7 @@ const ActiveRoute: React.FC<ActiveRouteProps> = ({navigation}) => {
     }
     setActivePostList(activePostListTmp);
     setIsLoading(false);
+    setRefreshing(false);
     if (activePostListTmp.length == 0) setIsEmpty(true);
   };
 
@@ -86,6 +95,34 @@ const ActiveRoute: React.FC<ActiveRouteProps> = ({navigation}) => {
     });
   };
 
+  const onSold = async (ID: number) => {
+    setIsLoadingPopup(true);
+    const res = await SoldPost(ID);
+    setIsLoadingPopup(false);
+    if (res) {
+      setIsSuccess(true);
+      setTextSuccess('Change post status successfully');
+      getPersonalPost();
+    } else {
+      setIsError(true);
+      setTextError('Change post status failed');
+    }
+  };
+
+  const onDeactivate = async (ID: number) => {
+    setIsLoadingPopup(true);
+    const res = await DeactivatePost(ID);
+    setIsLoadingPopup(false);
+    if (res) {
+      setIsSuccess(true);
+      setTextSuccess('Change post status successfully');
+      getPersonalPost();
+    } else {
+      setIsError(true);
+      setTextError('Change post status failed');
+    }
+  };
+
   const renderItem: ListRenderItem<personalPostInfoType> = ({item, index}) => {
     return (
       <ContextMenu
@@ -98,9 +135,9 @@ const ActiveRoute: React.FC<ActiveRouteProps> = ({navigation}) => {
           if (e.nativeEvent.index == 0) {
             onViewDetail(item.post.ID);
           } else if (e.nativeEvent.index == 1) {
-            console.log('Sold');
+            onSold(item.post.ID);
           } else if (e.nativeEvent.index == 2) {
-            console.log('Deactivated');
+            onDeactivate(item.post.ID);
           }
         }}
         dropdownMenuMode={true}
@@ -124,6 +161,29 @@ const ActiveRoute: React.FC<ActiveRouteProps> = ({navigation}) => {
     return item.post.ID.toString();
   };
 
+  //Popup message
+  const [isLoadingPopup, setIsLoadingPopup] = useState<boolean>(false);
+  const onChangeLoadingState = (x: boolean) => {
+    setIsLoadingPopup(x);
+  };
+
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [textSuccess, setTextSuccess] = useState<string>('');
+  const onChangeSuccessState = (x: boolean) => {
+    setIsSuccess(x);
+  };
+  const [isError, setIsError] = useState<boolean>(false);
+  const [textError, setTextError] = useState<string>('');
+  const onChangeErrorState = (x: boolean) => {
+    setIsError(x);
+  };
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getPersonalPost();
+  }, []);
+
   const color = useTheme().colors.customColors;
   return (
     <View
@@ -134,6 +194,9 @@ const ActiveRoute: React.FC<ActiveRouteProps> = ({navigation}) => {
       }}>
       {/*Preview Post List */}
       <FlatList
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         columnWrapperStyle={{
           justifyContent: 'space-around',
           marginHorizontal: widthScreen * 0.01,
@@ -163,36 +226,57 @@ const ActiveRoute: React.FC<ActiveRouteProps> = ({navigation}) => {
               </View>
             );
           }
-          if (isEmpty) {
-            return (
-              <View
-                style={{
-                  width: '100%',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: widthScreen,
-                  marginLeft: widthScreen * -0.01,
-                  backgroundColor: color.background,
-                }}>
-                <Image
-                  source={require('../../../assets/images/out-of-stock.png')}
-                  style={{width: '30%', height: '30%'}}
-                />
-                <Text
-                  style={{
-                    fontSize: getFontSize(16),
-                    fontFamily: POPPINS_MEDIUM,
-                    textAlign: 'center',
-                    marginTop: '5%',
-                    color: color.onBackground,
-                  }}>
-                  No active posts
-                </Text>
-              </View>
-            );
-          }
+          // if (isEmpty) {
+          //   return (
+          //     <View
+          //       style={{
+          //         width: '100%',
+          //         justifyContent: 'center',
+          //         alignItems: 'center',
+          //         height: widthScreen,
+          //         marginLeft: widthScreen * -0.01,
+          //         backgroundColor: color.background,
+          //       }}>
+          //       <Image
+          //         source={require('../../../assets/images/out-of-stock.png')}
+          //         style={{width: '30%', height: '30%'}}
+          //       />
+          //       <Text
+          //         style={{
+          //           fontSize: getFontSize(16),
+          //           fontFamily: POPPINS_MEDIUM,
+          //           textAlign: 'center',
+          //           marginTop: '5%',
+          //           color: color.onBackground,
+          //         }}>
+          //         No active posts
+          //       </Text>
+          //     </View>
+          //   );
+          // }
           return <View style={{height: 100}} />;
         }}
+      />
+      <PopUpLoading
+        text={'Changing...'}
+        visibility={isLoadingPopup}
+        onChangePopupVisibility={onChangeLoadingState}
+      />
+      <PopUpMessage
+        message={textSuccess}
+        type={'success'}
+        visibility={isSuccess}
+        onChangePopupVisibility={onChangeSuccessState}
+        havingTwoButton={true}
+        labelCTA="Ok"
+      />
+      <PopUpMessage
+        message={textError}
+        type={'error'}
+        visibility={isError}
+        onChangePopupVisibility={onChangeErrorState}
+        havingTwoButton={true}
+        labelCTA="Ok"
       />
     </View>
   );

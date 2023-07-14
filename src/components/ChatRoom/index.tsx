@@ -50,12 +50,17 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
     setSellerInfo(result);
   };
   useEffect(() => {
+    console.log('Render first time');
     getUserInfo(sellerID);
   }, []);
 
   const messages = useSelector<RootState, Message[]>(
     state => state.message[roomID],
   );
+
+  useEffect(() => {
+    console.log('Redux change');
+  }, messages);
 
   const color = useTheme().colors.customColors;
 

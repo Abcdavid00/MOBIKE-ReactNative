@@ -67,9 +67,6 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
   useEffect(() => {
     if (isFocused) getData();
   }, [isFocused]);
-  useEffect(() => {
-    console.log('Need re-render');
-  }, [dataState]);
   const getData = async () => {
     let dataTmp = data
       .sort((a, b) => {

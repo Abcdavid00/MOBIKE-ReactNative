@@ -25,6 +25,7 @@ const LoadingText: React.FC<LoadingTextProps> = ({text}) => {
         color: 'black',
         fontFamily: POPPINS_REGULAR,
         fontSize: 14,
+        textAlign: 'center',
       }}>
       {' '}
       {loadingText}

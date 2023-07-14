@@ -335,13 +335,13 @@ export const RatePost = async (PostID, ratingPoint, content) => {
 
 export const DeactivatePost = async (ID) => {
     const token = getToken();
-    const deactivateResponse = await HttpRequest.ProtectedPostRequest("personal/post/deactivate" + ID, token);
+    const deactivateResponse = await HttpRequest.ProtectedPostRequest("personal/post/" + ID + "/deactivate", {}, token);
     return deactivateResponse.msg == "Completed";
 }
 
 export const SoldPost = async (ID) => {
     const token = getToken();
-    const soldResponse = await HttpRequest.ProtectedPostRequest("personal/post/sold" + ID, token);
+    const soldResponse = await HttpRequest.ProtectedPostRequest("personal/post/" + ID + "/sold", {}, token);
     return soldResponse.msg == "Completed";
 }
 

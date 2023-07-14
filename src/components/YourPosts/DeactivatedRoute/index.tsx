@@ -1,6 +1,12 @@
 import React from 'react';
 import {useEffect} from 'react';
-import {Dimensions, FlatList, ListRenderItem, View} from 'react-native';
+import {
+  Dimensions,
+  FlatList,
+  ListRenderItem,
+  RefreshControl,
+  View,
+} from 'react-native';
 import ContextMenu from 'react-native-context-menu-view';
 import {GetPersonalPost, GetPersonalPostDetail} from '../../../backendAPI';
 import Container from '../../common/container';
@@ -43,7 +49,7 @@ const DeactivatedRoute: React.FC<DeactivatedRouteProps> = ({navigation}) => {
   const getPersonalPost = async () => {
     const postListTmp = await GetPersonalPost();
     let postListID: Array<number> = [];
-    Object.values(postListTmp.sold).forEach((item: any) => {
+    Object.values(postListTmp.deactivated).forEach((item: any) => {
       //   console.log('Sold ID :' + item.ID);
       postListID.push(item.ID);
     });
@@ -54,6 +60,7 @@ const DeactivatedRoute: React.FC<DeactivatedRouteProps> = ({navigation}) => {
     }
     setDeactivatedPostList(deactivatedPostListTmp);
     setIsLoading(false);
+    setRefreshing(false);
     if (deactivatedPostListTmp.length == 0) setIsEmpty(true);
   };
 
@@ -75,18 +82,10 @@ const DeactivatedRoute: React.FC<DeactivatedRouteProps> = ({navigation}) => {
   const renderItem: ListRenderItem<personalPostInfoType> = ({item, index}) => {
     return (
       <ContextMenu
-        actions={[
-          {title: 'View Detail'},
-          {title: 'Sold'},
-          {title: 'Deactivated'},
-        ]}
+        actions={[{title: 'View Detail'}]}
         onPress={e => {
           if (e.nativeEvent.index == 0) {
             onViewDetail(item.post.ID);
-          } else if (e.nativeEvent.index == 1) {
-            console.log('Sold');
-          } else if (e.nativeEvent.index == 2) {
-            console.log('Deactivated');
           }
         }}
         dropdownMenuMode={true}
@@ -110,6 +109,13 @@ const DeactivatedRoute: React.FC<DeactivatedRouteProps> = ({navigation}) => {
     return item.post.ID.toString();
   };
 
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getPersonalPost();
+  }, []);
+
   const color = useTheme().colors.customColors;
   return (
     <View
@@ -120,6 +126,9 @@ const DeactivatedRoute: React.FC<DeactivatedRouteProps> = ({navigation}) => {
       }}>
       {/*Preview Post List */}
       <FlatList
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         columnWrapperStyle={{
           justifyContent: 'space-around',
           marginHorizontal: widthScreen * 0.01,
@@ -149,34 +158,34 @@ const DeactivatedRoute: React.FC<DeactivatedRouteProps> = ({navigation}) => {
               </View>
             );
           }
-          if (isEmpty) {
-            return (
-              <View
-                style={{
-                  width: '100%',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: widthScreen,
-                  marginLeft: widthScreen * -0.01,
-                  backgroundColor: color.background,
-                }}>
-                <Image
-                  source={require('../../../assets/images/out-of-stock.png')}
-                  style={{width: '30%', height: '30%'}}
-                />
-                <Text
-                  style={{
-                    fontSize: getFontSize(16),
-                    fontFamily: POPPINS_MEDIUM,
-                    textAlign: 'center',
-                    marginTop: '5%',
-                    color: color.onBackground,
-                  }}>
-                  No deactivated posts
-                </Text>
-              </View>
-            );
-          }
+          // if (isEmpty) {
+          //   return (
+          //     <View
+          //       style={{
+          //         width: '100%',
+          //         justifyContent: 'center',
+          //         alignItems: 'center',
+          //         height: widthScreen,
+          //         marginLeft: widthScreen * -0.01,
+          //         backgroundColor: color.background,
+          //       }}>
+          //       <Image
+          //         source={require('../../../assets/images/out-of-stock.png')}
+          //         style={{width: '30%', height: '30%'}}
+          //       />
+          //       <Text
+          //         style={{
+          //           fontSize: getFontSize(16),
+          //           fontFamily: POPPINS_MEDIUM,
+          //           textAlign: 'center',
+          //           marginTop: '5%',
+          //           color: color.onBackground,
+          //         }}>
+          //         No deactivated posts
+          //       </Text>
+          //     </View>
+          //   );
+          // }
           return <View style={{height: 100}} />;
         }}
       />
