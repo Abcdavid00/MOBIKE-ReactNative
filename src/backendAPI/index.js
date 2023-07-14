@@ -258,7 +258,7 @@ export const EditPost = async (
     console.log("Image responses: " + JSON.stringify(imageResponses));
     if (imageResponses.every(imageResponse => imageResponse.msg == "Completed")) {
         const imageIDs = imageResponses.map(imageResponse => imageResponse.info);
-    
+
         const body = {
             P_title: title,
             P_content: content,
@@ -275,7 +275,7 @@ export const EditPost = async (
             V_type: vehicleTypeID,
             V_condition: vehicleConditionID,
             V_color: vehicleColorID,
-            
+
         }
         const postInfoResponse = await HttpRequest.ProtectedPutRequest(`personal/post/${postID}/edit`, body, token);
         // console.log("Uploading vehicle info");
@@ -361,6 +361,21 @@ export const PostFilter = (
 
 export const NUM_PER_PAGE = 20;
 
+export const GetAllReact = async (ID) => {
+    const token = getToken();
+    const postResponse = await HttpRequest.ProtectedGetRequest("search/post/" + ID + "/personals", token);
+    if (postResponse.msg == "Completed") {
+        return postResponse.info;
+    }
+}
+
+export const GetAllRatings = async (ID) => {
+    const postResponse = await HttpRequest.GetRequest("search/post/" + ID + '/ratings');
+    if (postResponse.msg == "Completed") {
+        return postResponse.info;
+    }
+}
+
 export const GetAllPosts = async (args: string) => {
     const postResponse = await HttpRequest.GetRequest("search/post/all?numperpage=" + NUM_PER_PAGE + (args ? "&" + args : ""));
     if (postResponse.msg == "Completed") {
@@ -370,10 +385,23 @@ export const GetAllPosts = async (args: string) => {
 
 export const LikePost = async (ID) => {
     const token = getToken();
-    const likeResponse = await HttpRequest.ProtectedPostRequest("personal/like/" + ID, {}, token);
-    await UpdateLikedPost();
+    const body = {
+        post: ID
+    }
+    const likeResponse = await HttpRequest.ProtectedPostRequest("personal/preferences/like/edit", body, token);
+    // await UpdateLikedPost();
     return likeResponse.msg == "Completed";
 }
+
+export const AddContact = async (ID) => {
+    const token = getToken();
+    const body = {
+        post: ID
+    }
+    const likeResponse = await HttpRequest.ProtectedPostRequest("personal/preferences/contact/edit", body, token);
+    return likeResponse.msg == "Completed";
+}
+
 
 export const UnlikePost = async (ID) => {
     const token = getToken();

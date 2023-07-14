@@ -24,7 +24,7 @@ import {TouchableWithoutFeedback} from 'react-native';
 import {
   AppAdminGetPost,
   GetPersonalPostDetail,
-  GetPost,
+  GetAllRatings,
 } from '../../../backendAPI';
 import ShadowWrapper from '../../common/shadowWrapper';
 import {RootState} from '../../../redux/store';
@@ -115,7 +115,7 @@ const PostPreview: React.FC<PostPreviewProps> = ({
   //Get post
   const [postInfo, setPostInfo] = React.useState<PostPreviewType>();
   const getPost = async () => {
-    const post = await GetPost(postID);
+    const post = await GetAllRatings(postID);
     setPostInfo(post);
   };
 

@@ -27,7 +27,7 @@ import {
   AppAdminGetPost,
   GetAllPosts,
   GetPersonalPostDetail,
-  GetPost,
+  GetAllRatings,
 } from '../../backendAPI';
 import {useEffect} from 'react';
 import {StyleSheet} from 'react-native';
@@ -166,7 +166,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
 
   //Prepare data for post preview
   const getPost = async (postID: number) => {
-    const post = await GetPost(postID);
+    const post = await GetAllRatings(postID);
     return post;
   };
 

@@ -43,11 +43,11 @@ import {
   AppAdminGetPost,
   AppAdminSetStatus,
   CreateRoom,
+  GetAllRatings,
   GetPersonalPostDetail,
-  GetPost,
   GetUserInfo,
-  LikePost,
   UnlikePost,
+  LikePost,
 } from '../../backendAPI';
 // import SkeletonContent from 'react-native-skeleton-content-nonexpo';
 import {useSelector} from 'react-redux';
@@ -77,6 +77,8 @@ import PostPreviewList from '../PostPreviewList';
 import PostPreview, {PostPreviewType} from '../PostPreview';
 import {personalInfoState} from '../../redux/clientDatabase/personalInfo';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import PopUpLoading from '../common/popupLoading';
+import PopUpMessage from '../common/popupMessage';
 
 const widthScreen = Dimensions.get('window').width;
 const heightScreen = Dimensions.get('window').height;
@@ -224,6 +226,18 @@ export type personalPostInfoType = {
     Manufacture_year: number;
     Odometer: number;
     Vehicle_name: string;
+  };
+};
+
+export type personalReact = {
+  contacted: boolean;
+  liked: boolean;
+  rating: {
+    Content: string;
+    ID: number;
+    ID_Account: number;
+    Rating_point: number;
+    Time_created: Date;
   };
 };
 
@@ -384,8 +398,6 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     },
   ];
 
-  const starAverage = 4.5;
-
   //Get post data
   const [isLoading, setIsLoading] = React.useState(true);
   useEffect(() => {
@@ -393,13 +405,16 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
       getInactivePostByAdmin();
     } else if (isActivePost) {
       getData();
+      getPersonalReact();
+      getRatingList();
     } else {
       getInactivePost();
+      getRatingList();
     }
   }, []);
 
   const getData = async () => {
-    const post: postInfoType = await GetPost(postID);
+    const post: postInfoType = await GetAllRatings(postID);
     // console.log('Post Detail: ' + JSON.stringify(post));
     setPostInfo(prevPost => post);
     const user: userInfoType = await GetUserInfo(post.user.ID);
@@ -407,7 +422,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     let tmp = Array.from(user.posts.filter(item => item.ID != postID));
     let tmp2: PostPreviewType[] = [];
     for (let i = 0; i < tmp.length; i++) {
-      let post = await GetPost(tmp[i].ID);
+      let post = await GetAllRatings(tmp[i].ID);
       tmp2.push(post);
     }
     setPostList(tmp2);
@@ -423,6 +438,15 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     state => state.personalInfo,
   );
 
+  const [personalReact, setPersonalReact] = useState<personalReact>();
+
+  const [ratingList, setRatingList] = useState<rating[]>([]);
+
+  const getRatingList = async () => {
+    const result = await GetAllRatings(postID);
+    setRatingList(result);
+  };
+
   //Get inactive post data
   const getInactivePost = async () => {
     const post = await GetPersonalPostDetail(postID);
@@ -436,6 +460,14 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     console.log('Post Detail by admin: ' + JSON.stringify(post));
     setPostInfo(post);
     setIsLoading(false);
+  };
+
+  const getPersonalReact = async () => {
+    const react: personalReact = await GetAllRating(postID);
+    console.log('React: ' + JSON.stringify(react));
+    setIsLiked(react.liked);
+    setIsContacted(react.contacted);
+    setPersonalReact(react);
   };
 
   const OnApprovePost = () => {
@@ -770,15 +802,22 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   );
 
   const ReviewRoute = () => {
-    if (ratingPost.length == 0) {
+    if (ratingList.length == 0) {
       return (
         <View
           style={{height: 50, justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={{color: '#555', fontWeight: '500'}}>No review yet</Text>
+          <Text
+            style={{
+              color: color.onBackground_light,
+              fontWeight: '500',
+              fontFamily: POPPINS_REGULAR,
+            }}>
+            No review yet
+          </Text>
         </View>
       );
     }
-    let shorttenRatingPost = ratingPost.slice(0, 5);
+    let shorttenRatingPost = ratingList.slice(0, 5);
     return (
       <View>
         {shorttenRatingPost.map((item, index) => (
@@ -791,7 +830,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
                 marginLeft: 10,
               }}>
               <MobikeImage
-                imageID={item.User_Info.ID_Avatar}
+                imageID={item.accountinfo.ID_Image_Profile}
                 style={{width: 40, height: 40, borderRadius: 500}}
               />
               <View style={{marginHorizontal: 15, flex: 1}}>
@@ -803,22 +842,22 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
                   }}>
                   <Text
                     style={{
-                      color: '#000',
-                      fontWeight: '500',
+                      color: color.onBackground,
+                      fontFamily: POPPINS_MEDIUM,
                       fontSize: 12,
                       flex: 1,
                     }}>
-                    {item.User_Info.Name}
+                    {item.accountinfo.Name}
                   </Text>
                   <Text
                     style={{
-                      color: '#555',
+                      color: color.onBackground_light,
                       fontWeight: '300',
                       fontSize: 10,
                       fontStyle: 'italic',
                       marginLeft: 10,
                     }}>
-                    {item.Time_created}
+                    {item.rating.Time_created.toLocaleDateString()}
                   </Text>
                 </View>
 
@@ -829,19 +868,19 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
                     alignItems: 'center',
                     marginTop: 5,
                   }}>
-                  {renderStarRating(item.Rating_point)}
+                  {renderStarRating(item.rating.Rating_point)}
                 </View>
 
                 {/* Content */}
                 <Text style={{marginTop: 5, fontStyle: 'italic', fontSize: 12}}>
-                  {item.Content}
+                  {item.rating.Content}
                 </Text>
               </View>
             </View>
 
             {/* Seperate */}
             <View
-              style={{height: 1, backgroundColor: '#E8E8E8', marginTop: 10}}
+              style={{height: 1, backgroundColor: color.divider, marginTop: 10}}
             />
           </View>
         ))}
@@ -902,6 +941,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
 
   const onLikePost = () => {
     onSavePost(postID);
+    LikePost(postID);
     setIsLiked(!isLiked);
   };
   const [isLiked, setIsLiked] = useState<boolean>(false);
@@ -1098,6 +1138,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
         />
 
         {DetailRoute()}
+        {/* {ReviewRoute()} */}
 
         {/* Seperate */}
         <View
@@ -1421,10 +1462,41 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   const {navigate} = useNavigation();
 
   const onApprove = async (status: number) => {
+    setIsLoadingPopup(true);
     let res = await AppAdminSetStatus(postInfo?.post.ID, status, messageAdmin);
+    setIsLoadingPopup(false);
+    if (res) {
+      setIsSuccess(true);
+      setTextSuccess('Approve post successfully');
+    } else {
+      setIsError(true);
+      setTextError('Approve post failed');
+    }
   };
 
   const [messageAdmin, setMessageAdmin] = useState<string>('');
+
+  //Popup message
+  const [isLoadingPopup, setIsLoadingPopup] = useState<boolean>(false);
+  const onChangeLoadingState = (x: boolean) => {
+    setIsLoadingPopup(x);
+  };
+
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [textSuccess, setTextSuccess] = useState<string>('');
+  const onChangeSuccessState = (x: boolean) => {
+    setIsSuccess(x);
+  };
+  const [isError, setIsError] = useState<boolean>(false);
+  const [textError, setTextError] = useState<string>('');
+  const onChangeErrorState = (x: boolean) => {
+    setIsError(x);
+  };
+
+  const onContact = (ID: number) => {
+    GetAllRatings(ID);
+  };
+  const [isContacted, setIsContacted] = useState<boolean>();
 
   return (
     <View
@@ -1492,13 +1564,14 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
             onPress={async () => {
               // TODO: Navigate to chat screen
               if (isAdmin) {
+                onApprove(1);
               } else {
-                console.log('Press Chat');
                 let room = await CreateRoom(postID, [
                   userPersonalInfo.ID,
                   postInfo?.user.ID,
                 ]);
                 console.log('Room created: ' + JSON.stringify(room));
+                onContact(postID);
                 navigate(CHAT_NAVIGATOR, {
                   screen: CHAT_ROOM,
                   params: {
@@ -1539,12 +1612,14 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
             }}
             onPress={() => {
               if (isAdmin) {
-                OnApprovePost();
+                onApprove(3);
                 return;
               }
               Linking.openURL(
                 `tel:${userInfo && userInfo.accountinfo.Phone_number}`,
               );
+              onContact(postID);
+              setIsContacted(true);
             }}>
             {!isAdmin && (
               <Feather name="phone-call" size={24} color={'#8DEE8B'} />
@@ -1561,6 +1636,31 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
           </Pressable>
         </View>
       )}
+
+      <PopUpLoading
+        text={'Loading...'}
+        visibility={isLoadingPopup}
+        onChangePopupVisibility={onChangeLoadingState}
+      />
+      <PopUpMessage
+        message={textSuccess}
+        type={'success'}
+        visibility={isSuccess}
+        onChangePopupVisibility={onChangeSuccessState}
+        havingTwoButton={true}
+        labelCTA="Go back"
+        onPress={() => {
+          navigation.goBack();
+        }}
+      />
+      <PopUpMessage
+        message={textError}
+        type={'error'}
+        visibility={isError}
+        onChangePopupVisibility={onChangeErrorState}
+        havingTwoButton={true}
+        labelCTA="Ok"
+      />
     </View>
   );
 };
