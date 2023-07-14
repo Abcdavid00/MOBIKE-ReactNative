@@ -2,7 +2,7 @@ import Store from '../../redux/store';
 import io, {Socket} from 'socket.io-client';
 import {
   GetMessageByRoom,
-  GetAllRatings,
+  GetPost,
   GetRoom,
   GetRoomByUser,
 } from '../../backendAPI';
@@ -63,7 +63,7 @@ async function addRoom(room: any) {
     console.log('Room already exist, skipping');
     return;
   }
-  const post = (await GetAllRatings(room.postId)).post;
+  const post = (await GetPost(room.postId)).post;
   let imageId = undefined;
   if (post.rel_Image.length > 0) {
     imageId = post.rel_Image[0];

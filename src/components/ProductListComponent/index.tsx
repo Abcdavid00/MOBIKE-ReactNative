@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import {Text, View} from 'react-native';
-import {GetAllPosts, GetAllRatings, PostFilter} from '../../backendAPI';
+import {GetAllPosts, GetPost, PostFilter} from '../../backendAPI';
 import {RootState} from '../../redux/store';
 import Container from '../common/container';
 import PostPreview, {PostPreviewType} from '../PostPreview';
@@ -120,7 +120,7 @@ const ProductListComponent: React.FC<ProductListComponentProps> = ({
     const postListTmp = await GetAllPosts(agrs);
     let tmp: Array<PostPreviewType> = [...postList];
     for (let i = 0; i < postListTmp.length; i++) {
-      tmp.push(await GetAllRatings(postListTmp[i].ID));
+      tmp.push(await GetPost(postListTmp[i].ID));
     }
     setPostList(tmp);
     // console.log('In function get: ' + agrs);

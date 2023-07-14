@@ -27,7 +27,7 @@ import {
   AppAdminGetPost,
   GetAllPosts,
   GetPersonalPostDetail,
-  GetAllRatings,
+  GetPost,
 } from '../../backendAPI';
 import {useEffect} from 'react';
 import {StyleSheet} from 'react-native';
@@ -66,7 +66,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // getFilterPostList(page);
+    getFilterPostList(page);
   }, []);
 
   const getFilterPostList = async (page?: number) => {
@@ -166,7 +166,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
 
   //Prepare data for post preview
   const getPost = async (postID: number) => {
-    const post = await GetAllRatings(postID);
+    const post = await GetPost(postID);
     return post;
   };
 
@@ -184,16 +184,16 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
             iconClass={Ionicons}
             iconName={'search-outline'}
             iconColor={color.primary}
-            style={{width: '85%'}}
+            style={{width: '90%'}}
             onTouchEnd={onNavigateSearch}
           />
-          <Pressable>
+          {/* <Pressable>
             <Ionicons
               name="notifications-outline"
               color={color.onBackground_light}
               size={28}
             />
-          </Pressable>
+          </Pressable> */}
         </View>
 
         {/* Banner */}
@@ -243,7 +243,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
         flex: 1,
       }}>
       {/* Preview Post List */}
-      {/* <PostPreviewList
+      <PostPreviewList
         data={postList}
         onEndReached={onEndReached}
         onMomentumScrollBegin={onMomentumScrollBegin}
@@ -252,7 +252,7 @@ const MarketplaceComponent: React.FC<MarketplaceComponentProps> = ({
         ListHeaderComponent={renderHeader()}
         isEnd={isEnd}
         color={color}
-      /> */}
+      />
     </View>
   );
 };

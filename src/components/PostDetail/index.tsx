@@ -43,11 +43,13 @@ import {
   AppAdminGetPost,
   AppAdminSetStatus,
   CreateRoom,
-  GetAllRatings,
   GetPersonalPostDetail,
   GetUserInfo,
-  UnlikePost,
   LikePost,
+  GetPost,
+  GetAllReact,
+  GetAllRatings,
+  AddContact,
 } from '../../backendAPI';
 // import SkeletonContent from 'react-native-skeleton-content-nonexpo';
 import {useSelector} from 'react-redux';
@@ -414,7 +416,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   }, []);
 
   const getData = async () => {
-    const post: postInfoType = await GetAllRatings(postID);
+    const post: postInfoType = await GetPost(postID);
     // console.log('Post Detail: ' + JSON.stringify(post));
     setPostInfo(prevPost => post);
     const user: userInfoType = await GetUserInfo(post.user.ID);
@@ -422,7 +424,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     let tmp = Array.from(user.posts.filter(item => item.ID != postID));
     let tmp2: PostPreviewType[] = [];
     for (let i = 0; i < tmp.length; i++) {
-      let post = await GetAllRatings(tmp[i].ID);
+      let post = await GetPost(tmp[i].ID);
       tmp2.push(post);
     }
     setPostList(tmp2);
@@ -463,7 +465,7 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
   };
 
   const getPersonalReact = async () => {
-    const react: personalReact = await GetAllRating(postID);
+    const react: personalReact = await GetAllReact(postID);
     console.log('React: ' + JSON.stringify(react));
     setIsLiked(react.liked);
     setIsContacted(react.contacted);
@@ -1434,13 +1436,6 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
         isActivePost={true}
         pressable={true}
         onPress={() => {
-          // dispatch(
-          //   selectPost({
-          //     ID: item.post.ID,
-          //     isActivePost: true,
-          //     isAdmin: false,
-          //   }),
-          // );
           navigation.push(POST_DETAIL, {
             postID: item.post.ID,
             isActivePost: true,
@@ -1493,8 +1488,8 @@ const PostDetailComponent: React.FC<PostDetailComponentProps> = ({
     setIsError(x);
   };
 
-  const onContact = (ID: number) => {
-    GetAllRatings(ID);
+  const onContact = async (ID: number) => {
+    await AddContact(ID);
   };
   const [isContacted, setIsContacted] = useState<boolean>();
 
