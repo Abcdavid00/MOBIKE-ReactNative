@@ -21,6 +21,7 @@ import {Pressable} from 'react-native';
 import {CHAT_ROOM} from '../../constants/routeNames';
 import {useIsFocused, useTheme} from '@react-navigation/native';
 import {GetUserInfo} from '../../backendAPI';
+import { FlatList } from 'react-native-gesture-handler';
 
 const widthScreen = Dimensions.get('window').width;
 
@@ -261,6 +262,9 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
               </Pressable>
             );
           })}
+          {/* <FlatList
+
+          /> */}
         </View>
       );
     }
