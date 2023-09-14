@@ -196,7 +196,6 @@ const ChatRoomComponent: React.FC<ChatRoomComponentProps> = ({
           onChangeText={value => {
             setCurrentMessage(value);
           }}
-          maxLength={32}
           value={currentMessage}
           spellCheck={false}
           style={{

@@ -58,7 +58,7 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
   const data = Object.values(
     useSelector<RootState, RoomDictionary>(state => state.room),
   );
-  console.log('ChatRooms: ' + JSON.stringify(store.getState().room));
+  // console.log('ChatRooms: ' + JSON.stringify(store.getState().room));
   const dataState = useSelector<RootState, RoomDictionary>(state => state.room);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const ChatListComponent: React.FC<ChatListComponentProps> = ({navigation}) => {
         return 0;
       })
       .map(item => item);
-    console.log('ChatList: ' + JSON.stringify(dataTmp));
+    // console.log('ChatList: ' + JSON.stringify(dataTmp));
     setChatRoomList(dataTmp);
 
     let userInfoListTmp: userInfoType[] = [];
